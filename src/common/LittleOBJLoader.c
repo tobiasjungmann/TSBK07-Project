@@ -1337,6 +1337,7 @@ Model* LoadDataToModel(
 	return m;
 }
 
+
 // Cleanup function, not tested!
 void DisposeModel(Model *m)
 {
@@ -1368,6 +1369,12 @@ void DisposeModel(Model *m)
 	}
 	free(m);
 }
+
+#ifdef __cplusplus
+Model::~Model() {
+	DisposeModel(this);
+}
+#endif
 
 void pushTexture(const Model *m, GLuint program, const char* unitName)
 {

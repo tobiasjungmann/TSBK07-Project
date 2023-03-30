@@ -15,39 +15,21 @@ using std::size_t;
 
 namespace scn
 {
-    // FIXME scene should not own the models
-    void Scene::freeModelsVector()
-    {
-        // use local hashmap with addresses as key to no free a second time
-        dbg::if_dlevel<dbg::Level::VERBOSE>([]()
-                                            { std::cerr << "freed up models vector" << std::endl; });
-        std::unordered_set<Model *> freed;
-        for (auto &mod : this->modelsTransfo)
-        {
-            auto &pModel{get<0>(mod)};
-            if (freed.find(pModel) == freed.end())
-            {
-                DisposeModel(pModel);
-                freed.insert(pModel);
-            }
-        }
-    }
-
     Scene::Scene()
         : camera{0, 0, 0},
           projectionMatrix{nullptr},
           skybox{nullptr}
     {   invalid = true; }
 
-    Scene::Scene(std::unique_ptr<SceneShader> shader, const Camera &camera, std::shared_ptr<mat4> projectionMatrix)
-        : Scene(std::move(shader), camera, projectionMatrix, nullptr)
+    Scene::Scene(std::unique_ptr<SceneShader> shader, const Camera &camera, std::unique_ptr<mat4> projectionMatrix)
+        : Scene(std::move(shader), camera, std::move(projectionMatrix), nullptr)
     {}
 
-    Scene::Scene(std::unique_ptr<SceneShader> shader, const Camera &camera, std::shared_ptr<mat4> projectionMatrix, Skybox *&&skybox)
+    Scene::Scene(std::unique_ptr<SceneShader> shader, const Camera &camera, std::unique_ptr<mat4> projectionMatrix, std::unique_ptr<Skybox> skybox)
         : camera{camera},
-          projectionMatrix{projectionMatrix},
+          projectionMatrix{std::move(projectionMatrix)},
           m_shader{std::move(shader)},
-          skybox{skybox}
+          skybox{std::move(skybox)}
     {invalid = false;}
 
     Scene &Scene::operator=(Scene &&moved) noexcept
@@ -55,17 +37,11 @@ namespace scn
         if (moved.invalid)
             throw std::invalid_argument("Tried to assign an invalid Scene.");
         m_shader = std::move(moved.m_shader);
-        moved.m_shader = nullptr;
         projectionMatrix = std::move(moved.projectionMatrix);
         camera = moved.camera;
         invalid = moved.invalid;
-
-        delete skybox;
-        skybox = moved.skybox;
-        moved.skybox = nullptr;
-
-        freeModelsVector();
-        modelsTransfo = std::move(moved.modelsTransfo);
+        skybox = std::move(moved.skybox);
+        model_w2v = std::move(moved.model_w2v);
 
         dbg::if_dlevel<dbg::Level::VERBOSE>([]()
                                             { std::cerr << "move assigment" << std::endl; });
@@ -73,30 +49,22 @@ namespace scn
         return *this;
     }
 
-    Scene::~Scene()
-    {
-        dbg::if_dlevel<dbg::Level::VERBOSE>([]()
-                                            { std::cerr << "destroyed scene" << std::endl; });
-        freeModelsVector();
-        delete skybox;
-        skybox = nullptr;
-    }
 
     void Scene::popModel()
     {
-        modelsTransfo.pop_back();
+        model_w2v.pop_back();
     }
 
-    void Scene::pushModel(Model *newMdl, std::shared_ptr<mat4> m2wMtx)
+    void Scene::pushModel(std::shared_ptr<Model> newMdl, std::shared_ptr<mat4> m2wMtx)
     {
-        modelsTransfo.emplace_back(newMdl, m2wMtx);
+        model_w2v.emplace_back(newMdl, m2wMtx);
     }
 
-    void Scene::updateTransfo(long modelIndex, std::shared_ptr<mat4> update)
+    void Scene::updateModelM2W(long modelIndex, std::shared_ptr<mat4> update)
     {
         if (modelIndex < 0)
-            modelIndex += modelsTransfo.size();
-        modelsTransfo[modelIndex].second = update;
+            modelIndex += model_w2v.size();
+        model_w2v[modelIndex].second = update;
     }
 
     void Scene::addLightSource(const Light &light)
@@ -151,7 +119,7 @@ namespace scn
         }
 
         // no need for upload if no models to render
-        if (!modelsTransfo.empty())
+        if (!model_w2v.empty())
         {
             shader->uploadMatrix(Shader::Matrices::w2v, camera.matrix());
             shader->uploadMatrix(Shader::Matrices::proj, *proj);
@@ -160,7 +128,7 @@ namespace scn
         shader->uploadMatrix(Shader::Matrices::m2w, IdentityMatrix());
 
 
-        for (auto const&[model, m2w] : modelsTransfo)
+        for (auto const&[model, m2w] : model_w2v)
         {
             glBindVertexArray(model->vao);
             // TODO apply transfo only if one was provided

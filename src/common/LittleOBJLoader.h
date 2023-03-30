@@ -72,6 +72,10 @@ typedef struct Model
   GLuint vb, ib, nb, tb; // VBOs
 
   MtlPtr material;
+
+	#ifdef __cplusplus
+	~Model();
+	#endif
 } Model;
 
 // Basic model loading

@@ -10,7 +10,7 @@ using std::size_t;
 
 namespace scn
 {
-    Shader::Shader(const char *vertexShader, const char *fragmentShader, std::array<const char*, Shader::max_mtx> const& matriceVarsNames)
+    Shader::Shader(const char *vertexShader, const char *fragmentShader, std::array<const char *, Shader::max_mtx> const &matriceVarsNames)
         : hndl{loadShaders(vertexShader, fragmentShader)}, nb_mtx{0}
     {
         useShader();
@@ -23,13 +23,14 @@ namespace scn
         const char *fragmentShader,
         const char *texUnitVarName,
         const char *textureVarName,
-        std::array<const char *, max_mtx> const& matriceVarsNames)
+        std::array<const char *, max_mtx> const &matriceVarsNames)
         : Shader(vertexShader, fragmentShader, matriceVarsNames)
     {
         initTexturing(texUnitVarName, textureVarName);
     }
 
-    void Shader::resetShaderDataLocation(Shader::Matrices index, const char* shaderVarName) {
+    void Shader::resetShaderDataLocation(Shader::Matrices index, const char *shaderVarName)
+    {
         useShader();
         auto i{to_underlying(index)};
         if (matricesLoc[i] < 0) // TODO careful here in case next line fails
@@ -98,7 +99,7 @@ namespace scn
 
     void Shader::useShader() const
     {
-        glUseProgram(hndl); // FIXME handle error
+        glUseProgram(hndl); // TODO handle error of this call
     }
 
     SceneShader::SceneShader(const char *vertexShader,
@@ -149,7 +150,8 @@ namespace scn
 
     SkyboxShader::SkyboxShader(const char *vertexShader, const char *fragmentShader, const char *projMtxVarName, const char *preProjMtxVarName)
         : Shader(vertexShader, fragmentShader, {projMtxVarName, preProjMtxVarName})
-    {}
+    {
+    }
 
     SkyboxShader::SkyboxShader(
         const char *vertexShader,
@@ -159,5 +161,6 @@ namespace scn
         const char *texUnitVarName,
         const char *textureVarName)
         : Shader(vertexShader, fragmentShader, texUnitVarName, textureVarName, {projMtxVarName, preProjMtxVarName})
-    {}
+    {
+    }
 }

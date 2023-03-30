@@ -182,10 +182,10 @@ void display(void)
 
 	blade_angle += 0.01f;
 	const mat4 m2w_blades = T(4.2f, 9.2f, -0.5f) * Rx(blade_angle) * Rx(M_PI_2);
-	mainScene.updateTransfo(-5, std::make_shared<mat4>(m2w_blades));
-	mainScene.updateTransfo(-4, std::make_shared<mat4>(m2w_blades * Rx(M_PI_2)));
-	mainScene.updateTransfo(-3, std::make_shared<mat4>(m2w_blades * Rx(M_PI)));
-	mainScene.updateTransfo(-2, std::make_shared<mat4>(m2w_blades * Rx(-M_PI_2)));
+	mainScene.updateModelM2W(-5, std::make_shared<mat4>(m2w_blades));
+	mainScene.updateModelM2W(-4, std::make_shared<mat4>(m2w_blades * Rx(M_PI_2)));
+	mainScene.updateModelM2W(-3, std::make_shared<mat4>(m2w_blades * Rx(M_PI)));
+	mainScene.updateModelM2W(-2, std::make_shared<mat4>(m2w_blades * Rx(-M_PI_2)));
 
 	mainScene.draw();
 

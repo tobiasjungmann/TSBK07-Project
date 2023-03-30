@@ -1,45 +1,28 @@
-# set this variable to the director in which you saved the common files
-BUILD_DIR := build
-SRC_DIR := src
-commondir := $(SRC_DIR)/common
-common_objs := $(BUILD_DIR)/common
-DEBUG_COMMON = false
+build_dir := build
+src_dir := src
+common_dir := $(src_dir)/common
 
-libs := -lXt -lX11 -lGL -lm
-deps =
+export MACROS = -DGL_GLEXT_PROTOTYPES
+export LDLIBS := -lXt -lX11 -lGL -lm
+export CPPOPTS := -std=c++17 -Wall
+ 
+.PHONY: clean profile $(common_dir) $(src_dir)
 
-INCLUDES := -I$(commondir)/ -I$(commondir)/Linux
-CC_OPTS := -Wall -std=c++17
-CC := g++
-FLAGS = -DGL_GLEXT_PROTOTYPES
-
-TARGETS := $(basename $(wildcard main.cpp))
-
-all : build_deps $(TARGETS)
+all: $(common_dir) $(src_dir)
 
 
-DLEVEL ?= 0
-debug: CC_OPTS += -g -O0 -DDLEVEL=$(DLEVEL)
-debug: all
+# active debugging and level with CPPFLAGS="-g3 -Og -DDLEVEL="
+
+profile: CPPFLAGS = -g -O3
+profile: all
+	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes --collect-jumps=yes $(build_dir)/main
 
 
-profile: CC_OPTS += -g -O3
-profile: TARGETS := $(firstword $(TARGETS))
-profile:
-	$(MAKE) TARGETS=$(TARGETS) DEBUG_COMMON=true CC_OPTS="$(CC_OPTS)"
-	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes --collect-jumps=yes $(BUILD_DIR)/$(TARGETS)
+$(common_dir):
+	$(MAKE) -C $@
 
+$(src_dir): $(common_dir)
+	$(MAKE) -C $@
 
-build_deps:
-	$(MAKE) -C $(commondir)
-	$(eval deps := $(wildcard $(common_objs)/*.o))
-
-%.o : %.cpp | $(BUILD_DIR)
-	$(CC) $(CC_OPTS) -o $(BUILD_DIR)/$@ $(INCLUDES) $< $(deps) $(libs)
-
-
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
-
-clean :
-	rm $(addprefix $(BUILD_DIR)/, $(TARGETS))
+clean:
+	rm -r $(build_dir)

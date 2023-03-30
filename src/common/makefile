@@ -1,36 +1,26 @@
-BUILD_DIR := build
-CC := g++
-CC_OPTS := -Wall -std=c++17
+build_dir := ../../build/common
 
-PROVIDED := Linux/MicroGlut.c ./GL_utilities.c ./LoadTGA.c ./LittleOBJLoader.c
-HOMEMADE := $(filter-out $(PROVIDED),$(wildcard ./*.cpp ./*.c))
+includes := -ILinux/
 
-SOURCES := $(PROVIDED) $(HOMEMADE)
+sources := Linux/MicroGlut.c GL_utilities.c LoadTGA.c LittleOBJLoader.c VectorUtils4.cpp
+targets := $(sources:.c=.c.o)
+targets := $(targets:.cpp=.o)
 
-LIBS := -lXt -lX11 -lGL -lm
-FLAGS := -DGL_GLEXT_PROTOTYPES
-INCLUDES := -ILinux/
+dirs := $(addprefix $(build_dir)/,$(sort $(dir $(targets:.cpp=.o))))
 
-
-TARGETS_OBJS := $(SOURCES:.c=.c.o)
-TARGETS_OBJS := $(TARGETS_OBJS:.cpp=.o)
-
-all: $(TARGETS_OBJS) | $(BUILD_DIR)
-
-DLEVEL ?= 0
-debug: CC_OPTS += -g -O0 -DDLEVEL=$(DLEVEL)
-debug: all
+all: create_objdirs $(targets)
+.PHONY: create_objdirs all 
 
 %.c.o: %.c
-	$(CC) $(CC_OPTS) -c $< -o $(BUILD_DIR)/$(notdir $(@:.c.o=.o)) $(FLAGS) $(INCLUDES) $(LIBS) -lstdc++
+	$(CXX) $(CPPOPTS) $(CPPFLAGS) -c $< -o $(build_dir)/$(dir $@)/$(notdir $(@:.c.o=.o)) $(MACROS) $(includes) $(LDLIBS) -lstdc++
 
 %.o: %.cpp
-	@echo $(shell pwd)
-	$(CC) $(CC_OPTS) -c $< -o $(BUILD_DIR)/$(notdir $@) $(FLAGS) $(INCLUDES) $(LIBS)
+	$(CXX) $(CPPOPTS) $(CPPFLAGS) -c $< -o $(build_dir)/$(dir $@)/$(notdir $@) $(MACROS) $(includes) $(LDLIBS)
 
 
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
 
-clean:
-	rm $(BUILD_DIR)/*.o
+create_objdirs:
+	for dir in $(dirs); do \
+		mkdir -p $$dir; \
+	done
+	
