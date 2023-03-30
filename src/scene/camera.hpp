@@ -31,8 +31,6 @@ struct Camera {
     // float &x {pos.x};
     // float &y {pos.y};
     // float &z {pos.z};
-
-public:
     constexpr Camera(vec3 pos, vec3 lookAt, vec3 upVector) :
         position {pos}, lookat{lookAt}, upVector{upVector} {}
 
