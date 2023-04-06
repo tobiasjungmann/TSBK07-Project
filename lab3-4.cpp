@@ -75,7 +75,6 @@ void keyControlCheck() {
 		cameraPositionOffset.z = 0.05f;
 	else if (glutKeyIsDown('n'))
 		cameraPositionOffset.z = -0.05f;
-
 }
 
 
