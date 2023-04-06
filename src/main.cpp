@@ -23,9 +23,7 @@ int display_size = 900; // size of the window - used for mouse movement
 #include "scene/camera.hpp"
 #include "resource_manager.hpp"
 
-
 static scn::Scene mainScene;
-static Scene mainScene;
 
 void keyControlCheck()
 {
@@ -107,7 +105,7 @@ int main(int argc, char **argv)
 	glutCreateWindow("TSBK07 Lab 4");
 	glutDisplayFunc(display);
 	init();
-	glutPassiveMotionFunc(updateMousePosition);
+	glutPassiveMotionFunc(mouseControlCallback);
 	glutRepeatingTimer(20);
 
 	glutMainLoop();
