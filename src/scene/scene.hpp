@@ -23,7 +23,7 @@ public:
   /// @param skybox An optional skybox's pointer. Ownership onto the underlying skybox must be given to the Scene.
   Scene (std::unique_ptr<SceneShader> shader, 
    const Camera &camera, 
-   std::unique_ptr<mat4> projectionMatrix, 
+   mat4 projectionMatrix, 
    std::unique_ptr<Skybox> skybox = nullptr);
   Scene& operator= (const Scene &cpy) = delete;
   Scene& operator= (Scene &&cpy) noexcept;
@@ -77,8 +77,8 @@ private:
 public:
   Camera camera;
   union {
-    std::unique_ptr<mat4> proj;
-    std::unique_ptr<mat4> projectionMatrix;
+    mat4 proj;
+    mat4 projectionMatrix;
   };
 
   const std::unique_ptr<SceneShader>& shader {m_shader};

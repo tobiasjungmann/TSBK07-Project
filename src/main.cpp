@@ -9,6 +9,15 @@
 #include "LittleOBJLoader.h"
 #include "LoadTGA.h"
 
+#include "scene/camera.hpp"
+#include "scene/scene.hpp"
+#include "scene/skybox.hpp"
+#include "scene/shaders.hpp"
+#include "resource_manager.hpp"
+
+
+static scn::Scene mainScene;
+
 
 void init(void)
 {
@@ -17,6 +26,8 @@ void init(void)
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
+	Model *fish, *ground;
+	fish = ResourceManager::get().getModel("gorgonian", "gorgonian.obj");
 
 }
 
@@ -25,6 +36,7 @@ void display(void)
 {
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
 
 

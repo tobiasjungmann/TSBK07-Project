@@ -45,6 +45,13 @@ namespace scn
             const char *textureVarName,
             std::array<const char *, max_mtx> const& matriceVarsNames);
     public:
+        /**
+         * @brief Update the glLocation of the matrix stored at INDEX with 
+         * the location of SHADERVARNAME within the shader. 
+         * 
+         * @param index 
+         * @param shaderVarName 
+         */
         void resetShaderDataLocation(Shader::Matrices index, const char* shaderVarName);
         void initTexturing(const char *texUnitVarName, const char *textureVarName);
         inline bool hasTexturing() const noexcept { return texturized; }
