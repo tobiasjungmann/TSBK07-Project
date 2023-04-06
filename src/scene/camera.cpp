@@ -73,47 +73,7 @@ namespace scn
         return os;
     }
 
-    /**
-     * @brief Returns z coordinate of the terrain at a given point on the generated terrain.
-     * identifies corresponding nodes and then computes the vector on the plane to the given x and y coordinates.
-     *
-     * @param x - Coordinate
-     * @param z - Coordiante
-     * @return float
-     */
-    /* integrate anywhere in the project once terrain exists
-    float computeHeight(float x, float z)
-    {
-        float x_difference = x - int(x);
-        float z_difference = z - int(z);
-        printf("x_difference: %f, ydifference: %f   sum: %f ", x_difference, z_difference, x_difference + z_difference);
-
-        vec3 p_bottom_left = tm->vertexArray[(int(x) + (int(z) + 1) * terrain_width)];
-        vec3 p_top_right = tm->vertexArray[((int(x) + 1) + int(z) * terrain_width)];
-
-        
-        //Third point of the triangle differs depending on which triangle is used in the square -> select teh corresponding starting point.
-        //if it's the bottom right one of the square -> x and y distances must be switched
-        
-        vec3 startingPoint;
-        if (x_difference + z_difference < 1.0)
-        {
-            startingPoint = tm->vertexArray[(int(x) + int(z) * terrain_width)]; // p_top_left;
-        }
-        else
-        {
-            startingPoint = tm->vertexArray[((int(x) + 1) + (int(z) + 1) * terrain_width)]; // p_bottom_right;
-            int helper = x_difference;                                                      // swapp since axis have changed
-            x_difference = z_difference;
-            z_difference = helper;
-        }
-
-        vec3 v1 = (p_bottom_left - startingPoint) * x_difference; // movement on the x axis (top left to bottom left)
-        vec3 v2 = (p_top_right - startingPoint) * z_difference;   // movement on the z axis (top left to top right)
-
-        return (startingPoint + v1 + v2).y;
-    }*/
-
+   
     /**
      * @brief Computes the minimum amount of camera rotation dependeing on the placement of the of teh mouse on the scree
      * If the current moevement is too smallcomapred to the camera position, the new minimum will be returned. Otherwise, the current

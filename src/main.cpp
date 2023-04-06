@@ -76,7 +76,7 @@ void init(void)
 	mainScene = Scene(std::move(programShader), camera, std::make_shared<mat4>(projectionMatrix), std::move(skybox));
 	mainScene.shader->resetShaderDataLocation(SceneShader::Matrices::preProj, "preProjTransform");
 
-	setMaterial(teapot, 1.0, 1.0, 1.0, specularExponent[2]);
+	setMaterial(teapot, 1.0, 1.0, 1.0, 100.0);
 	mainScene.pushModel(teapot);
 		glutRepeatingTimer(FRAME_GAP_MS);
 
