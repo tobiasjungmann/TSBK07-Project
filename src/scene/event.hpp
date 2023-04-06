@@ -1,16 +1,21 @@
 #include <vector>
 #include <memory>
 
+namespace sm {
+class Input;
+class State;
+class FSM;
+
+class Input {
+
+};
+
 class State {
     protected:
         virtual void enter() = 0;
         virtual void exit() = 0;
     public:
         virtual bool update(Input const& input, FSM& machine) = 0;
-};
-
-class Input {
-
 };
 
 class FSM {
@@ -23,3 +28,4 @@ class FSM {
     public:
     void interpret(Input const& input);
 };
+}

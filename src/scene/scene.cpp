@@ -21,10 +21,6 @@ namespace scn
           skybox{nullptr}
     {   invalid = true; }
 
-    Scene::Scene(std::unique_ptr<SceneShader> shader, const Camera &camera, std::unique_ptr<mat4> projectionMatrix)
-        : Scene(std::move(shader), camera, std::move(projectionMatrix), nullptr)
-    {}
-
     Scene::Scene(std::unique_ptr<SceneShader> shader, const Camera &camera, std::unique_ptr<mat4> projectionMatrix, std::unique_ptr<Skybox> skybox)
         : camera{camera},
           projectionMatrix{std::move(projectionMatrix)},
@@ -41,7 +37,7 @@ namespace scn
         camera = moved.camera;
         invalid = moved.invalid;
         skybox = std::move(moved.skybox);
-        model_w2v = std::move(moved.model_w2v);
+        model_m2w = std::move(moved.model_m2w);
 
         dbg::if_dlevel<dbg::Level::VERBOSE>([]()
                                             { std::cerr << "move assigment" << std::endl; });
@@ -52,19 +48,19 @@ namespace scn
 
     void Scene::popModel()
     {
-        model_w2v.pop_back();
+        model_m2w.pop_back();
     }
 
     void Scene::pushModel(std::shared_ptr<Model> newMdl, std::shared_ptr<mat4> m2wMtx)
     {
-        model_w2v.emplace_back(newMdl, m2wMtx);
+        model_m2w.emplace_back(newMdl, m2wMtx);
     }
 
     void Scene::updateModelM2W(long modelIndex, std::shared_ptr<mat4> update)
     {
         if (modelIndex < 0)
-            modelIndex += model_w2v.size();
-        model_w2v[modelIndex].second = update;
+            modelIndex += model_m2w.size();
+        model_m2w[modelIndex].second = update;
     }
 
     void Scene::addLightSource(const Light &light)
@@ -119,7 +115,7 @@ namespace scn
         }
 
         // no need for upload if no models to render
-        if (!model_w2v.empty())
+        if (!model_m2w.empty())
         {
             shader->uploadMatrix(Shader::Matrices::w2v, camera.matrix());
             shader->uploadMatrix(Shader::Matrices::proj, *proj);
@@ -128,8 +124,10 @@ namespace scn
         shader->uploadMatrix(Shader::Matrices::m2w, IdentityMatrix());
 
 
-        for (auto const&[model, m2w] : model_w2v)
+        for (auto &model_m2w_pair : model_m2w)
         {
+            auto model = model_m2w_pair.first;
+            auto m2w = model_m2w_pair.second;
             glBindVertexArray(model->vao);
             // TODO apply transfo only if one was provided
             if (alsoSynthesisPreProj) {
@@ -141,7 +139,7 @@ namespace scn
                 shader->uploadSpecularExponent(model->material->alpha);
 
             if (shader->hasTexturing())
-                shader->uploadTexture(model);
+                shader->uploadTexture(model.get());
             glDrawElements(GL_TRIANGLES, model->numIndices, GL_UNSIGNED_INT, 0L);
         }
         dbg::if_dlevel<dbg::Level::VERBOSE>([]()

@@ -19,16 +19,12 @@ public:
   /// @brief Construct a scene without prior information of the projection matrix
   /// @param shader A pointer to shader instance, whose ownership will be acquired by the scene.
   /// @param camera The camera used for this Scenes
-  Scene (std::unique_ptr<SceneShader>shader, const Camera &camera, std::unique_ptr<mat4> projectionMatrix);
-  /// @brief Construct a scene without prior information of the projection matrix
-  /// @param shader A pointer to shader instance, whose ownership will be acquired by the scene.
-  /// @param camera The camera used for this Scenes
   /// @param projectionMatrix The projection matrix shared between all models of the scene, sent to the shaders" "projName" uniform
   /// @param skybox An optional skybox's pointer. Ownership onto the underlying skybox must be given to the Scene.
   Scene (std::unique_ptr<SceneShader> shader, 
    const Camera &camera, 
    std::unique_ptr<mat4> projectionMatrix, 
-   std::unique_ptr<Skybox> skybox);
+   std::unique_ptr<Skybox> skybox = nullptr);
   Scene& operator= (const Scene &cpy) = delete;
   Scene& operator= (Scene &&cpy) noexcept;
   ~Scene() = default;
@@ -65,7 +61,7 @@ public:
 
 private:  
   inline std::shared_ptr<mat4> getM2W (std::size_t index) const {
-    return model_w2v[index].second;
+    return model_m2w[index].second;
   }
 
   inline mat4 getPreProj(std::size_t index) const {
@@ -90,7 +86,7 @@ public:
 
 private:
   // TODO compare performance with a vector<pair<std::shared_ptr<Model>, vector<mat4>>> (comparison of cache proximity)
-  std::vector<std::pair<std::shared_ptr<Model>, std::shared_ptr<mat4>>> model_w2v;
+  std::vector<std::pair<std::shared_ptr<Model>, std::shared_ptr<mat4>>> model_m2w;
   
   std::vector<vec4> lightSourcesIntensities;
   std::vector<vec3> lightSourcesDirections;
