@@ -9,6 +9,7 @@
 #include "LittleOBJLoader.h"
 #include "LoadTGA.h"
 
+
 // TODO adapt in case the windowsize is changed
 int display_size = 900; // size of the window - used for mouse movement
 
@@ -19,9 +20,11 @@ int display_size = 900; // size of the window - used for mouse movement
 #include "scene/skybox.hpp"
 #include "scene/light.hpp"
 #include "scene/shaders.hpp"
+#include "scene/camera.hpp"
+#include "resource_manager.hpp"
 
-using namespace scn;
 
+static scn::Scene mainScene;
 static Scene mainScene;
 
 void keyControlCheck()
@@ -76,6 +79,7 @@ void init(void)
 	mainScene = Scene(std::move(programShader), camera, std::make_shared<mat4>(projectionMatrix), std::move(skybox));
 	mainScene.shader->resetShaderDataLocation(SceneShader::Matrices::preProj, "preProjTransform");
 
+
 	setMaterial(teapot, 1.0, 1.0, 1.0, 100.0);
 	mainScene.pushModel(teapot);
 		glutRepeatingTimer(FRAME_GAP_MS);
@@ -88,6 +92,7 @@ void display(void)
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	keyControlCheck();
+
 
 	// todo draw stuff here
 	glutSwapBuffers();

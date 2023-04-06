@@ -1,9 +1,10 @@
 #ifndef DEBUGGING_H
 #define DEBUGGING_H
 
-#include <functional>
 
 #ifdef __cplusplus
+#include <functional>
+#include <iostream>
 #include "types_properties.hpp"
 
 namespace dbg {
@@ -12,14 +13,18 @@ enum class Level : int {
     VERBOSE = 1
 };
 
+
+
 template <Level level>
 constexpr void if_dlevel(std::function<void(void)>&& action_if_sufficient_dlevel)
 {
     #ifdef DLEVEL
         if constexpr (DLEVEL >= scn::to_underlying(level)) action_if_sufficient_dlevel();
     #else
-    #endif // ENDIF
+    #endif // DLEVEL
 }
+
+
 }
 #else // __cplusplus not defined
     enum Level {
@@ -28,8 +33,8 @@ constexpr void if_dlevel(std::function<void(void)>&& action_if_sufficient_dlevel
     };
     #ifdef DLEVEL
     #define if_dlevel(lvl, func) do {if (DLEVEL >= (lvl)) {func}} while(0)
-    #else // __cplusplus
+    #else // DLEVEL
     #define if_dlevel(lvl, func) do {} while(0)
-    #endif // __cplusplus
+    #endif // DLEVEL
 #endif // __cplusplus
 #endif // DEBUGGING_H

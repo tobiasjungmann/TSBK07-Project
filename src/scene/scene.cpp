@@ -17,13 +17,13 @@ namespace scn
 {
     Scene::Scene()
         : camera{0, 0, 0},
-          projectionMatrix{nullptr},
+          projectionMatrix{IdentityMatrix()},
           skybox{nullptr}
     {   invalid = true; }
 
-    Scene::Scene(std::unique_ptr<SceneShader> shader, const Camera &camera, std::unique_ptr<mat4> projectionMatrix, std::unique_ptr<Skybox> skybox)
+    Scene::Scene(std::unique_ptr<SceneShader> shader, const Camera &camera, mat4 projectionMatrix, std::unique_ptr<Skybox> skybox)
         : camera{camera},
-          projectionMatrix{std::move(projectionMatrix)},
+          projectionMatrix{projectionMatrix},
           m_shader{std::move(shader)},
           skybox{std::move(skybox)}
     {invalid = false;}
@@ -33,7 +33,7 @@ namespace scn
         if (moved.invalid)
             throw std::invalid_argument("Tried to assign an invalid Scene.");
         m_shader = std::move(moved.m_shader);
-        projectionMatrix = std::move(moved.projectionMatrix);
+        projectionMatrix = moved.projectionMatrix;
         camera = moved.camera;
         invalid = moved.invalid;
         skybox = std::move(moved.skybox);
@@ -118,7 +118,7 @@ namespace scn
         if (!model_m2w.empty())
         {
             shader->uploadMatrix(Shader::Matrices::w2v, camera.matrix());
-            shader->uploadMatrix(Shader::Matrices::proj, *proj);
+            shader->uploadMatrix(Shader::Matrices::proj, projectionMatrix);
         }
 
         shader->uploadMatrix(Shader::Matrices::m2w, IdentityMatrix());
