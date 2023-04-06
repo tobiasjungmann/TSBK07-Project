@@ -28,6 +28,7 @@ void init(void)
 
 	Model *fish, *ground;
 	fish = ResourceManager::get().getModel("gorgonian", "gorgonian.obj");
+	ground = ResourceManager::get().getModel("gorgonian", "gorgonian.obj");
 
 }
 
