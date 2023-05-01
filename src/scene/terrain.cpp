@@ -79,14 +79,6 @@ namespace scn
         return m_terrain;
     }
 
-    /**
-     * @brief Returns z coordinate of the terrain at a given point on the generated terrain.
-     * identifies corresponding nodes and then computes the vector on the plane to the given x and y coordinates.
-     *
-     * @param x - Coordinate
-     * @param z - Coordiante
-     * @return float
-     */
 
     float Terrain::computeHeight(float x, float z)
     {

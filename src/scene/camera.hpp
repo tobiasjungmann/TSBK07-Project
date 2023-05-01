@@ -66,10 +66,27 @@ namespace scn
         void rotateAround(Axis axis, float angle, float radius) noexcept;
         void rotateRelAround(Axis axis, float relativeAng, float radius) noexcept;
         void translate(vec3 offset) noexcept;
-        void setMousePosition(int x, int y);
+
+        /**
+         * @brief If any of the inputs have changed (either the mouse moved or one button was clicked) it recomputes all 3 vectors used by the lookat function
+         *
+         */
         void updateCameraPosition();
+        /**
+         * @brief Set the Mouse position based on the given location
+         *
+         * @param x position of the mouse
+         * @param y position of the mouse
+         */
+        void setMousePosition(int x, int y);
+        /**
+         * @brief Indicates, if one or more of the keys for forward, left, down and right are currently pressed. e.g.: (w,a,s,d)
+         *
+         * @param input (w,a,s,d)
+         */
         void forwardPressedKeys(vec4 input);
 
+        // TODO move lookat call from this function to updateCameraPosition
         mat4 matrix() const;
     };
     std::ostream &operator<<(std::ostream &os, Camera const &camera);
