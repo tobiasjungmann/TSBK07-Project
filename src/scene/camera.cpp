@@ -1,18 +1,15 @@
 #include "camera.hpp"
 
-#include <math.h>
+#include <cmath>
+
+#define min(a, b) ((a) > (b) ? (b) : (a))
+#define max(a, b) ((a) < (b) ? (b) : (a))
+
 
 namespace scn
 {
-    int display_size = 900;     // TODO move at a better position
-
-    bool firstMouse = true;
-    float lastX = display_size / 2; // last position of the mouse
-    float lastY = display_size / 2; // last position of the mouse
     float yaw = 0;                  // yaw of the camera
     float pitch = 0;                // pitch of the camera
-    float xoffset, yoffset;         // actual movement between the last two mouse position updates.
-    bool cameraNeedsRecomputing = true;
 
     void Camera::rotateAround(Axis axis, float angle, float radius) noexcept
     {
@@ -59,6 +56,18 @@ namespace scn
         pos += offset;
     }
 
+    void Camera::setMousePosition(int x, int y)
+    {
+    }
+
+    void Camera::updateCameraPosition()
+    {
+    }
+
+    void Camera::forwardPressedKeys(vec4 input)
+    {
+    }
+
     mat4 Camera::matrix() const
     {
         
@@ -83,14 +92,15 @@ namespace scn
      * @param offset current movement
      * @return float
      */
-    float computeMinMovement(float last, float offset)
+    static float computeMinMovement(float last, float offset)
     {
-        float noMovement = (display_size / 4);
+        int display_size = 800;
+        float noMovement = (display_size >> 2);
         float minMovementScaling = 0.05;
 
-        if (last < (display_size / 2))
+        if (last < (display_size >> 1))
         {
-            float minMovement = std::min((last - (display_size / 2) + noMovement), 0.0f) * minMovementScaling;
+            float minMovement = min((last - (display_size >> 1) + noMovement), 0.0f) * minMovementScaling;
             if (minMovement < offset && offset >= 0)
             {
                 return minMovement;
@@ -98,7 +108,7 @@ namespace scn
         }
         else
         {
-            float minMovement = std::max((last - (display_size / 2) - noMovement), 0.0f) * minMovementScaling;
+            float minMovement = max((last - (display_size >> 1) - noMovement), 0.0f) * minMovementScaling;
             if (minMovement > offset && offset >= 0)
             {
                 return minMovement;
@@ -107,102 +117,61 @@ namespace scn
         return offset;
     }
 
+    // FIXME there should be this function in header <cmath>
     float toRadians(float degrees)
     {
         return degrees * (M_1_PI / 180);
     }
 
-    /**
-     * @brief Updates camera position according to the keys "wasd" and the mouse movement
-     * minimal mouse movement used to rotate the camera without moving it -> move the mouse to a side of a screen
-     *
-     */
-    void Camera::updateCameraPosition()
+    bool CameraEventSubscriber::dispatch(long delta_time, unsigned char keymap[26])
     {
-        if (cameraNeedsRecomputing)
-        {
-            float sensitivity = 0.7f;
-            float xmovement = computeMinMovement(lastX, xoffset) * sensitivity;
-            float ymovement = -computeMinMovement(lastY, yoffset) * sensitivity;
-
-            yaw += xmovement;
-            pitch += ymovement;
-
-            /* Add if loopings should be forbidden
-            if (pitch > 179.0f)
-                pitch = 179.0f;
-            if (pitch < -179.0f)
-                pitch = -179.0f;*/
-
-            vec3 direction;
-            direction.x = cos(toRadians(yaw)) * cos(toRadians(pitch));
-            direction.y = sin(toRadians(pitch));
-            direction.z = sin(toRadians(yaw)) * cos(toRadians(pitch));
-            lookat = normalize(direction);
-
-            // check for collisions with the ground
-            /* TODO add once height is computed
-            float minHeigth = computeHeight(camera.x, camera.z) + 0.5;
-              if (camera.y < minHeigth)
-              {
-                  camera.y = minHeigth;
-              }*/
-            lookat = pos + lookat;
-            cameraNeedsRecomputing=false;
-            // lookAt(pos, lookat, upVector);
-            // camMatrix = lookAt(pos, lookat, upVector);
-        }
-
-        
-    }
-
-    void Camera::forwardPressedKeys(vec4 input)
-    {
+        auto& pos = camera->pos;
+        auto const& lookat = camera->lookat;
+        auto const& upV = camera->upVector;
         const float cameraSpeed = 0.5f;
-        if (input.a)
-        {
+        if (keymap['w'])
             pos += cameraSpeed * lookat;
-            cameraNeedsRecomputing = true;
-        }
-        if (input.b)
-        {
+        if (keymap['a'])
             pos -= cameraSpeed * lookat;
-            cameraNeedsRecomputing = true;
-        }
-        if (input.g)
-        {
-            pos -= normalize(cross(lookat, upVector)) * cameraSpeed;
-            cameraNeedsRecomputing = true;
-        }
-        if (input.h)
-        {
-            pos += normalize(cross(lookat, upVector)) * cameraSpeed;
-            cameraNeedsRecomputing = true;
-        }
-        
-        if (cameraNeedsRecomputing)
-        {
-            updateCameraPosition();
-        }
+        if (keymap['s'])
+            pos -= normalize(cross(lookat, upV)) * cameraSpeed;
+        if (keymap['d'])
+            pos += normalize(cross(lookat, upV)) * cameraSpeed;
+
+        return false;
     }
 
-    void setMousePosition(int x, int y)
+    bool CameraEventSubscriber::dispatch(long delta_time, evt::Mouse const& prev, evt::Mouse const& curr)
     {
-        if (firstMouse)
-        {
-            lastX = x;
-            lastY = y;
-            firstMouse = false;
-        }
+        auto dx = curr.rel.x - prev.rel.x;
+        auto dy = curr.rel.y - prev.rel.y;
+        float sensitivity = 0.7f;
+        float xmovement = computeMinMovement(prev.rel.x, dx) * sensitivity;
+        float ymovement = -computeMinMovement(prev.rel.y, dy) * sensitivity;
 
-        xoffset = x - lastX;
-        yoffset = y - lastY;
-        lastX = x;
-        lastY = y;
+        yaw += xmovement;
+        pitch += ymovement;
 
-        if (xoffset == 0 && yoffset == 0)
-        {
-            cameraNeedsRecomputing = true;
-        }
+        /* Add if loopings should be forbidden
+        if (pitch > 179.0f)
+            pitch = 179.0f;
+        if (pitch < -179.0f)
+            pitch = -179.0f;*/
+
+        vec3 direction;
+        direction.x = cos(toRadians(yaw)) * cos(toRadians(pitch));
+        direction.y = sin(toRadians(pitch));
+        direction.z = sin(toRadians(yaw)) * cos(toRadians(pitch));
+        auto lookat = normalize(direction);
+
+        // check for collisions with the ground
+        /* TODO add once height is computed
+        float minHeigth = computeHeight(camera.x, camera.z) + 0.5;
+            if (camera.y < minHeigth)
+            {
+                camera.y = minHeigth;
+            }*/
+        camera->lookat = lookat + camera->pos;
+        return false;
     }
 }

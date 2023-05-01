@@ -3,6 +3,8 @@
 #include "VectorUtils4.h"
 #include <iostream>
 
+#include "event.hpp"
+
 namespace scn
 {
     enum class Axis
@@ -10,6 +12,17 @@ namespace scn
         X,
         Y,
         Z
+    };
+
+    struct Camera;
+
+    class CameraEventSubscriber : public evt::Subscriber {
+        public:
+            constexpr CameraEventSubscriber(Camera * camera) : camera{camera} {}
+            bool dispatch (long delta_time, unsigned char keymap[26]) override;
+            bool dispatch (long delta_time, evt::Mouse const& prev, evt::Mouse const& curr) override;
+        private:
+            Camera* camera = nullptr;
     };
 
     struct Camera
@@ -32,6 +45,8 @@ namespace scn
             vec3 upVector;
             vec3 up;
         };
+
+        const CameraEventSubscriber subscriber {this};
 
         // float &x {pos.x};
         // float &y {pos.y};

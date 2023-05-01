@@ -4,7 +4,6 @@
 
 #ifdef __cplusplus
 #include <functional>
-#include <iostream>
 #include "types_properties.hpp"
 
 namespace dbg {
@@ -20,7 +19,6 @@ constexpr void if_dlevel(std::function<void(void)>&& action_if_sufficient_dlevel
 {
     #ifdef DLEVEL
         if constexpr (DLEVEL >= scn::to_underlying(level)) action_if_sufficient_dlevel();
-    #else
     #endif // DLEVEL
 }
 

@@ -763,6 +763,10 @@ char glutKeyIsDown(unsigned char c)
 	return gKeymap[(unsigned int)c];
 }
 
+void glutAlphabetState(unsigned char *keymap[26]) {
+	// keymap = &gKeymap[(unsigned int)'a'];
+}
+
 // Added by the Risinger/R\8Cberg/Wikstr\9Am project! But... gButtonPressed
 // was already here! Did I miss something?
 char glutMouseIsDown(unsigned char c)

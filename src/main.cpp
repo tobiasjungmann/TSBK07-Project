@@ -23,9 +23,31 @@ int display_size = 900; // size of the window - used for mouse movement
 #include "scene/camera.hpp"
 #include "resource_manager.hpp"
 
+#define FRAME_GAP_MS 20
+
+
+const scn::Light redLight {{1.0f, 0.0f, 0.0f}, {10.0f, 5.0f, 0.0f}, false};
+const scn::Light greenLight {{0.0f, 1.0f, 0.0f}, {0.0f, 5.0f, 10.0f}, false};
+const scn::Light blueLight {{0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, true};
+const scn::Light whiteLight {{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, true};
+
+// frustum
+#define near 1.0
+#define far 80.0
+#define right 0.5
+#define left -0.5
+#define top 0.5
+#define bottom -0.5
+
+const mat4 projectionMatrix = {
+	2.0 * near/(right-left), 	0.0, 					(right+left)/(right-left), 	0.0,
+	0.0, 						2.0*near/(top-bottom), 	(top+bottom)/(top-bottom), 	0.0,
+	0.0, 						0.0, 					-(far+near)/(far-near), 	-2*far*near/(far-near),
+	0.0, 						0.0, 					-1.0, 						0.,
+};
+
 
 static scn::Scene mainScene;
-static Scene mainScene;
 
 void keyControlCheck()
 {
@@ -70,19 +92,27 @@ void init(void)
 	glClearColor(0.2, 0.2, 0.5, 0);
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
-	Model *teapot;
-	teapot = LoadModel("models/various/teapot.obj");
-	auto programShader = std::make_unique<SceneShader>("lab3-3.raw.vert", "lab3-3.raw.frag", "projectionMatrix", "w2vMatrix", "m2wMatrix");
-	InitModel(teapot, programShader->hndl, "in_Position", "in_Normal", NULL);
+	auto programShader = std::make_unique<scn::SceneShader>("src/shaders/light.vert", "src/shaders/light.frag", "projectionMatrix", "w2vMatrix", "m2wMatrix");
+	const scn::Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
 
-	const Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
-	mainScene = Scene(std::move(programShader), camera, std::make_shared<mat4>(projectionMatrix), std::move(skybox));
-	mainScene.shader->resetShaderDataLocation(SceneShader::Matrices::preProj, "preProjTransform");
+	Model *green_reef;
+	green_reef = ResourceManager::get().getModel("green_reef","green_reef.obj");
+	InitModel(green_reef, programShader->hndl, "in_Position", "in_Normal", NULL);
+
+	mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix);
+	mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
 
 
-	setMaterial(teapot, 1.0, 1.0, 1.0, 100.0);
-	mainScene.pushModel(teapot);
-		glutRepeatingTimer(FRAME_GAP_MS);
+	setMaterial(green_reef, 1.0, 1.0, 1.0, 100.0);
+
+	mainScene.shader->initLighting("lightSourcesDirPosArr", "lightSourcesColorArr", "isDirectional", "specularExponent");
+	mainScene.addLightSource(redLight);
+	mainScene.addLightSource(greenLight);
+	mainScene.addLightSource(blueLight);
+	mainScene.addLightSource(whiteLight);
+
+	mainScene.pushModel(green_reef);
+	glutRepeatingTimer(FRAME_GAP_MS);
 
 	glutPassiveMotionFunc(mouseControlCallback);
 }
@@ -107,7 +137,7 @@ int main(int argc, char **argv)
 	glutCreateWindow("TSBK07 Lab 4");
 	glutDisplayFunc(display);
 	init();
-	glutPassiveMotionFunc(updateMousePosition);
+	// glutPassiveMotionFunc(updateMousePosition);
 	glutRepeatingTimer(20);
 
 	glutMainLoop();

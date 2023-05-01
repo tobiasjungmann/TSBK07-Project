@@ -18,7 +18,7 @@ void Skybox::draw(const Scene& scene) const
 	glDisable(GL_DEPTH_TEST); // required before drawing skybox
 	glBindVertexArray(model->vao);
 	// NO TRANSLATION for the world-to-view matrix of the skybox !!
-	shader->uploadMatrix(Shader::Matrices::proj, *scene.proj);
+	shader->uploadMatrix(Shader::Matrices::proj, scene.proj);
 	shader->uploadMatrix(Shader::Matrices::preProj, zeroOutTranslation(scene.camera.matrix())); // do not translate with th ecamera !!
 
 	glDrawElements(GL_TRIANGLES, model->numIndices, GL_UNSIGNED_INT, 0L);

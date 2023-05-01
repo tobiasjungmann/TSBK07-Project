@@ -57,6 +57,8 @@ void glutRepeatingTimer(int millis);
 
 // New call for polling the keyboard, good for games
 char glutKeyIsDown(unsigned char c);
+// Fits the whole english alphabet into KEYMAP
+void glutAlphabetState(unsigned char *keymap[26]); 
 // And the same for the mouse
 char glutMouseIsDown(unsigned char c);
 

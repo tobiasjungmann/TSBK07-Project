@@ -56,32 +56,7 @@ typedef struct Mtl
 	// Extensions for physically based rendering not supported
 } Mtl, *MtlPtr, **MtlHandle;
 
-typedef struct Model
-{
-  vec3* vertexArray;
-  vec3* normalArray;
-  vec2* texCoordArray;
-  vec3* colorArray; // Rarely used
-  GLuint* indexArray;
-  int numVertices;
-  int numIndices;
-  char externalData;
-  
-  // Space for saving VBO and VAO IDs
-  GLuint vao; // VAO
-  GLuint vb, ib, nb, tb; // VBOs
-
-  MtlPtr material;
-
-	#ifdef __cplusplus
-	~Model();
-	#endif
-} Model;
-
-// Basic model loading
-#define LoadModelPlus LoadModel
-Model* LoadModel(const char* name); // Load OBJ as single Model
-Model** LoadModelSet(const char* name);  // Multi-part OBJ!
+typedef struct Model Model;
 
 // Drawing models
 void DrawModel(Model *m, GLuint program);
@@ -90,6 +65,11 @@ void InitModel(Model *m, GLuint program, const char* vertexVariableName, const c
 void InitModel(Model *m, GLuint program, const char* vertexVariableName, const char* normalVariableName, const char* texCoordVariableName, GLint texUnit, GLint texReferenceID);
 #endif // __cplusplus
 void DrawWireframeModel(Model *m, GLuint program, const char* vertexVariableName, const char* normalVariableName, const char* texCoordVariableName);
+
+// Basic model loading
+#define LoadModelPlus LoadModel
+Model* LoadModel(const char* name); // Load OBJ as single Model
+Model** LoadModelSet(const char* name);  // Multi-part OBJ!
 
 // Utility functions that you may need if you want to modify the model.
 
@@ -111,6 +91,75 @@ void pushTexture(const Model *m, GLuint program, const char* unitName);
 #ifdef __cplusplus
 void pushTexture(const Model *m, GLuint program, GLint texUnitLoc);
 #endif // __cplusplus
+
+
+typedef struct Model
+{
+  vec3* vertexArray;
+  vec3* normalArray;
+  vec2* texCoordArray;
+  vec3* colorArray; // Rarely used
+  GLuint* indexArray;
+  int numVertices;
+  int numIndices;
+  char externalData;
+  
+  // Space for saving VBO and VAO IDs
+  GLuint vao; // VAO
+  GLuint vb, ib, nb, tb; // VBOs
+
+  MtlPtr material;
+
+	#ifdef __cplusplus
+	~Model();
+	// initialize
+	inline void init(GLuint program, const char* vertexVariableName, const char* normalVariableName, const char* texCoordVariableName) {
+		InitModel(this, program, vertexVariableName, normalVariableName, texCoordVariableName);
+	}
+	inline void init(GLuint program, const char* vertexVariableName, const char* normalVariableName, const char* texCoordVariableName, GLint texUnit, GLint texReferenceID) {
+		InitModel(this, program, vertexVariableName, normalVariableName, texCoordVariableName, texUnit, texReferenceID);
+	}
+	// static load 
+	inline static Model* load(const char* name) {
+		Model* mdl = LoadModel(name);
+		if (!mdl)
+			throw std::runtime_error("Failed to load model");
+		return mdl;
+	}
+	inline static Model** loadSet(const char* name) {
+		Model** mdlp = LoadModelSet(name);
+		if (!mdlp)
+			throw std::runtime_error("Failed to load model set");
+		return mdlp;
+	}
+	inline static Model* loadFromData(
+			vec3 *vertices,
+			vec3 *normals,
+			vec2 *texCoords,
+			vec3 *colors,
+			GLuint *indices,
+			int numVert,
+			int numInd)
+		{
+			Model* mdl = LoadDataToModel(vertices, normals, texCoords, colors, indices, numVert, numInd);
+			if (!mdl)
+				throw std::runtime_error("Failed to load model from data");
+			return mdl;
+		}
+	// utilities methods
+	inline void reloadData() {ReloadModelData(this);}
+	inline void center() {CenterModel(this);}
+	inline void scale(float sx, float sy, float sz) {ScaleModel(this, sx, sy, sz);}
+	// drawing
+	inline void draw(GLuint program) {DrawModel(this, program);}
+	inline void drawWireframe(GLuint program, const char* vertexVariableName, const char* normalVariableName, const char* texCoordVariableName)
+	{ DrawWireframeModel(this, program, vertexVariableName, normalVariableName, texCoordVariableName); }
+	#endif // __cplusplus
+
+} Model;
+
+
+
 //#ifdef __cplusplus
 //}
 ///#endif

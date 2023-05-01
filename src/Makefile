@@ -11,10 +11,10 @@ targets := $(sources:.cpp=.o)
 targets := $(addprefix $(build_dir)/,$(targets))
 obj_dirs := $(addprefix $(build_dir)/,$(dirs))
 
-PROGRAM := $(build_dir)/main 
+PROGRAM := $(build_dir)/$(TARGET) 
 
 
-all: create_objdirs $(targets)
+all: $(targets) | $(obj_dirs)
 	$(CXX) $(targets) $(common_objs) $(LDLIBS) -o $(PROGRAM)
 
 .PHONY: create_objdirs all
@@ -22,7 +22,7 @@ all: create_objdirs $(targets)
 $(build_dir)/%.o: %.cpp
 	$(CXX) $(CPPOPTS) $(CPPFLAGS) -c $< -o $@ $(includes) $(MACROS) $(LDLIBS)
 
-create_objdirs:
+$(obj_dirs):
 	for dir in $(obj_dirs); do \
 		mkdir -p $$dir; \
 	done

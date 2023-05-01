@@ -1,33 +1,61 @@
-#include <stack>
+#pragma once
+
 #include <memory>
+#include <unordered_set> 
 
-namespace sm {
-class Input;
-class State;
-class FSM;
+#include "VectorUtils4.h"
+#include "MicroGlut.h"
 
-class Input {
-    
+namespace evt {
+
+struct Mouse {
+    vec2 abs;
+    vec2 rel;
 };
 
-class State {
-    protected:
-        virtual void enter() = 0;
-        virtual void exit() = 0;
+class Subscriber {
     public:
-        virtual bool update(Input const& input, FSM& machine) = 0;
+    /**
+     * @brief Manage key input;
+     * 
+     * @return true if dispatch chaining should stop here.
+     * @return false keep going with following subscribers
+     */
+    virtual bool dispatch(long delta_time, unsigned char keymap[26]) = 0;
+    virtual bool dispatch(long delta_time, Mouse const& prev, Mouse const& curr) = 0;
+
+    // delete copy functions for polymorphic class to avoid slicing derived classes.
+    // here abstract class should prevent this anyway 
 };
 
-using state_t = std::unique_ptr<State>;
+/* class Dispatcher
+{
+public:
+    Dispatcher(Window *win) : win{win} {};
+    inline void operator()() {
+        unsigned char keymap[26];
+        glutAlphabetState(&keymap);
+        for (auto& sub: subscribers) {
+            sub->dispatch(-1, keymap);
+        }
+    }
+    inline void operator()(int x, int y) {
+        Mouse curr;
+        curr.abs = vec2(x,y);
+        curr.rel = 2*vec2(x/win->width(), y/win->height()) - vec2(1, 1); 
+        for (auto& sub: subscribers) {
+            sub->dispatch(-1, prev, curr);
+        }
+        prev = curr;
+    }
 
-class FSM : public std::stack<state_t> {
-    private:
-    std::stack<std::unique_ptr<State>> states; // TODO maybe consider linked list or deque for performance on access
-
-    void popState();
-    void pushState(std::unique_ptr<State> toPush);
-
-    public:
-    void interpret(Input const& input);
-};
+    inline void addSubscriber(std::unique_ptr<Subscriber> sub) {
+        subscribers.emplace(sub);
+    }
+    void removeSubscriber(Subscriber *sub);
+private:
+    Mouse prev = {vec2(0,0), vec2(0,0)};
+    std::unordered_set<std::unique_ptr<Subscriber>> subscribers;
+    Window *win;
+}; */
 }

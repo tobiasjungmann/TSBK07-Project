@@ -1,0 +1,2 @@
+- Find a way to test for non-update in Scene::draw, more efficient that checking against the IdentityMatrix
+- Update main.cpp to use Dispatcher, a Scene should probably owns a Dispatcher, and subscribe camera automatically at construction.

@@ -23,7 +23,7 @@ public:
   * @param path Suffix to append to ../rc/models/
   * @return Model* 
   */
-  Model* getModel(std::string const& key, const char* path = "");
+  Model* getModel(std::string const& key, std::string const& path = "");
   Model* getModel(std::string const& key, vec3* vert, vec3* norm, vec2* texCoords, vec3* colors, GLuint *indices, int numVert, int numInd);
   inline void freeModel(std::string const& key) {
     modelsMap.erase(key);

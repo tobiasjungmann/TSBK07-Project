@@ -41,7 +41,8 @@ public:
    * @param newMdl 
    * @param m2wMtx 
    */
-  void pushModel (std::shared_ptr<Model> newMdl, std::shared_ptr<mat4> m2wMtx = nullptr); // TODO should returns index of insertion in vector
+  void pushModel (const Model* newMdl); // TODO should returns index of insertion in vector
+  void pushModel (const Model* newMdl, mat4 m2wMtx); // TODO should returns index of insertion in vector
   
   
   /**
@@ -50,7 +51,7 @@ public:
    * @param modelIndex The index of the model to be updated. 
    * @param update The model-to-world matrix that should replace the current one
    */
-  void updateModelM2W (long modelIndex, std::shared_ptr<mat4> update);
+  void updateModelM2W (long modelIndex, mat4 update);
   
   // Light management
   void addLightSource(const Light &light);
@@ -60,17 +61,17 @@ public:
 
 
 private:  
-  inline std::shared_ptr<mat4> getM2W (std::size_t index) const {
+  inline mat4 getM2W (std::size_t index) const {
     return model_m2w[index].second;
   }
 
   inline mat4 getPreProj(std::size_t index) const {
     auto m2w = getM2W(index);
-    return camera.matrix () * (m2w == nullptr ? IdentityMatrix () : *m2w);
+    return camera.matrix () * m2w;
   }
   
-  inline mat4 getPreProj(std::shared_ptr<mat4> m2w) const {
-    return camera.matrix () * (m2w == nullptr ? IdentityMatrix () : *m2w);
+  inline mat4 getPreProj(mat4 const& m2w) const {
+    return camera.matrix () * m2w;
   }
 
 
@@ -86,7 +87,7 @@ public:
 
 private:
   // TODO compare performance with a vector<pair<std::shared_ptr<Model>, vector<mat4>>> (comparison of cache proximity)
-  std::vector<std::pair<std::shared_ptr<Model>, std::shared_ptr<mat4>>> model_m2w;
+  std::vector<std::pair<const Model*, mat4>> model_m2w;
   
   std::vector<vec4> lightSourcesIntensities;
   std::vector<vec3> lightSourcesDirections;

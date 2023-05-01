@@ -51,12 +51,17 @@ namespace scn
         model_m2w.pop_back();
     }
 
-    void Scene::pushModel(std::shared_ptr<Model> newMdl, std::shared_ptr<mat4> m2wMtx)
+    void Scene::pushModel(const Model *newMdl)
+    {
+        pushModel(newMdl, IdentityMatrix());
+    }
+
+    void Scene::pushModel(const Model *newMdl, mat4 m2wMtx)
     {
         model_m2w.emplace_back(newMdl, m2wMtx);
     }
 
-    void Scene::updateModelM2W(long modelIndex, std::shared_ptr<mat4> update)
+    void Scene::updateModelM2W(long modelIndex, mat4 update)
     {
         if (modelIndex < 0)
             modelIndex += model_m2w.size();
@@ -133,13 +138,13 @@ namespace scn
             if (alsoSynthesisPreProj) {
                 shader->uploadMatrix(Shader::Matrices::preProj, getPreProj(m2w));
             }
-            if (m2w)
-                shader->uploadMatrix(Shader::Matrices::m2w, *m2w);
+            if (m2w != IdentityMatrix()) // TODO improve that performance wise (store pointer maybe ?)
+                shader->uploadMatrix(Shader::Matrices::m2w, m2w);
             if (shader->hasLighting() && model->material)
                 shader->uploadSpecularExponent(model->material->alpha);
 
             if (shader->hasTexturing())
-                shader->uploadTexture(model.get());
+                shader->uploadTexture(model);
             glDrawElements(GL_TRIANGLES, model->numIndices, GL_UNSIGNED_INT, 0L);
         }
         dbg::if_dlevel<dbg::Level::VERBOSE>([]()

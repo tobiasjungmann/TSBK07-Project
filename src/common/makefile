@@ -2,13 +2,15 @@ build_dir := ../../build/common
 
 includes := -ILinux/
 
-sources := Linux/MicroGlut.c GL_utilities.c LoadTGA.c LittleOBJLoader.c VectorUtils4.cpp
+sources := Linux/MicroGlut.c GL_utilities.cpp LoadTGA.cpp LittleOBJLoader.cpp VectorUtils4.cpp
 targets := $(sources:.c=.c.o)
 targets := $(targets:.cpp=.o)
 
+CPPFLAGS += -w
+
 dirs := $(addprefix $(build_dir)/,$(sort $(dir $(targets:.cpp=.o))))
 
-all: create_objdirs $(targets)
+all: $(targets) | $(dirs)
 .PHONY: create_objdirs all 
 
 %.c.o: %.c
@@ -19,7 +21,7 @@ all: create_objdirs $(targets)
 
 
 
-create_objdirs:
+$(dirs):
 	for dir in $(dirs); do \
 		mkdir -p $$dir; \
 	done

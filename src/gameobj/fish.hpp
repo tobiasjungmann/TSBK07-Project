@@ -3,10 +3,12 @@
 #include "LittleOBJLoader.h"
 
 namespace obj {
-  class GameObj {
-
-
+  class Fish {
+    Fish(std::string modelName, vec3 pos = vec3(0));
     private:
-      Model *model;
+      std::string modelName; 
+      vec3 pos;
+      vec3 vel;
+      vec3 acc;
   };
 }
