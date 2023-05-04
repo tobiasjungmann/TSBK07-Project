@@ -5,6 +5,8 @@
 #include <algorithm>
 #include "LittleOBJLoader.h"
 #include "types_properties.hpp"
+#include "debugging.h"
+#include "light.hpp"
 
 using std::size_t;
 
@@ -45,7 +47,7 @@ namespace scn
     {
         useShader();
         auto i{to_underlying(index)};
-        if (matricesLoc[i] < 0)
+        if (matricesLoc[i] < 0 && ! ENV_NOTHROW)
             throw std::logic_error("Attempted to upload a matrix whose shader's location was unitialized.");
         glUniformMatrix4fv(matricesLoc[i], 1, GL_TRUE, matrixData.m);
     }
@@ -114,38 +116,77 @@ namespace scn
                              const char *projMtxVarName,
                              const char *preProjMtxVarName) : Shader(vertexShader, fragmentShader, {projMtxVarName, preProjMtxVarName}) {}
 
-    void SceneShader::initLighting(const char *lightSourcesDirPosArrName,
-                                   const char *lightSourcesColorArrName,
-                                   const char *lightDirectionalitiesArrName,
-                                   const char *specularExponentVarName)
+    void SceneShader::initLighting(std::string const& lightStructArrayName)
     {
         useShader();
-        lightDirsMtxLoc = glGetUniformLocation(hndl, lightSourcesDirPosArrName);
-        lightIntensitiesMtxLoc = glGetUniformLocation(hndl, lightSourcesColorArrName);
-        lightDirecnalMtxLoc = glGetUniformLocation(hndl, lightDirectionalitiesArrName);
-        specExponentLoc = glGetUniformLocation(hndl, specularExponentVarName);
-        lighting = true;
+        if (! ENV_NOTHROW
+         && glGetUniformLocation(hndl, (lightStructArrayName + "[0].color").c_str()) == -1)
+            throw  std::logic_error(
+                "Failure when initializing lighting. Variable "
+            + std::string(lightStructArrayName)
+            + " not found in shader.");
+        this->lightStructArrayName = lightStructArrayName;
     }
 
-    void SceneShader::uploadLighting(size_t nbLights,
-                                     const GLfloat *sourcesDirs,
-                                     const GLfloat *sourcesIntensities,
-                                     const GLint *sourcesDirnalties) const
+    void SceneShader::initMaterialProps(std::string const& materialPropsStructName)
     {
-        if (not lighting)
+        useShader();
+        if (! ENV_NOTHROW && glGetUniformLocation(hndl, (materialPropsStructName + ".specularity").c_str()) == -1)
+            throw  std::logic_error(
+                "Failure when initializing material props. Variable "
+                + std::string(materialPropsStructName)
+                + " not found in shader.");
+        this->mtlPropsStructName = materialPropsStructName;
+    }
+
+    void SceneShader::uploadLighting(std::vector<Light> const& lights) const
+    {
+        if (!ENV_NOTHROW && not hasLighting())
             throw std::logic_error("Lighting was not properly initialized before attempting data upload");
         useShader();
-        glUniform3fv(lightDirsMtxLoc, nbLights, sourcesDirs);
-        glUniform3fv(lightIntensitiesMtxLoc, nbLights, sourcesIntensities);
-        glUniform1iv(lightDirecnalMtxLoc, nbLights, sourcesDirnalties);
+
+        for (std::size_t i = 0; i < lights.size(); i++)
+        {
+            std::string currentLight = lightStructArrayName + '[' + std::to_string(i) + ']'; 
+            GLint lightDirLoc = glGetUniformLocation(hndl, (currentLight + ".dirPos").c_str());
+            GLint lightColorLoc = glGetUniformLocation(hndl, (currentLight + ".color").c_str());
+            GLint lightDirectionalLoc = glGetUniformLocation(hndl, (currentLight + ".directional").c_str());
+
+            if ((lightDirLoc == -1 or lightColorLoc == -1 or lightDirectionalLoc == -1) && ! ENV_NOTHROW)
+                throw std::logic_error("Light " + std::to_string(i) + " could not be properly located in shader");
+
+            glUniform3f(lightDirLoc, lights[i].dirPos.x, lights[i].dirPos.y, lights[i].dirPos.z);
+            glUniform3f(lightColorLoc, lights[i].intensity.x, lights[i].intensity.y, lights[i].intensity.z);
+            glUniform1i(lightDirectionalLoc, lights[i].directional);
+        }
     }
 
-    void SceneShader::uploadSpecularExponent(GLfloat exponent) const
+
+    void SceneShader::uploadModelLightProps(const Modelv2::MaterialLight *props) const
     {
-        if (not lighting)
-            throw std::logic_error("Lighting was not properly initialized before attempting specular exponent upload");
-        useShader();
-        glUniform1f(specExponentLoc, exponent);
+        if (not hasLighting() && ! ENV_NOTHROW)
+            throw std::logic_error("Lighting was not properly initialized before attempting model light properties upload");
+        if (props)
+        {
+            if (! ENV_NOTHROW && mtlPropsStructName.empty()) {
+                throw std::logic_error("Material properties were not initialized before attempting model light properties upload");
+            }
+                
+            useShader();
+            GLint diffusenessLoc = glGetUniformLocation(hndl, (mtlPropsStructName + ".diffuseness").c_str());
+            GLint specularityLoc = glGetUniformLocation(hndl, (mtlPropsStructName + ".specularity").c_str());
+            GLint ambiantCoeffLoc = glGetUniformLocation(hndl, (mtlPropsStructName + ".ambiantCoeff").c_str());
+            GLint alphaLoc = glGetUniformLocation(hndl, (mtlPropsStructName + ".specularExponent").c_str());
+
+            if (diffusenessLoc != -1)
+                glUniform1f(diffusenessLoc, props->diffuseness);
+            if (specularityLoc != -1)
+                glUniform1f(specularityLoc, props->specularity);
+            if (alphaLoc != -1)
+                glUniform1f(alphaLoc, props->specularExponent);
+            if (ambiantCoeffLoc != -1)
+                glUniform1f(ambiantCoeffLoc, props->ambiantCoeff);
+        }
     }
 
     SkyboxShader::SkyboxShader(const char *vertexShader, const char *fragmentShader, const char *projMtxVarName, const char *preProjMtxVarName)

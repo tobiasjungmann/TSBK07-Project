@@ -12,6 +12,9 @@ enum class Level : int {
     VERBOSE = 1
 };
 
+#ifndef ENV_NOTHROW
+#define ENV_NOTHROW 0
+#endif
 
 
 template <Level level>

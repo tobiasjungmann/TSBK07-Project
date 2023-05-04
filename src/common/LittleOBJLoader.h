@@ -25,22 +25,9 @@ typedef struct Mtl
 	
 	vec3 Ke;
 	
-	union {
-		vec3 Ka;
-		vec3 ambiantCoeff;
-	};
-	union {
-		vec3 Kd;
-		vec3 diffuseness;
-	};
-	union {
-		vec3 Ks;
-		vec3 specularity;
-	};
-
-	union {
-		GLfloat specularExponent, alpha;
-	};
+	vec3 Ka;
+	vec3 Kd;
+	vec3 Ks;
 
 	// I have also seen vec3's named Tf and a float called Ni in one file. What is that?
 	// Tf = transmission filter

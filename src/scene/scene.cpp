@@ -51,12 +51,12 @@ namespace scn
         model_m2w.pop_back();
     }
 
-    void Scene::pushModel(const Model *newMdl)
+    void Scene::pushModel(Modelv2 newMdl)
     {
         pushModel(newMdl, IdentityMatrix());
     }
 
-    void Scene::pushModel(const Model *newMdl, mat4 m2wMtx)
+    void Scene::pushModel(Modelv2 newMdl, mat4 m2wMtx)
     {
         model_m2w.emplace_back(newMdl, m2wMtx);
     }
@@ -70,24 +70,20 @@ namespace scn
 
     void Scene::addLightSource(const Light &light)
     {
-        if (not shader->hasLighting())
+        if (not shader->hasLighting() && ! ENV_NOTHROW)
             throw std::logic_error("Attempt to add light sources without prior initialization of the lighting engine");
-        lightSourcesIntensities.push_back(light.intensity);
-        lightSourcesDirections.push_back(light.direction);
-        lightSourcesDirectionalities.push_back(light.directional);
+        lights.push_back(light);
     }
 
     void Scene::removeLightSource(long index)
     {
-        if (not shader->hasLighting())
+        if (not shader->hasLighting() && ! ENV_NOTHROW)
             throw std::logic_error("Attempt to add light sources without prior initialization of the lighting engine");
 
         if (index < 0)
-            index += lightSourcesIntensities.size();
+            index += lights.size();
 
-        lightSourcesIntensities.erase(lightSourcesIntensities.begin() + index);
-        lightSourcesDirectionalities.erase(lightSourcesDirectionalities.begin() + index);
-        lightSourcesDirections.erase(lightSourcesDirections.begin() + index);
+        lights.erase(std::begin(lights) + index);
     }
 
     // BUG add management of the textures (upload them as necessary)
@@ -99,24 +95,24 @@ namespace scn
         dbg::if_dlevel<dbg::Level::VERBOSE>([]()
                                          { std::cerr << "Drawing scene." << std::endl; });
 
+
+        // upload the skybox if there is one.
         if (skybox)
         {
-        // TODO maybe add a conditional on the upload of the skybox texture to limit the number of uploads
             if (skybox->shader->hasTexturing())
                 skybox->shader->uploadTexture(skybox->model);
             skybox->draw(*this);
         }
 
 
+        // Use underlying shader before uploading anything
         shader->useShader();
         // upload matices
 
+        // if lighting is used in the scene, upload the Lights data to shader
         if (shader->hasLighting())
         {
-            shader->uploadLighting(lightSourcesIntensities.size(),
-                                   &lightSourcesDirections.data()[0].x,
-                                   &lightSourcesIntensities.data()[0].x,
-                                   lightSourcesDirectionalities.data());
+            shader->uploadLighting(lights);
         }
 
         // no need for upload if no models to render
@@ -129,23 +125,26 @@ namespace scn
         shader->uploadMatrix(Shader::Matrices::m2w, IdentityMatrix());
 
 
-        for (auto &model_m2w_pair : model_m2w)
+        // Draw every Model
+        for (auto const& model_m2w_pair : model_m2w)
         {
-            auto model = model_m2w_pair.first;
+            auto const& model = model_m2w_pair.first;
             auto m2w = model_m2w_pair.second;
-            glBindVertexArray(model->vao);
-            // TODO apply transfo only if one was provided
+            glBindVertexArray(model.get()->vao);
             if (alsoSynthesisPreProj) {
                 shader->uploadMatrix(Shader::Matrices::preProj, getPreProj(m2w));
             }
-            if (m2w != IdentityMatrix()) // BUG improve that performance wise (store pointer maybe ?)
+
+            // if (m2w != IdentityMatrix()) // BUG improve that performance wise (store pointer maybe ?)
                 shader->uploadMatrix(Shader::Matrices::m2w, m2w);
-            if (shader->hasLighting() && model->material)
-                shader->uploadSpecularExponent(model->material->alpha);
+            // upload material of 
+            if (shader->hasLighting()) {
+                shader->uploadModelLightProps(model.getLightProps());
+            }
 
             if (shader->hasTexturing())
-                shader->uploadTexture(model);
-            glDrawElements(GL_TRIANGLES, model->numIndices, GL_UNSIGNED_INT, 0L);
+                shader->uploadTexture(model.get());
+            glDrawElements(GL_TRIANGLES, model.get()->numIndices, GL_UNSIGNED_INT, 0L);
         }
         dbg::if_dlevel<dbg::Level::VERBOSE>([]()
                                          { std::cerr << "Scene drawn successfully" << std::endl; });

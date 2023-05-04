@@ -18,6 +18,7 @@ int display_size = 900; // size of the window - used for mouse movement
 #include "scene/scene.hpp"
 #include "scene/skybox.hpp"
 #include "scene/light.hpp"
+#include "scene/modelv2.hpp"
 #include "scene/shaders.hpp"
 #include "scene/camera.hpp"
 #include "resource_manager.hpp"
@@ -84,18 +85,6 @@ void mouseControlCallback(int x, int y)
 	glutPostRedisplay();
 }
 
-void setMaterial(Model *m, GLfloat Ka, GLfloat Kd, GLfloat Kspec, GLfloat alpha)
-{
-	if (!m->material)
-	{
-		m->material = (MtlPtr)malloc(sizeof(Mtl));
-	}
-	m->material->alpha = alpha;
-	m->material->specularity = Kspec;
-	m->material->diffuseness = Kd;
-	m->material->Ka = Ka;
-}
-
 void init(void)
 {
 	// GL inits
@@ -105,16 +94,16 @@ void init(void)
 	auto programShader = std::make_unique<scn::SceneShader>("src/shaders/light.vert", "src/shaders/light.frag", "projectionMatrix", "w2vMatrix", "m2wMatrix");
 	const scn::Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
 
-	Model *green_reef;
-	green_reef = ResourceManager::get().getModel("green_reef", "green_reef.obj");
-	InitModel(green_reef, programShader->hndl, "in_Position", "in_Normal", NULL);
+	Modelv2 green_reef {"green_reef", "green_reef.obj"};
+	green_reef.init(programShader->hndl, "in_Position", "in_Normal", NULL);
+	green_reef.setLightProps(1.0, 0.8, 0.5, 100.0);
 
 	mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix);
 	// mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
 
-	setMaterial(green_reef, 1.0, 1.0, 1.0, 100.0);
 
-	mainScene.shader->initLighting("lightSourcesDirPosArr", "lightSourcesColorArr", "isDirectional", "specularExponent");
+	mainScene.shader->initMaterialProps("materialLight");
+	mainScene.shader->initLighting("lights");
 	mainScene.addLightSource(redLight);
 	mainScene.addLightSource(greenLight);
 	mainScene.addLightSource(blueLight);
@@ -147,7 +136,7 @@ int main(int argc, char **argv)
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitContextVersion(3, 2);
 	glutInitWindowSize(display_size, display_size);
-	glutCreateWindow("TSBK07 Lab 4");
+	glutCreateWindow("Deep Sea");
 	glutDisplayFunc(display);
 	init();
 	// glutPassiveMotionFunc(updateMousePosition);

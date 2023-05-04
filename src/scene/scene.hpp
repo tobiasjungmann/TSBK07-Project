@@ -10,6 +10,8 @@
 #include "skybox.hpp"
 #include "light.hpp"
 
+#include "modelv2.hpp"
+
 namespace scn
 {
 class Scene
@@ -41,8 +43,8 @@ public:
    * @param newMdl 
    * @param m2wMtx 
    */
-  void pushModel (const Model* newMdl); // TODO should returns index of insertion in vector
-  void pushModel (const Model* newMdl, mat4 m2wMtx); // TODO should returns index of insertion in vector
+  void pushModel (Modelv2 newMdl); // TODO should returns index of insertion in vector
+  void pushModel (Modelv2 newMdl, mat4 m2wMtx); // TODO should returns index of insertion in vector
   
   
   /**
@@ -86,12 +88,8 @@ public:
   std::unique_ptr<Skybox> skybox;
 
 private:
-  // TODO compare performance with a vector<pair<std::shared_ptr<Model>, vector<mat4>>> (comparison of cache proximity)
-  std::vector<std::pair<const Model*, mat4>> model_m2w;
-  
-  std::vector<vec4> lightSourcesIntensities;
-  std::vector<vec3> lightSourcesDirections;
-  std::vector<int> lightSourcesDirectionalities; /// int instead of bools, cuz we need the underlying array with ints
+  std::vector<std::pair<Modelv2, mat4>> model_m2w;
+  std::vector<Light> lights;
   
   std::unique_ptr<SceneShader> m_shader;
   bool invalid;
