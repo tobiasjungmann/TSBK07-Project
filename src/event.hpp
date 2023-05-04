@@ -19,7 +19,6 @@ namespace evt
 
         void update(int x, int y)
         {
-            std::cout << "New mouse input\n";
             if (previousPosition.x != -INFINITY)
             {
                 previousPosition = currentPosition;

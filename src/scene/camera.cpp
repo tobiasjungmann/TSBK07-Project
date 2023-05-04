@@ -125,12 +125,9 @@ namespace scn
 
     void Camera::updateCameraPosition() // const& prev, evt::Mouse const& curr)
     {
-        //  std::cout << "mouse: x" << currentMousePosition.previousPosition.x << "  y: " << currentMousePosition.previousPosition.y;
-        //  std::cout << "    curent: x" << currentMousePosition.currentPosition.x << "  y: " << currentMousePosition.currentPosition.y << "\n";
-        const float cameraSpeed = 0.5f;
+       const float cameraSpeed = 0.5f;
         float sensitivity = 0.7f;
-        std::cout << "wasd " << currentPressedKeys.w << currentPressedKeys.a << currentPressedKeys.s << currentPressedKeys.d<<"\n";
-        if (currentPressedKeys.w)
+       if (currentPressedKeys.w)
         {
             pos += cameraSpeed * viewingDirection;
         }
@@ -147,7 +144,6 @@ namespace scn
             pos += normalize(cross(viewingDirection, up)) * cameraSpeed;
         }
 
-        // std::cout << this <<"\n";
         float xmovement = computeMinMovement(currentMousePosition.previousPosition.x, currentMousePosition.currentPosition.x) * sensitivity;
         float ymovement = -computeMinMovement(currentMousePosition.currentPosition.y, currentMousePosition.previousPosition.y) * sensitivity;
 

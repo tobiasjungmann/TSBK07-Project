@@ -25,7 +25,7 @@ namespace scn
          * @param z - Coordiante
          * @return float
          */
-        float computeHeight(float x, float z);
+        float computeHeight(float x, float z)const;
 
         Model *getModel();
 

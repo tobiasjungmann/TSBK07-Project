@@ -85,7 +85,7 @@ namespace scn
         return m_terrain;
     }
 
-    float Terrain::computeHeight(float x, float z)
+    float Terrain::computeHeight(float x, float z)const
     {
         float x_difference = x - int(x);
         float z_difference = z - int(z);
