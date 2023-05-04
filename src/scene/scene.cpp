@@ -98,9 +98,8 @@ namespace scn
 
         dbg::if_dlevel<dbg::Level::VERBOSE>([]()
                                          { std::cerr << "Drawing scene." << std::endl; });
-//camera.subscriber.updateCameraPosition();
 
-//        camera->updateCameraPosition();
+
 
         if (skybox)
         {

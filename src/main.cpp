@@ -122,9 +122,9 @@ void display(void)
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	keyControlCheck();
-	mainScene.camera.subscriber.updateCameraPosition();
+mainScene.camera.updateCameraPosition();
 
-
+mainScene.draw();
 	// todo draw stuff here
 	glutSwapBuffers();
 }

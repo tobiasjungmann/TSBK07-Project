@@ -62,9 +62,6 @@ namespace scn
 currentMousePosition.update(x,y);
     }
 
-    void Camera::updateCameraPosition()
-    {
-    }
 
     void Camera::forwardPressedKeys(vec4 input)
     {
@@ -147,20 +144,20 @@ currentMousePosition.update(x,y);
         return false;
     }*/
 
-    void CameraEventSubscriber::updateCameraPosition()// const& prev, evt::Mouse const& curr)
+    void Camera::updateCameraPosition()// const& prev, evt::Mouse const& curr)
     {
 
         const float cameraSpeed = 0.5f;
         float sensitivity = 0.7f;
 
         if (currentPressedKeys.w)
-            camera->pos += cameraSpeed * camera->viewingDirection;
+            pos += cameraSpeed * viewingDirection;
         if (currentPressedKeys.s)
-            camera->pos -= cameraSpeed * camera->viewingDirection;
+            pos -= cameraSpeed * viewingDirection;
         if (currentPressedKeys.a)
-            camera->pos -= normalize(cross(camera->viewingDirection, camera->up)) * cameraSpeed;
+            pos -= normalize(cross(viewingDirection, up)) * cameraSpeed;
         if (currentPressedKeys.d)
-            camera->pos += normalize(cross(camera->viewingDirection, camera->up)) * cameraSpeed;
+            pos += normalize(cross(viewingDirection, up)) * cameraSpeed;
 
 
         float xmovement = computeMinMovement(currentMousePosition.previousPosition.x,currentMousePosition.abs.x) * sensitivity;
@@ -179,7 +176,7 @@ currentMousePosition.update(x,y);
         direction.x = cos(toRadians(yaw)) * cos(toRadians(pitch));
         direction.y = sin(toRadians(pitch));
         direction.z = sin(toRadians(yaw)) * cos(toRadians(pitch));
-        camera->viewingDirection= normalize(direction);
+        viewingDirection= normalize(direction);
 
         // check for collisions with the ground
         /* TODO add once height is computed

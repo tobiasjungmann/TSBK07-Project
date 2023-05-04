@@ -15,7 +15,7 @@ namespace scn
     };
 
     struct Camera;
-
+/*
     class CameraEventSubscriber : public evt::Subscriber
     {
     public:
@@ -26,7 +26,7 @@ namespace scn
     private:
         Camera *camera = nullptr;
     };
-
+*/
     struct Camera
     {
         union
@@ -49,7 +49,7 @@ namespace scn
         };
         vec3 viewingDirection;
 
-        const CameraEventSubscriber subscriber{this};
+    //    const CameraEventSubscriber subscriber{this};
 
         // float &x {pos.x};
         // float &y {pos.y};
@@ -65,7 +65,7 @@ namespace scn
             up = other.up;
             return *this;
         }
-
+public:
         void rotateAround(Axis axis, float angle, float radius) noexcept;
         void rotateRelAround(Axis axis, float relativeAng, float radius) noexcept;
         void translate(vec3 offset) noexcept;
@@ -88,6 +88,8 @@ namespace scn
          * @param input (w,a,s,d)
          */
         void forwardPressedKeys(vec4 input);
+
+        
 
     
         mat4 matrix() const;
