@@ -5,10 +5,11 @@
 namespace scn
 {
 
-    Terrain::Terrain(std::string filename){
+    Terrain::Terrain(std::string filename)
+    {
         TextureData tex;
         LoadTGATextureData(filename.c_str(), &tex);
-        m_terrain=generateTerrain(&tex);
+        m_terrain = generateTerrain(&tex);
     }
     void Terrain::addToNormalArray(vec3 *normalarray, vec3 *vertexarray, int previousVertexIndex, int thisVertexIndex, int nextVertexIndex)
     {
@@ -84,38 +85,37 @@ namespace scn
         return m_terrain;
     }
 
-
     float Terrain::computeHeight(float x, float z)
     {
         float x_difference = x - int(x);
         float z_difference = z - int(z);
-        printf("x_difference: %f, ydifference: %f   sum: %f ", x_difference, z_difference, x_difference + z_difference);
 
-        vec3 p_bottom_left = m_terrain->vertexArray[(int(x) + (int(z) + 1) * terrain_width)];
+        vec3 p_bottom_left = m_terrain->vertexArray[int(x) + (int(z) + 1) * terrain_width];
         vec3 p_top_right = m_terrain->vertexArray[((int(x) + 1) + int(z) * terrain_width)];
 
-        // Third point of the triangle differs depending on which triangle is used in the square -> select teh corresponding starting point.
-        // if it's the bottom right one of the square -> x and y distances must be switched
-
         vec3 startingPoint;
+        vec3 v1, v2;
         if (x_difference + z_difference < 1.0)
         {
             startingPoint = m_terrain->vertexArray[(int(x) + int(z) * terrain_width)]; // p_top_left;
-        }
-        else
-        {
-            startingPoint = m_terrain->vertexArray[((int(x) + 1) + (int(z) + 1) * terrain_width)]; // p_bottom_right;
-            int helper = x_difference;                                                      // swapp since axis have changed
-            x_difference = z_difference;
-            z_difference = helper;
+
+            v1 = (p_bottom_left - startingPoint) * z_difference; // movement on the x axis (top left to bottom left)
+            v2 = (p_top_right - startingPoint) * x_difference;   // movement on the z axis (top left to top right)
         }
 
-        vec3 v1 = (p_bottom_left - startingPoint) * x_difference; // movement on the x axis (top left to bottom left)
-        vec3 v2 = (p_top_right - startingPoint) * z_difference;   // movement on the z axis (top left to top right)
+        else
+        {
+            startingPoint = m_terrain->vertexArray[((int(x) + 1) + (int(z) + 1) * terrain_width)];
+
+            v1 = (p_bottom_left - startingPoint) * (1 - x_difference); // movement on the x axis (top left to bottom left)
+            v2 = (p_top_right - startingPoint) * (1 - z_difference);   // movement on the z axis (top left to top right)
+        }
 
         return (startingPoint + v1 + v2).y;
     }
-    Model *Terrain::getModel(){
+
+    Model *Terrain::getModel()
+    {
         return m_terrain;
     }
 }

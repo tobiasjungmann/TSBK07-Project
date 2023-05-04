@@ -7,8 +7,7 @@
 
 namespace scn
 {
-    float yaw = 0;   // yaw of the camera
-    float pitch = 0; // pitch of the camera TODO move into camera struct
+
     evt::MovementKeys currentPressedKeys;
     evt::Mouse currentMousePosition;
 
@@ -59,21 +58,19 @@ namespace scn
 
     void Camera::setMousePosition(int x, int y)
     {
-        printf("Mouse:  %f,%f  new %i, %i  \n", currentMousePosition.abs.x, currentMousePosition.abs.y,x,y);
         currentMousePosition.update(x, y);
     }
 
     void Camera::forwardPressedKeys(vec4 input)
     {
-        currentPressedKeys.w = input.a;
-        currentPressedKeys.a = input.b;
-        currentPressedKeys.s = input.g;
-        currentPressedKeys.d = input.h;
+        currentPressedKeys.w = input.w;
+        currentPressedKeys.a = input.x;
+        currentPressedKeys.s = input.y;
+        currentPressedKeys.d = input.z;
     }
 
     mat4 Camera::matrix() const
     {
-
         return lookAt(pos, pos + viewingDirection, upVector);
     }
 
@@ -97,7 +94,7 @@ namespace scn
     static float computeMinMovement(int last, int current)
     {
         int offset = last - current;
-        int display_size = 900;     // TODO load from main - resizable
+        int display_size = 900; // TODO load from main - resizable
         float noMovement = (display_size >> 2);
         float minMovementScaling = 0.05;
 
@@ -128,21 +125,31 @@ namespace scn
 
     void Camera::updateCameraPosition() // const& prev, evt::Mouse const& curr)
     {
-        
+        //  std::cout << "mouse: x" << currentMousePosition.previousPosition.x << "  y: " << currentMousePosition.previousPosition.y;
+        //  std::cout << "    curent: x" << currentMousePosition.currentPosition.x << "  y: " << currentMousePosition.currentPosition.y << "\n";
         const float cameraSpeed = 0.5f;
         float sensitivity = 0.7f;
-
+        std::cout << "wasd " << currentPressedKeys.w << currentPressedKeys.a << currentPressedKeys.s << currentPressedKeys.d<<"\n";
         if (currentPressedKeys.w)
+        {
             pos += cameraSpeed * viewingDirection;
+        }
         if (currentPressedKeys.s)
+        {
             pos -= cameraSpeed * viewingDirection;
+        }
         if (currentPressedKeys.a)
+        {
             pos -= normalize(cross(viewingDirection, up)) * cameraSpeed;
+        }
         if (currentPressedKeys.d)
+        {
             pos += normalize(cross(viewingDirection, up)) * cameraSpeed;
+        }
 
-        float xmovement = computeMinMovement(currentMousePosition.previousPosition.x, currentMousePosition.abs.x) * sensitivity;
-        float ymovement = -computeMinMovement(currentMousePosition.previousPosition.y, currentMousePosition.abs.y) * sensitivity;
+        // std::cout << this <<"\n";
+        float xmovement = computeMinMovement(currentMousePosition.previousPosition.x, currentMousePosition.currentPosition.x) * sensitivity;
+        float ymovement = -computeMinMovement(currentMousePosition.currentPosition.y, currentMousePosition.previousPosition.y) * sensitivity;
 
         yaw += xmovement;
         pitch += ymovement;
@@ -153,6 +160,7 @@ namespace scn
         if (pitch < -179.0f)
             pitch = -179.0f;*/
 
+        // TODO only compute when mouse was updated between the last two dispalys
         vec3 direction;
         direction.x = cos(toRadians(yaw)) * cos(toRadians(pitch));
         direction.y = sin(toRadians(pitch));

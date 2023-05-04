@@ -15,18 +15,18 @@ namespace scn
     };
 
     struct Camera;
-/*
-    class CameraEventSubscriber : public evt::Subscriber
-    {
-    public:
-        constexpr CameraEventSubscriber(Camera *camera) : camera{camera} {}
-        void updateCameraPosition();
-        //bool dispatch(long delta_time); //, unsigned char keymap[26]) override;
-        // bool dispatch (long delta_time, evt::Mouse const& prev, evt::Mouse const& curr) override;
-    private:
-        Camera *camera = nullptr;
-    };
-*/
+    /*
+        class CameraEventSubscriber : public evt::Subscriber
+        {
+        public:
+            constexpr CameraEventSubscriber(Camera *camera) : camera{camera} {}
+            void updateCameraPosition();
+            //bool dispatch(long delta_time); //, unsigned char keymap[26]) override;
+            // bool dispatch (long delta_time, evt::Mouse const& prev, evt::Mouse const& curr) override;
+        private:
+            Camera *camera = nullptr;
+        };
+    */
     struct Camera
     {
         union
@@ -48,8 +48,10 @@ namespace scn
             vec3 up;
         };
         vec3 viewingDirection;
+        float yaw = 0;   // yaw of the camera
+        float pitch = 0; // pitch of the camera
 
-    //    const CameraEventSubscriber subscriber{this};
+        //    const CameraEventSubscriber subscriber{this};
 
         // float &x {pos.x};
         // float &y {pos.y};
@@ -65,7 +67,8 @@ namespace scn
             up = other.up;
             return *this;
         }
-public:
+
+    public:
         void rotateAround(Axis axis, float angle, float radius) noexcept;
         void rotateRelAround(Axis axis, float relativeAng, float radius) noexcept;
         void translate(vec3 offset) noexcept;
@@ -89,9 +92,6 @@ public:
          */
         void forwardPressedKeys(vec4 input);
 
-        
-
-    
         mat4 matrix() const;
     };
     std::ostream &operator<<(std::ostream &os, Camera const &camera);

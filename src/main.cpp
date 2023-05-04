@@ -63,13 +63,13 @@ void keyControlCheck()
 {
 	vec4 pressedKeys = vec4(false, false, false, false);
 	if (glutKeyIsDown('w'))
-		pressedKeys.a = true;
+		pressedKeys.w = true;
 	if (glutKeyIsDown('a'))
-		pressedKeys.b = true;
+		pressedKeys.x = true;
 	if (glutKeyIsDown('s'))
-		pressedKeys.g = true;
+		pressedKeys.y = true;
 	if (glutKeyIsDown('d'))
-		pressedKeys.h = true;
+		pressedKeys.z = true;
 	mainScene.camera.forwardPressedKeys(pressedKeys);
 }
 

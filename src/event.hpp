@@ -2,7 +2,10 @@
 
 #include <memory>
 #include <unordered_set>
-
+#include <cstdlib>
+#include <cmath>
+#include <cassert>
+#include <limits>
 #include "VectorUtils4.h"
 #include "MicroGlut.h"
 
@@ -11,16 +14,31 @@ namespace evt
 
     struct Mouse
     {
-        vec2 abs;
-       // vec2 rel;
-        vec2 previousPosition;
+        vec2 currentPosition= vec2(450,450);
+        vec2 previousPosition = vec2(450,450);//-INFINITY, -INFINITY);
 
         void update(int x, int y)
         {
-            previousPosition = abs;
-            abs.x = x;
-            abs.y = y;
+            std::cout << "New mouse input\n";
+            if (previousPosition.x != -INFINITY)
+            {
+                previousPosition = currentPosition;
+                currentPosition.x = x;
+                currentPosition.y = y;
+            }
+            else
+            {
+                currentPosition.x = x;
+                currentPosition.y = y;
+                previousPosition = currentPosition;
+            }
         }
+
+        /*std::ostream &operator<<(std::ostream &os, Mouse const &mouse)
+        {
+            os << "x:" << mouse << ' ';
+            return os;
+        }*/
     };
 
     struct MovementKeys
@@ -60,7 +78,7 @@ namespace evt
         }
         inline void operator()(int x, int y) {
             Mouse curr;
-            curr.abs = vec2(x,y);
+            curr.currentPosition = vec2(x,y);
             curr.rel = 2*vec2(x/win->width(), y/win->height()) - vec2(1, 1);
             for (auto& sub: subscribers) {
                 sub->dispatch(-1, prev, curr);

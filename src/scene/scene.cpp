@@ -93,6 +93,7 @@ namespace scn
     // TODO add management of the textures (upload them as necessary)
     void Scene::draw(bool alsoSynthesisPreProj) const
     {
+        std::cout << camera<<"\n";
         if (invalid)
             throw std::invalid_argument("Tried to draw an invalid Scene.");
 
