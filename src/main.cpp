@@ -9,7 +9,6 @@
 #include "LittleOBJLoader.h"
 #include "LoadTGA.h"
 
-
 // TODO adapt in case the windowsize is changed
 int display_size = 900; // size of the window - used for mouse movement
 
@@ -25,11 +24,10 @@ int display_size = 900; // size of the window - used for mouse movement
 
 #define FRAME_GAP_MS 20
 
-
-const scn::Light redLight {{1.0f, 0.0f, 0.0f}, {10.0f, 5.0f, 0.0f}, false};
-const scn::Light greenLight {{0.0f, 1.0f, 0.0f}, {0.0f, 5.0f, 10.0f}, false};
-const scn::Light blueLight {{0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, true};
-const scn::Light whiteLight {{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, true};
+const scn::Light redLight{{1.0f, 0.0f, 0.0f}, {10.0f, 5.0f, 0.0f}, false};
+const scn::Light greenLight{{0.0f, 1.0f, 0.0f}, {0.0f, 5.0f, 10.0f}, false};
+const scn::Light blueLight{{0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, true};
+const scn::Light whiteLight{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, true};
 
 // frustum
 #define near 1.0
@@ -40,12 +38,23 @@ const scn::Light whiteLight {{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, true};
 #define bottom -0.5
 
 const mat4 projectionMatrix = {
-	2.0 * near/(right-left), 	0.0, 					(right+left)/(right-left), 	0.0,
-	0.0, 						2.0*near/(top-bottom), 	(top+bottom)/(top-bottom), 	0.0,
-	0.0, 						0.0, 					-(far+near)/(far-near), 	-2*far*near/(far-near),
-	0.0, 						0.0, 					-1.0, 						0.,
+		2.0 * near / (right - left),
+		0.0,
+		(right + left) / (right - left),
+		0.0,
+		0.0,
+		2.0 * near / (top - bottom),
+		(top + bottom) / (top - bottom),
+		0.0,
+		0.0,
+		0.0,
+		-(far + near) / (far - near),
+		-2 * far *near / (far - near),
+		0.0,
+		0.0,
+		-1.0,
+		0.,
 };
-
 
 static scn::Scene mainScene;
 
@@ -77,9 +86,10 @@ void mouseControlCallback(int x, int y)
 
 void setMaterial(Model *m, GLfloat Ka, GLfloat Kd, GLfloat Kspec, GLfloat alpha)
 {
-	if (m->material)
-		free(m->material);
-	m->material = (MtlPtr)malloc(sizeof(Mtl));
+	if (!m->material)
+	{
+		m->material = (MtlPtr)malloc(sizeof(Mtl));
+	}
 	m->material->alpha = alpha;
 	m->material->specularity = Kspec;
 	m->material->diffuseness = Kd;
@@ -96,12 +106,11 @@ void init(void)
 	const scn::Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
 
 	Model *green_reef;
-	green_reef = ResourceManager::get().getModel("green_reef","green_reef.obj");
+	green_reef = ResourceManager::get().getModel("green_reef", "green_reef.obj");
 	InitModel(green_reef, programShader->hndl, "in_Position", "in_Normal", NULL);
 
 	mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix);
-	mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
-
+	// mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
 
 	setMaterial(green_reef, 1.0, 1.0, 1.0, 100.0);
 
@@ -122,7 +131,11 @@ void display(void)
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	keyControlCheck();
+	// camera.controlCheck
 
+	// mainScene.updateTransfo(-2, std::make_shared<mat4>(m2w_blades * Rx(-M_PI_2)));
+
+	mainScene.draw();
 
 	// todo draw stuff here
 	glutSwapBuffers();

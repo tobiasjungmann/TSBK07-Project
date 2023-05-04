@@ -78,7 +78,7 @@ namespace scn
     }
 
     void Scene::removeLightSource(long index)
-    { // TODO maybe consider std::set::extract
+    {
         if (not shader->hasLighting())
             throw std::logic_error("Attempt to add light sources without prior initialization of the lighting engine");
 
@@ -90,7 +90,7 @@ namespace scn
         lightSourcesDirections.erase(lightSourcesDirections.begin() + index);
     }
 
-    // TODO add management of the textures (upload them as necessary)
+    // BUG add management of the textures (upload them as necessary)
     void Scene::draw(bool alsoSynthesisPreProj) const
     {
         if (invalid)
@@ -138,7 +138,7 @@ namespace scn
             if (alsoSynthesisPreProj) {
                 shader->uploadMatrix(Shader::Matrices::preProj, getPreProj(m2w));
             }
-            if (m2w != IdentityMatrix()) // TODO improve that performance wise (store pointer maybe ?)
+            if (m2w != IdentityMatrix()) // BUG improve that performance wise (store pointer maybe ?)
                 shader->uploadMatrix(Shader::Matrices::m2w, m2w);
             if (shader->hasLighting() && model->material)
                 shader->uploadSpecularExponent(model->material->alpha);
