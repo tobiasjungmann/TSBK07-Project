@@ -59,9 +59,9 @@ namespace scn
 
     void Camera::setMousePosition(int x, int y)
     {
-currentMousePosition.update(x,y);
+        printf("Mouse:  %f,%f  new %i, %i  \n", currentMousePosition.abs.x, currentMousePosition.abs.y,x,y);
+        currentMousePosition.update(x, y);
     }
-
 
     void Camera::forwardPressedKeys(vec4 input)
     {
@@ -74,7 +74,7 @@ currentMousePosition.update(x,y);
     mat4 Camera::matrix() const
     {
 
-        return lookAt(pos, pos+viewingDirection, upVector);
+        return lookAt(pos, pos + viewingDirection, upVector);
     }
 
     std::ostream &operator<<(std::ostream &os, Camera const &camera)
@@ -91,13 +91,13 @@ currentMousePosition.update(x,y);
      * movement offest is returned.
      *
      * @param last last mouse cordinate (either x or y direction)
-     * @param offset current movement
+     * @param current current mouse coordniate
      * @return float
      */
-    static float computeMinMovement(float last, float current)
+    static float computeMinMovement(int last, int current)
     {
-        int offset=last-current;
-        int display_size = 800;
+        int offset = last - current;
+        int display_size = 900;     // TODO load from main - resizable
         float noMovement = (display_size >> 2);
         float minMovementScaling = 0.05;
 
@@ -126,27 +126,9 @@ currentMousePosition.update(x,y);
         return degrees * (M_1_PI / 180);
     }
 
-    /*bool CameraEventSubscriber::updateCameraPosition()
+    void Camera::updateCameraPosition() // const& prev, evt::Mouse const& curr)
     {
-        auto &pos = camera->pos;
-        auto const &lookat = camera->lookat;
-        auto const &upV = camera->upVector;
-        const float cameraSpeed = 0.5f;
-        if (keymap['w'])
-            pos += cameraSpeed * lookat;
-        if (keymap['a'])
-            pos -= cameraSpeed * lookat;
-        if (keymap['s'])
-            pos -= normalize(cross(lookat, upV)) * cameraSpeed;
-        if (keymap['d'])
-            pos += normalize(cross(lookat, upV)) * cameraSpeed;
-
-        return false;
-    }*/
-
-    void Camera::updateCameraPosition()// const& prev, evt::Mouse const& curr)
-    {
-
+        
         const float cameraSpeed = 0.5f;
         float sensitivity = 0.7f;
 
@@ -159,13 +141,12 @@ currentMousePosition.update(x,y);
         if (currentPressedKeys.d)
             pos += normalize(cross(viewingDirection, up)) * cameraSpeed;
 
+        float xmovement = computeMinMovement(currentMousePosition.previousPosition.x, currentMousePosition.abs.x) * sensitivity;
+        float ymovement = -computeMinMovement(currentMousePosition.previousPosition.y, currentMousePosition.abs.y) * sensitivity;
 
-        float xmovement = computeMinMovement(currentMousePosition.previousPosition.x,currentMousePosition.abs.x) * sensitivity;
-        float ymovement = -computeMinMovement(currentMousePosition.previousPosition.y,currentMousePosition.abs.y) * sensitivity;
-       	
         yaw += xmovement;
-	    pitch += ymovement;
-        
+        pitch += ymovement;
+
         /* Add if loopings should be forbidden
         if (pitch > 179.0f)
             pitch = 179.0f;
@@ -176,7 +157,7 @@ currentMousePosition.update(x,y);
         direction.x = cos(toRadians(yaw)) * cos(toRadians(pitch));
         direction.y = sin(toRadians(pitch));
         direction.z = sin(toRadians(yaw)) * cos(toRadians(pitch));
-        viewingDirection= normalize(direction);
+        viewingDirection = normalize(direction);
 
         // check for collisions with the ground
         /* TODO add once height is computed
@@ -185,6 +166,6 @@ currentMousePosition.update(x,y);
             {
                 camera.y = minHeigth;
             }*/
-        //camera->lookat = lookat + camera->pos;
+        // camera->lookat = lookat + camera->pos;
     }
 }

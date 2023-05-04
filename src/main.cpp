@@ -9,7 +9,6 @@
 #include "LittleOBJLoader.h"
 #include "LoadTGA.h"
 
-
 // TODO adapt in case the windowsize is changed
 int display_size = 900; // size of the window - used for mouse movement
 
@@ -21,15 +20,15 @@ int display_size = 900; // size of the window - used for mouse movement
 #include "scene/light.hpp"
 #include "scene/shaders.hpp"
 #include "scene/camera.hpp"
+#include "scene/terrain.hpp"
 #include "resource_manager.hpp"
 
 #define FRAME_GAP_MS 20
 
-
-const scn::Light redLight {{1.0f, 0.0f, 0.0f}, {10.0f, 5.0f, 0.0f}, false};
-const scn::Light greenLight {{0.0f, 1.0f, 0.0f}, {0.0f, 5.0f, 10.0f}, false};
-const scn::Light blueLight {{0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, true};
-const scn::Light whiteLight {{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, true};
+const scn::Light redLight{{1.0f, 0.0f, 0.0f}, {10.0f, 5.0f, 0.0f}, false};
+const scn::Light greenLight{{0.0f, 1.0f, 0.0f}, {0.0f, 5.0f, 10.0f}, false};
+const scn::Light blueLight{{0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, true};
+const scn::Light whiteLight{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, true};
 
 // frustum
 #define near 1.0
@@ -40,12 +39,23 @@ const scn::Light whiteLight {{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, true};
 #define bottom -0.5
 
 const mat4 projectionMatrix = {
-	2.0 * near/(right-left), 	0.0, 					(right+left)/(right-left), 	0.0,
-	0.0, 						2.0*near/(top-bottom), 	(top+bottom)/(top-bottom), 	0.0,
-	0.0, 						0.0, 					-(far+near)/(far-near), 	-2*far*near/(far-near),
-	0.0, 						0.0, 					-1.0, 						0.,
+	2.0 * near / (right - left),
+	0.0,
+	(right + left) / (right - left),
+	0.0,
+	0.0,
+	2.0 * near / (top - bottom),
+	(top + bottom) / (top - bottom),
+	0.0,
+	0.0,
+	0.0,
+	-(far + near) / (far - near),
+	-2 * far *near / (far - near),
+	0.0,
+	0.0,
+	-1.0,
+	0.,
 };
-
 
 static scn::Scene mainScene;
 
@@ -95,15 +105,18 @@ void init(void)
 	auto programShader = std::make_unique<scn::SceneShader>("src/shaders/light.vert", "src/shaders/light.frag", "projectionMatrix", "w2vMatrix", "m2wMatrix");
 	const scn::Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
 
+	scn::Terrain terrain("rc/models/fft-terrain.tga");
+	InitModel(terrain.getModel(), programShader->hndl, "in_Position", "in_Normal", NULL);
+
 	Model *green_reef;
-	green_reef = ResourceManager::get().getModel("green_reef","green_reef.obj");
+	green_reef = ResourceManager::get().getModel("green_reef", "green_reef.obj");
 	InitModel(green_reef, programShader->hndl, "in_Position", "in_Normal", NULL);
 
 	mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix);
 	mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
 
-
 	setMaterial(green_reef, 1.0, 1.0, 1.0, 100.0);
+	setMaterial(terrain.getModel(), 1.0, 1.0, 1.0, 100.0);
 
 	mainScene.shader->initLighting("lightSourcesDirPosArr", "lightSourcesColorArr", "isDirectional", "specularExponent");
 	mainScene.addLightSource(redLight);
@@ -111,6 +124,7 @@ void init(void)
 	mainScene.addLightSource(blueLight);
 	mainScene.addLightSource(whiteLight);
 
+	mainScene.pushModel(terrain.getModel());
 	mainScene.pushModel(green_reef);
 	glutRepeatingTimer(FRAME_GAP_MS);
 
@@ -122,9 +136,9 @@ void display(void)
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	keyControlCheck();
-mainScene.camera.updateCameraPosition();
+	mainScene.camera.updateCameraPosition();
 
-mainScene.draw();
+	mainScene.draw();
 	// todo draw stuff here
 	glutSwapBuffers();
 }

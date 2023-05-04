@@ -4,6 +4,12 @@
 
 namespace scn
 {
+
+    Terrain::Terrain(std::string filename){
+        TextureData tex;
+        LoadTGATextureData(filename.c_str(), &tex);
+        m_terrain=generateTerrain(&tex);
+    }
     void Terrain::addToNormalArray(vec3 *normalarray, vec3 *vertexarray, int previousVertexIndex, int thisVertexIndex, int nextVertexIndex)
     {
         vec3 a = vertexarray[thisVertexIndex] - vertexarray[previousVertexIndex];
@@ -25,7 +31,7 @@ namespace scn
         addToNormalArray(normalArray, vertexArray, second, third, first);
     }
 
-    Model *Terrain::GenerateTerrain(TextureData *tex)
+    Model *Terrain::generateTerrain(TextureData *tex)
     {
         int vertexCount = tex->width * tex->height;
         terrain_width = tex->width;
@@ -44,7 +50,6 @@ namespace scn
                 // Vertex array. You need to scale this properly
                 vertexArray[(x + z * tex->width)].x = x / 1.0;
                 vertexArray[(x + z * tex->width)].y = tex->imageData[(x + z * tex->width) * (tex->bpp / 8)] / 10.0 - 20;
-                // printf("y: %f\n", vertexArray[(x + z * tex->width)].y);
                 vertexArray[(x + z * tex->width)].z = z / 1.0;
                 // Normal vectors. You need to calculate these.
 
@@ -109,5 +114,8 @@ namespace scn
         vec3 v2 = (p_top_right - startingPoint) * z_difference;   // movement on the z axis (top left to top right)
 
         return (startingPoint + v1 + v2).y;
+    }
+    Model *Terrain::getModel(){
+        return m_terrain;
     }
 }
