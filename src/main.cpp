@@ -122,6 +122,7 @@ void display(void)
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	keyControlCheck();
+	mainScene.camera.subscriber.updateCameraPosition();
 
 
 	// todo draw stuff here
@@ -137,7 +138,7 @@ int main(int argc, char **argv)
 	glutCreateWindow("TSBK07 Lab 4");
 	glutDisplayFunc(display);
 	init();
-	// glutPassiveMotionFunc(updateMousePosition);
+
 	glutRepeatingTimer(20);
 
 	glutMainLoop();

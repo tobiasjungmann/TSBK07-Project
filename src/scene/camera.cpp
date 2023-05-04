@@ -5,11 +5,12 @@
 #define min(a, b) ((a) > (b) ? (b) : (a))
 #define max(a, b) ((a) < (b) ? (b) : (a))
 
-
 namespace scn
 {
-    float yaw = 0;                  // yaw of the camera
-    float pitch = 0;                // pitch of the camera
+    float yaw = 0;   // yaw of the camera
+    float pitch = 0; // pitch of the camera TODO move into camera struct
+    evt::MovementKeys currentPressedKeys;
+    evt::Mouse currentMousePosition;
 
     void Camera::rotateAround(Axis axis, float angle, float radius) noexcept
     {
@@ -58,6 +59,7 @@ namespace scn
 
     void Camera::setMousePosition(int x, int y)
     {
+currentMousePosition.update(x,y);
     }
 
     void Camera::updateCameraPosition()
@@ -66,23 +68,26 @@ namespace scn
 
     void Camera::forwardPressedKeys(vec4 input)
     {
+        currentPressedKeys.w = input.a;
+        currentPressedKeys.a = input.b;
+        currentPressedKeys.s = input.g;
+        currentPressedKeys.d = input.h;
     }
 
     mat4 Camera::matrix() const
     {
-        
-        return lookAt(pos, lookat, upVector);
+
+        return lookAt(pos, pos+viewingDirection, upVector);
     }
 
     std::ostream &operator<<(std::ostream &os, Camera const &camera)
     {
         os << "pos:" << camera.pos << ' ';
-        os << "lookAt:" << camera.at << ' ';
+        os << "viewingDirection:" << camera.viewingDirection << ' ';
         os << "upVector:" << camera.up;
         return os;
     }
 
-   
     /**
      * @brief Computes the minimum amount of camera rotation dependeing on the placement of the of teh mouse on the scree
      * If the current moevement is too smallcomapred to the camera position, the new minimum will be returned. Otherwise, the current
@@ -92,8 +97,9 @@ namespace scn
      * @param offset current movement
      * @return float
      */
-    static float computeMinMovement(float last, float offset)
+    static float computeMinMovement(float last, float current)
     {
+        int offset=last-current;
         int display_size = 800;
         float noMovement = (display_size >> 2);
         float minMovementScaling = 0.05;
@@ -123,11 +129,11 @@ namespace scn
         return degrees * (M_1_PI / 180);
     }
 
-    bool CameraEventSubscriber::dispatch(long delta_time, unsigned char keymap[26])
+    /*bool CameraEventSubscriber::updateCameraPosition()
     {
-        auto& pos = camera->pos;
-        auto const& lookat = camera->lookat;
-        auto const& upV = camera->upVector;
+        auto &pos = camera->pos;
+        auto const &lookat = camera->lookat;
+        auto const &upV = camera->upVector;
         const float cameraSpeed = 0.5f;
         if (keymap['w'])
             pos += cameraSpeed * lookat;
@@ -139,19 +145,30 @@ namespace scn
             pos += normalize(cross(lookat, upV)) * cameraSpeed;
 
         return false;
-    }
+    }*/
 
-    bool CameraEventSubscriber::dispatch(long delta_time, evt::Mouse const& prev, evt::Mouse const& curr)
+    void CameraEventSubscriber::updateCameraPosition()// const& prev, evt::Mouse const& curr)
     {
-        auto dx = curr.rel.x - prev.rel.x;
-        auto dy = curr.rel.y - prev.rel.y;
+
+        const float cameraSpeed = 0.5f;
         float sensitivity = 0.7f;
-        float xmovement = computeMinMovement(prev.rel.x, dx) * sensitivity;
-        float ymovement = -computeMinMovement(prev.rel.y, dy) * sensitivity;
 
+        if (currentPressedKeys.w)
+            camera->pos += cameraSpeed * camera->viewingDirection;
+        if (currentPressedKeys.s)
+            camera->pos -= cameraSpeed * camera->viewingDirection;
+        if (currentPressedKeys.a)
+            camera->pos -= normalize(cross(camera->viewingDirection, camera->up)) * cameraSpeed;
+        if (currentPressedKeys.d)
+            camera->pos += normalize(cross(camera->viewingDirection, camera->up)) * cameraSpeed;
+
+
+        float xmovement = computeMinMovement(currentMousePosition.previousPosition.x,currentMousePosition.abs.x) * sensitivity;
+        float ymovement = -computeMinMovement(currentMousePosition.previousPosition.y,currentMousePosition.abs.y) * sensitivity;
+       	
         yaw += xmovement;
-        pitch += ymovement;
-
+	    pitch += ymovement;
+        
         /* Add if loopings should be forbidden
         if (pitch > 179.0f)
             pitch = 179.0f;
@@ -162,7 +179,7 @@ namespace scn
         direction.x = cos(toRadians(yaw)) * cos(toRadians(pitch));
         direction.y = sin(toRadians(pitch));
         direction.z = sin(toRadians(yaw)) * cos(toRadians(pitch));
-        auto lookat = normalize(direction);
+        camera->viewingDirection= normalize(direction);
 
         // check for collisions with the ground
         /* TODO add once height is computed
@@ -171,7 +188,6 @@ namespace scn
             {
                 camera.y = minHeigth;
             }*/
-        camera->lookat = lookat + camera->pos;
-        return false;
+        //camera->lookat = lookat + camera->pos;
     }
 }
