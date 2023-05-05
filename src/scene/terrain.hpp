@@ -14,7 +14,8 @@ namespace scn
     {
     public:
     
-        Model *GenerateTerrain(TextureData *tex);
+    Terrain(std::string filename);
+        Model *generateTerrain(TextureData *tex);
 
         /**
          * @brief Returns z coordinate of the terrain at a given point on the generated terrain.
@@ -24,7 +25,9 @@ namespace scn
          * @param z - Coordiante
          * @return float
          */
-        float computeHeight(float x, float z);
+        float computeHeight(float x, float z)const;
+
+        Model *getModel();
 
     private:
         /**
@@ -46,5 +49,6 @@ namespace scn
         int terrain_width;
         int terrain_height;
         Model *m_terrain;
+        
     };
 }

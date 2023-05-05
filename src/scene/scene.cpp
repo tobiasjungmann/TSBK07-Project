@@ -99,6 +99,8 @@ namespace scn
         dbg::if_dlevel<dbg::Level::VERBOSE>([]()
                                          { std::cerr << "Drawing scene." << std::endl; });
 
+
+
         if (skybox)
         {
         // TODO maybe add a conditional on the upload of the skybox texture to limit the number of uploads

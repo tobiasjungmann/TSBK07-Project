@@ -20,6 +20,7 @@ int display_size = 900; // size of the window - used for mouse movement
 #include "scene/light.hpp"
 #include "scene/shaders.hpp"
 #include "scene/camera.hpp"
+#include "scene/terrain.hpp"
 #include "resource_manager.hpp"
 
 #define FRAME_GAP_MS 20
@@ -62,13 +63,13 @@ void keyControlCheck()
 {
 	vec4 pressedKeys = vec4(false, false, false, false);
 	if (glutKeyIsDown('w'))
-		pressedKeys.a = true;
+		pressedKeys.w = true;
 	if (glutKeyIsDown('a'))
-		pressedKeys.b = true;
+		pressedKeys.x = true;
 	if (glutKeyIsDown('s'))
-		pressedKeys.g = true;
+		pressedKeys.y = true;
 	if (glutKeyIsDown('d'))
-		pressedKeys.h = true;
+		pressedKeys.z = true;
 	mainScene.camera.forwardPressedKeys(pressedKeys);
 }
 
@@ -105,14 +106,16 @@ void init(void)
 	auto programShader = std::make_unique<scn::SceneShader>("src/shaders/light.vert", "src/shaders/light.frag", "projectionMatrix", "w2vMatrix", "m2wMatrix");
 	const scn::Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
 
+	scn::Terrain terrain("rc/models/fft-terrain.tga");
+	InitModel(terrain.getModel(), programShader->hndl, "in_Position", "in_Normal", NULL);
+
 	Model *green_reef;
 	green_reef = ResourceManager::get().getModel("green_reef", "green_reef.obj");
 	InitModel(green_reef, programShader->hndl, "in_Position", "in_Normal", NULL);
 
 	mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix);
-	// mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
-
 	setMaterial(green_reef, 1.0, 1.0, 1.0, 100.0);
+	setMaterial(terrain.getModel(), 1.0, 1.0, 1.0, 100.0);
 
 	mainScene.shader->initLighting("lightSourcesDirPosArr", "lightSourcesColorArr", "isDirectional", "specularExponent");
 	mainScene.addLightSource(redLight);
@@ -120,6 +123,7 @@ void init(void)
 	mainScene.addLightSource(blueLight);
 	mainScene.addLightSource(whiteLight);
 
+	mainScene.pushModel(terrain.getModel());
 	mainScene.pushModel(green_reef);
 	glutRepeatingTimer(FRAME_GAP_MS);
 
@@ -131,10 +135,8 @@ void display(void)
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	keyControlCheck();
-	// camera.controlCheck
 
-	// mainScene.updateTransfo(-2, std::make_shared<mat4>(m2w_blades * Rx(-M_PI_2)));
-
+	mainScene.camera.updateCameraPosition();
 	mainScene.draw();
 
 	// todo draw stuff here
@@ -150,7 +152,7 @@ int main(int argc, char **argv)
 	glutCreateWindow("TSBK07 Lab 4");
 	glutDisplayFunc(display);
 	init();
-	// glutPassiveMotionFunc(updateMousePosition);
+
 	glutRepeatingTimer(20);
 
 	glutMainLoop();
