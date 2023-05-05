@@ -14,8 +14,8 @@ namespace evt
 
     struct Mouse
     {
-        vec2 currentPosition= vec2(450,450);
-        vec2 previousPosition = vec2(450,450);//-INFINITY, -INFINITY);
+        vec2 currentPosition = vec2(450, 450);
+        vec2 previousPosition = vec2(450, 450);
 
         void update(int x, int y)
         {
@@ -42,10 +42,26 @@ namespace evt
 
     struct MovementKeys
     {
-        bool w;
-        bool a;
-        bool s;
-        bool d;
+        union
+        {
+            bool w;
+            bool forward;
+        };
+        union
+        {
+            bool a;
+            bool left;
+        };
+        union
+        {
+            bool s;
+            bool back;
+        };
+        union
+        {
+            bool d;
+            bool right;
+        };
     };
 
     class Subscriber

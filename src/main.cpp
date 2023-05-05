@@ -7,10 +7,8 @@
 #include "GL_utilities.h"
 #include "VectorUtils4.h"
 #include "LittleOBJLoader.h"
+#include "constants.hpp"
 #include "LoadTGA.h"
-
-// TODO adapt in case the windowsize is changed
-int display_size = 900; // size of the window - used for mouse movement
 
 #define MAIN
 #include "LittleOBJLoader.h"
@@ -39,38 +37,29 @@ const scn::Light whiteLight{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, true};
 #define bottom -0.5
 
 const mat4 projectionMatrix = {
-		2.0 * near / (right - left),
-		0.0,
-		(right + left) / (right - left),
-		0.0,
-		0.0,
-		2.0 * near / (top - bottom),
-		(top + bottom) / (top - bottom),
-		0.0,
-		0.0,
-		0.0,
-		-(far + near) / (far - near),
-		-2 * far *near / (far - near),
-		0.0,
-		0.0,
-		-1.0,
-		0.,
+	2.0 * near / (right - left),
+	0.0,
+	(right + left) / (right - left),
+	0.0,
+	0.0,
+	2.0 * near / (top - bottom),
+	(top + bottom) / (top - bottom),
+	0.0,
+	0.0,
+	0.0,
+	-(far + near) / (far - near),
+	-2 * far *near / (far - near),
+	0.0,
+	0.0,
+	-1.0,
+	0.,
 };
 
 static scn::Scene mainScene;
 
 void keyControlCheck()
 {
-	vec4 pressedKeys = vec4(false, false, false, false);
-	if (glutKeyIsDown('w'))
-		pressedKeys.w = true;
-	if (glutKeyIsDown('a'))
-		pressedKeys.x = true;
-	if (glutKeyIsDown('s'))
-		pressedKeys.y = true;
-	if (glutKeyIsDown('d'))
-		pressedKeys.z = true;
-	mainScene.camera.forwardPressedKeys(pressedKeys);
+	mainScene.camera.setPressedKeys(glutKeyIsDown(constants::KEY_FORWARD), glutKeyIsDown(constants::KEY_LEFT), glutKeyIsDown(constants::KEY_BACK), glutKeyIsDown(constants::KEY_RIGHT));
 }
 
 /**
@@ -148,7 +137,7 @@ int main(int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitContextVersion(3, 2);
-	glutInitWindowSize(display_size, display_size);
+	glutInitWindowSize(constants::display_size, constants::display_size);
 	glutCreateWindow("TSBK07 Lab 4");
 	glutDisplayFunc(display);
 	init();

@@ -1,6 +1,7 @@
 #include "camera.hpp"
 
 #include <cmath>
+#include "constants.hpp"
 
 #define min(a, b) ((a) > (b) ? (b) : (a))
 #define max(a, b) ((a) < (b) ? (b) : (a))
@@ -56,17 +57,17 @@ namespace scn
         pos += offset;
     }
 
-    void Camera::setMousePosition(int x, int y)
+    void Camera::setMousePosition(int x, int y)noexcept
     {
         currentMousePosition.update(x, y);
     }
 
-    void Camera::forwardPressedKeys(vec4 input)
+    void Camera::setPressedKeys(bool forward,bool left,bool back,bool right)noexcept
     {
-        currentPressedKeys.w = input.w;
-        currentPressedKeys.a = input.x;
-        currentPressedKeys.s = input.y;
-        currentPressedKeys.d = input.z;
+        currentPressedKeys.w = forward;
+        currentPressedKeys.a = left;
+        currentPressedKeys.s = back;
+        currentPressedKeys.d = right;
     }
 
     mat4 Camera::matrix() const
@@ -82,39 +83,20 @@ namespace scn
         return os;
     }
 
-    /**
-     * @brief Computes the minimum amount of camera rotation dependeing on the placement of the of teh mouse on the scree
-     * If the current moevement is too smallcomapred to the camera position, the new minimum will be returned. Otherwise, the current
-     * movement offest is returned.
-     *
-     * @param last last mouse cordinate (either x or y direction)
-     * @param current current mouse coordniate
-     * @return float
-     */
-    static float computeMinMovement(int last, int current)
+  float Camera::computeMinMovement(int last, int current)
     {
         int offset = last - current;
-        int display_size = 900; // TODO load from main - resizable
-        float noMovement = (display_size >> 2);
+        float noMovement = (constants::display_size >> 2);
         float minMovementScaling = 0.05;
 
-        if (last < (display_size >> 1))
+        if (last < (constants::display_size >> 1))
         {
-            float minMovement = min((last - (display_size >> 1) + noMovement), 0.0f) * minMovementScaling;
-            if (minMovement < offset && offset >= 0)
-            {
-                return minMovement;
-            }
+            return min((last - (constants::display_size >> 1) + noMovement), 0.0f) * minMovementScaling;
         }
         else
         {
-            float minMovement = max((last - (display_size >> 1) - noMovement), 0.0f) * minMovementScaling;
-            if (minMovement > offset && offset >= 0)
-            {
-                return minMovement;
-            }
+            return max((last - (constants::display_size >> 1) - noMovement), 0.0f) * minMovementScaling;
         }
-        return offset;
     }
 
     // FIXME there should be this function in header <cmath>
@@ -123,7 +105,7 @@ namespace scn
         return degrees * (M_1_PI / 180);
     }
 
-    void Camera::updateCameraPosition() // const& prev, evt::Mouse const& curr)
+    void Camera::updateCameraPosition()
     {
        const float cameraSpeed = 0.5f;
         float sensitivity = 0.7f;
@@ -164,7 +146,7 @@ namespace scn
         viewingDirection = normalize(direction);
 
         // check for collisions with the ground
-        /* TODO add once height is computed
+        /* TODO probably move into the collision detection
         float minHeigth = computeHeight(camera.x, camera.z) + 0.5;
             if (camera.y < minHeigth)
             {
