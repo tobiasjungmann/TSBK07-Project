@@ -135,7 +135,6 @@ namespace scn
 
         shader->uploadMatrix(Shader::Matrices::m2w, IdentityMatrix());
 
-std::cout << objects.size()<<"\n";
         for (size_t i = 0; i < objects.size(); i++)
         {
             // TODO add movement to the fish
@@ -178,7 +177,7 @@ std::cout << objects.size()<<"\n";
                   shader->uploadTexture(model);
               glDrawElements(GL_TRIANGLES, model->numIndices, GL_UNSIGNED_INT, 0L);
           }*/
-        /*  for (auto &model_m2w_pair : model_m2w)
+          for (auto &model_m2w_pair : model_m2w)
           {
               // TODO add movement to the fish
               auto model = model_m2w_pair.first;
@@ -196,7 +195,7 @@ std::cout << objects.size()<<"\n";
               if (shader->hasTexturing())
                   shader->uploadTexture(model);
               glDrawElements(GL_TRIANGLES, model->numIndices, GL_UNSIGNED_INT, 0L);
-          }*/
+          }
         dbg::if_dlevel<dbg::Level::VERBOSE>([]()
                                             { std::cerr << "Scene drawn successfully" << std::endl; });
     }

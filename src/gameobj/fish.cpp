@@ -2,8 +2,7 @@
 
 namespace obj
 {
-    Fish::Fish(Model *m, vec3 pos, vec3 dir): MoveableObject{m, pos, dir}{
-    };
+    Fish::Fish(Model *m, vec3 pos, vec3 dir) : MoveableObject{m, pos, dir} {};
 
     bool Fish::isCollision(const MoveableObject &other) const
     {
@@ -17,7 +16,11 @@ namespace obj
 
     void Fish::moveSingleStep()
     {
-        //m2w=;
+        position += movementDirection * 0.1;
+        m2w.m[3] = position.x;
+        m2w.m[7] = position.y;
+        m2w.m[11] = position.z;
+        
     }
 
     mat4 Fish::getM2W()

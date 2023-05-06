@@ -115,8 +115,10 @@ void init(void)
 	mainScene.addLightSource(whiteLight);
 
 	mainScene.pushModel(terrain.getModel());
+	
 	auto fish =std::make_unique<obj::Fish>(green_reef, vec3(0), vec3(1, 0, 0));
 	mainScene.pushMoveableObject(std::move(fish));
+	
 	glutRepeatingTimer(FRAME_GAP_MS);
 
 	glutPassiveMotionFunc(mouseControlCallback);
