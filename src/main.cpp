@@ -102,7 +102,7 @@ void init(void)
 	Model *green_reef;
 	green_reef = ResourceManager::get().getModel("green_reef", "green_reef.obj");
 	InitModel(green_reef, programShader->hndl, "in_Position", "in_Normal", NULL);
-	//obj::Fish fish(green_reef, vec3(0),vec3(1,0,0));
+	// obj::Fish fish(green_reef, vec3(0),vec3(1,0,0));
 
 	mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix);
 	setMaterial(green_reef, 1.0, 1.0, 1.0, 100.0);
@@ -115,8 +115,8 @@ void init(void)
 	mainScene.addLightSource(whiteLight);
 
 	mainScene.pushModel(terrain.getModel());
-	obj::Fish fish(green_reef,vec3(0),vec3(1,0,0));
-	//mainScene.pushMoveableObject();
+	auto fish =std::make_unique<obj::Fish>(green_reef, vec3(0), vec3(1, 0, 0));
+	mainScene.pushMoveableObject(std::move(fish));
 	glutRepeatingTimer(FRAME_GAP_MS);
 
 	glutPassiveMotionFunc(mouseControlCallback);

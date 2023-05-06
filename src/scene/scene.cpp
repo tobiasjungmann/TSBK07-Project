@@ -19,14 +19,18 @@ namespace scn
         : camera{0, 0, 0},
           projectionMatrix{IdentityMatrix()},
           skybox{nullptr}
-    {   invalid = true; }
+    {
+        invalid = true;
+    }
 
     Scene::Scene(std::unique_ptr<SceneShader> shader, const Camera &camera, mat4 projectionMatrix, std::unique_ptr<Skybox> skybox)
         : camera{camera},
           projectionMatrix{projectionMatrix},
           m_shader{std::move(shader)},
           skybox{std::move(skybox)}
-    {invalid = false;}
+    {
+        invalid = false;
+    }
 
     Scene &Scene::operator=(Scene &&moved) noexcept
     {
@@ -45,7 +49,6 @@ namespace scn
         return *this;
     }
 
-
     void Scene::popModel()
     {
         model_m2w.pop_back();
@@ -61,8 +64,9 @@ namespace scn
         model_m2w.emplace_back(newMdl, m2wMtx);
     }
 
-    void Scene::pushMoveableObject(obj::MoveableObject obj){
-        objects.emplace_back(obj);
+    void Scene::pushMoveableObject(std::unique_ptr<obj::Fish> obj)
+    {
+        objects.emplace_back(std::move(obj));
     }
 
     void Scene::updateModelM2W(long modelIndex, mat4 update)
@@ -101,18 +105,15 @@ namespace scn
             throw std::invalid_argument("Tried to draw an invalid Scene.");
 
         dbg::if_dlevel<dbg::Level::VERBOSE>([]()
-                                         { std::cerr << "Drawing scene." << std::endl; });
-
-
+                                            { std::cerr << "Drawing scene." << std::endl; });
 
         if (skybox)
         {
-        // TODO maybe add a conditional on the upload of the skybox texture to limit the number of uploads
+            // TODO maybe add a conditional on the upload of the skybox texture to limit the number of uploads
             if (skybox->shader->hasTexturing())
                 skybox->shader->uploadTexture(skybox->model);
             skybox->draw(*this);
         }
-
 
         shader->useShader();
         // upload matices
@@ -134,15 +135,18 @@ namespace scn
 
         shader->uploadMatrix(Shader::Matrices::m2w, IdentityMatrix());
 
-
-        for (auto &model_m2w_pair : model_m2w)
+std::cout << objects.size()<<"\n";
+        for (size_t i = 0; i < objects.size(); i++)
         {
             // TODO add movement to the fish
-            auto model = model_m2w_pair.first;
-            auto m2w = model_m2w_pair.second;
+            objects[i]->moveSingleStep();
+            auto model = objects[i]->getModel();
+            auto m2w = objects[i]->getM2W();
+
             glBindVertexArray(model->vao);
             // TODO apply transfo only if one was provided
-            if (alsoSynthesisPreProj) {
+            if (alsoSynthesisPreProj)
+            {
                 shader->uploadMatrix(Shader::Matrices::preProj, getPreProj(m2w));
             }
             if (m2w != IdentityMatrix()) // BUG improve that performance wise (store pointer maybe ?)
@@ -154,8 +158,47 @@ namespace scn
                 shader->uploadTexture(model);
             glDrawElements(GL_TRIANGLES, model->numIndices, GL_UNSIGNED_INT, 0L);
         }
+
+        /*  for (obj::MoveableObject &obj : objects)
+          {
+              obj.moveSingleStep();
+              auto model = obj.getModel();
+              glBindVertexArray(model->vao);
+              // TODO apply transfo only if one was provided
+              if (alsoSynthesisPreProj)
+              {
+                  shader->uploadMatrix(Shader::Matrices::preProj, getPreProj(m2w));
+              }
+              if (m2w != IdentityMatrix()) // BUG improve that performance wise (store pointer maybe ?)
+                  shader->uploadMatrix(Shader::Matrices::m2w, m2w);
+              if (shader->hasLighting() && model->material)
+                  shader->uploadSpecularExponent(model->material->alpha);
+
+              if (shader->hasTexturing())
+                  shader->uploadTexture(model);
+              glDrawElements(GL_TRIANGLES, model->numIndices, GL_UNSIGNED_INT, 0L);
+          }*/
+        /*  for (auto &model_m2w_pair : model_m2w)
+          {
+              // TODO add movement to the fish
+              auto model = model_m2w_pair.first;
+              auto m2w = model_m2w_pair.second;
+              glBindVertexArray(model->vao);
+              // TODO apply transfo only if one was provided
+              if (alsoSynthesisPreProj) {
+                  shader->uploadMatrix(Shader::Matrices::preProj, getPreProj(m2w));
+              }
+              if (m2w != IdentityMatrix()) // BUG improve that performance wise (store pointer maybe ?)
+                  shader->uploadMatrix(Shader::Matrices::m2w, m2w);
+              if (shader->hasLighting() && model->material)
+                  shader->uploadSpecularExponent(model->material->alpha);
+
+              if (shader->hasTexturing())
+                  shader->uploadTexture(model);
+              glDrawElements(GL_TRIANGLES, model->numIndices, GL_UNSIGNED_INT, 0L);
+          }*/
         dbg::if_dlevel<dbg::Level::VERBOSE>([]()
-                                         { std::cerr << "Scene drawn successfully" << std::endl; });
+                                            { std::cerr << "Scene drawn successfully" << std::endl; });
     }
 
 } // closing of namespace
