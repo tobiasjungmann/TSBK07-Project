@@ -22,6 +22,7 @@ namespace obj
         mat4 m2w = IdentityMatrix();
         vec3 position = vec3(0, 0, 0);
         vec3 movementDirection = vec3(1, 0, 0);
+        vec3 up = vec3(0, 1, 0);
         const Model *model;
     };
 }
