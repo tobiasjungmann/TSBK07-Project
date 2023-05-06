@@ -20,6 +20,7 @@
 #include "scene/camera.hpp"
 #include "scene/terrain.hpp"
 #include "resource_manager.hpp"
+#include "gameobj/fish.hpp"
 
 #define FRAME_GAP_MS 20
 
@@ -101,6 +102,7 @@ void init(void)
 	Model *green_reef;
 	green_reef = ResourceManager::get().getModel("green_reef", "green_reef.obj");
 	InitModel(green_reef, programShader->hndl, "in_Position", "in_Normal", NULL);
+	//obj::Fish fish(green_reef, vec3(0),vec3(1,0,0));
 
 	mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix);
 	setMaterial(green_reef, 1.0, 1.0, 1.0, 100.0);
@@ -113,7 +115,8 @@ void init(void)
 	mainScene.addLightSource(whiteLight);
 
 	mainScene.pushModel(terrain.getModel());
-	mainScene.pushModel(green_reef);
+	obj::Fish fish(green_reef,vec3(0),vec3(1,0,0));
+	//mainScene.pushMoveableObject();
 	glutRepeatingTimer(FRAME_GAP_MS);
 
 	glutPassiveMotionFunc(mouseControlCallback);

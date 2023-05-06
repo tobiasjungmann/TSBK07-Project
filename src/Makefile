@@ -5,7 +5,7 @@ common_dir := common
 includes := -I$(common_dir)/ -I$(common_dir)/Linux -I$(src_dir)
 common_objs := $(wildcard $(build_dir)/$(common_dir)/*.o $(build_dir)/$(common_dir)/Linux/*.o)
 
-dirs := scene .
+dirs := scene . gameobj
 sources := $(foreach dir,$(dirs),$(wildcard $(dir)/*.cpp))
 targets := $(sources:.cpp=.o)
 targets := $(addprefix $(build_dir)/,$(targets))

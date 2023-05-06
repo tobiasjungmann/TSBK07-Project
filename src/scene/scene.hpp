@@ -9,6 +9,7 @@
 #include "camera.hpp"
 #include "skybox.hpp"
 #include "light.hpp"
+#include "gameobj/MoveableObject.hpp"
 
 namespace scn
 {
@@ -44,7 +45,8 @@ public:
   void pushModel (const Model* newMdl); // TODO should returns index of insertion in vector
   void pushModel (const Model* newMdl, mat4 m2wMtx); // TODO should returns index of insertion in vector
   
-  
+  void pushMoveableObject(obj::MoveableObject obj);
+
   /**
    * @brief Update the model-to-world matrix with UPDATE of the model at MODELINDEX
    * 
@@ -88,6 +90,7 @@ public:
 private:
   // TODO compare performance with a vector<pair<std::shared_ptr<Model>, vector<mat4>>> (comparison of cache proximity)
   std::vector<std::pair<const Model*, mat4>> model_m2w;
+   std::vector<obj::MoveableObject> objects;
   
   std::vector<vec4> lightSourcesIntensities;
   std::vector<vec3> lightSourcesDirections;

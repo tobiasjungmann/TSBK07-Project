@@ -61,6 +61,10 @@ namespace scn
         model_m2w.emplace_back(newMdl, m2wMtx);
     }
 
+    void Scene::pushMoveableObject(obj::MoveableObject obj){
+        objects.emplace_back(obj);
+    }
+
     void Scene::updateModelM2W(long modelIndex, mat4 update)
     {
         if (modelIndex < 0)
@@ -133,6 +137,7 @@ namespace scn
 
         for (auto &model_m2w_pair : model_m2w)
         {
+            // TODO add movement to the fish
             auto model = model_m2w_pair.first;
             auto m2w = model_m2w_pair.second;
             glBindVertexArray(model->vao);
