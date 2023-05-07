@@ -113,12 +113,14 @@ void init(void)
 	mainScene.addLightSource(blueLight);
 	mainScene.addLightSource(whiteLight);
 
-	auto fish = std::make_unique<obj::Fish>(green_reef, vec3(0), vec3(1, 0, 0));
-	auto fish2 = std::make_unique<obj::Fish>(green_reef, vec3(1, 0, 0), vec3(0, 1, 0));
-	
+	auto fish = std::make_unique<obj::Fish>(green_reef, vec3(10,4,15), normalize(vec3(0, 0, 1)));
+	auto fish2 = std::make_unique<obj::Fish>(green_reef, vec3(15, 4, 10), normalize(vec3(0, 1, 0)));
+	auto fish3 = std::make_unique<obj::Fish>(green_reef, vec3(10,4,15), normalize(vec3(1, 0, 0)));
+
 	mainScene.pushMoveableObject(std::move(fish));
 	mainScene.pushMoveableObject(std::move(fish2));
-	
+	mainScene.pushMoveableObject(std::move(fish3));
+
 	glutRepeatingTimer(FRAME_GAP_MS);
 
 	glutPassiveMotionFunc(mouseControlCallback);

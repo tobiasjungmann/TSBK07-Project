@@ -6,7 +6,7 @@ namespace obj
     class MoveableObject
     {
     public:
-        MoveableObject(Model *m, vec3 pos = vec3(0), vec3 dir = vec3(0)) : model(m), position(pos), movementDirection(dir){
+        MoveableObject(Model *m, vec3 pos = vec3(0)) : model(m), position(pos){
         };
 
         virtual void moveSingleStep() = 0;
@@ -21,8 +21,8 @@ namespace obj
     protected:
         mat4 m2w = IdentityMatrix();
         vec3 position = vec3(0, 0, 0);
-        vec3 movementDirection = vec3(1, 0, 0);
-        vec3 up = vec3(0, 1, 0);
+        vec3 movementDirection = vec3(0, 1, 0);// model is pointing upwards by default
+        vec3 up = vec3(0, 0, -1);
         const Model *model;
     };
 }
