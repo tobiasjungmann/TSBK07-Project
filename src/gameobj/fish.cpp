@@ -8,7 +8,7 @@ namespace obj
     {
         for (size_t i = 0; i < 9; i++)
         {
-            m2w.m[i + i / 3] = rotation.m[i]; // leave out the field in hte last column
+            m2w.m[i + i / 3] = rotation.m[i]; // leave out the field in the last column
         }
     }
 
@@ -17,57 +17,43 @@ namespace obj
         updateMovementVector(normalize(dir), vec3(0, 1, 0));
     };
 
+    void setVectorInLine(mat4 &matrix, vec3 input, int line)
+    {
+        matrix.m[0 + line * 4] = input.x;
+        matrix.m[1 + line * 4] = input.y;
+        matrix.m[2 + line * 4] = input.z;
+    }
+
     /*
     updatemovement vector - neuen übergebendann eine rotation in alle drei richtungen, wenn nötig
     */
     void Fish::updateMovementVector(vec3 newMovement, vec3 newUp)
     {
-
-        float angle = dot(newMovement, movementDirection);
         float rotation_factor = M_1_PI * 5;
-        mat3 rotateZ = IdentityMatrix();
+        mat3 rotateHelper = IdentityMatrix();
         mat3 rotateX = IdentityMatrix();
 
-        // rotate the fish model to point in the initial direction vector
-        rotateZ.m[0] = cos(rotation_factor);
-        rotateZ.m[2] = sin(rotation_factor);
-        rotateZ.m[6] = -sin(rotation_factor);
-        rotateZ.m[8] = cos(rotation_factor);
+        // rotate the fish model  so that the head is pointing along the x axis
+        rotateHelper.m[0] = cos(rotation_factor);
+        rotateHelper.m[2] = sin(rotation_factor);
+        rotateHelper.m[6] = -sin(rotation_factor);
+        rotateHelper.m[8] = cos(rotation_factor);
 
         rotateX.m[0] = cos(rotation_factor);
         rotateX.m[1] = -sin(rotation_factor);
         rotateX.m[3] = sin(rotation_factor);
         rotateX.m[4] = cos(rotation_factor);
 
-        rotateZ = rotateX * rotateZ;
-        // copyMat3InMat4(m2w,rotateZ);
-        //  mat4 lookatRotate=lookAt(position,position+newMovement,newUp);//*rotateZ;
-        //  mat3 lookatRotatesmall=mat3(lookAt(position,position+newMovement,newUp));//*
-        //  copyMat3InMat4(m2w,lookatRotate);
-        // mat4 rotateHelper=IdentityMatrix();
-        /* rotateHelper.m[0]=newMovement.x;
-         rotateHelper.m[4]=newMovement.y;
-         rotateHelper.m[8]=newMovement.z;*/
-        /*   rotateHelper.m[0]=newMovement.x;
-           rotateHelper.m[5]=newMovement.y;
-           rotateHelper.m[10]=newMovement.z;
-           m2w=IdentityMatrix();
-           m2w=m2w*rotateHelper;*/
-        m2w.m[0] = newMovement.x;
-        m2w.m[1] = newMovement.y;
-        m2w.m[2] = newMovement.z;
+        rotateHelper = rotateX * rotateHelper;
 
         vec3 zaxis = CrossProduct(vec3(0, 1, 0), newMovement);
         vec3 yaxis = CrossProduct(newMovement, zaxis);
-        m2w.m[4] = yaxis.x;
-        m2w.m[5] = yaxis.y;
-        m2w.m[6] = yaxis.z;
+       
+        setVectorInLine(m2w, newMovement, 0);
+        setVectorInLine(m2w, yaxis, 1);
+        setVectorInLine(m2w, zaxis, 2);
 
-        m2w.m[8] = zaxis.x;
-        m2w.m[9] = zaxis.y;
-        m2w.m[10] = zaxis.z;
-
-        copyMat3InMat4(m2w,mat3(m2w)*rotateZ);
+        copyMat3InMat4(m2w, mat3(m2w) * rotateHelper);
         movementDirection = newMovement;
     }
 
