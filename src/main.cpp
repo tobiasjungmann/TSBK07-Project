@@ -114,9 +114,11 @@ void init(void)
 	mainScene.addLightSource(whiteLight);
 
 	auto fish = std::make_unique<obj::Fish>(green_reef, vec3(0), vec3(1, 0, 0));
-	mainScene.pushMoveableObject(std::move(fish));
 	auto fish2 = std::make_unique<obj::Fish>(green_reef, vec3(1, 0, 0), vec3(0, 1, 0));
+	
+	mainScene.pushMoveableObject(std::move(fish));
 	mainScene.pushMoveableObject(std::move(fish2));
+	
 	glutRepeatingTimer(FRAME_GAP_MS);
 
 	glutPassiveMotionFunc(mouseControlCallback);
@@ -124,7 +126,6 @@ void init(void)
 
 void display(void)
 {
-
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	keyControlCheck();

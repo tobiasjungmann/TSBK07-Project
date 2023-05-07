@@ -57,12 +57,12 @@ namespace scn
         pos += offset;
     }
 
-    void Camera::setMousePosition(int x, int y)noexcept
+    void Camera::setMousePosition(int x, int y) noexcept
     {
         currentMousePosition.update(x, y);
     }
 
-    void Camera::setPressedKeys(bool forward,bool left,bool back,bool right)noexcept
+    void Camera::setPressedKeys(bool forward, bool left, bool back, bool right) noexcept
     {
         currentPressedKeys.w = forward;
         currentPressedKeys.a = left;
@@ -83,7 +83,7 @@ namespace scn
         return os;
     }
 
-  float Camera::computeMinMovement(int last, int current)
+    float Camera::computeMinMovement(int last, int current)
     {
         int offset = last - current;
         float noMovement = (constants::display_size >> 2);
@@ -105,11 +105,11 @@ namespace scn
         return degrees * (M_1_PI / 180);
     }
 
-    void Camera::updateCameraPosition(const Terrain & terrain)
+    void Camera::updateCameraPosition(const Terrain &terrain)
     {
-       const float cameraSpeed = 0.5f;
+        const float cameraSpeed = 0.5f;
         float sensitivity = 0.7f;
-       if (currentPressedKeys.w)
+        if (currentPressedKeys.w)
         {
             pos += cameraSpeed * viewingDirection;
         }
@@ -125,7 +125,17 @@ namespace scn
         {
             pos += normalize(cross(viewingDirection, up)) * cameraSpeed;
         }
+        pos.x = terrain.nextInsideFieldWidth(pos.x);
+        pos.z = terrain.nextInsideFieldWidth(pos.z);
 
+        // check for collisions with the ground
+        float minHeigth = terrain.computeHeight(pos.x, pos.z) + 2.0; // + 0.5;        // TODO take a real hitbox size
+        if (pos.y < minHeigth)
+        {
+            pos.y = minHeigth;
+        }
+
+        // Mouse rotating the frustum
         float xmovement = computeMinMovement(currentMousePosition.previousPosition.x, currentMousePosition.currentPosition.x) * sensitivity;
         float ymovement = -computeMinMovement(currentMousePosition.currentPosition.y, currentMousePosition.previousPosition.y) * sensitivity;
 
@@ -144,12 +154,5 @@ namespace scn
         direction.y = sin(toRadians(pitch));
         direction.z = sin(toRadians(yaw)) * cos(toRadians(pitch));
         viewingDirection = normalize(direction);
-
-        // check for collisions with the ground
-        float minHeigth = terrain.computeHeight(pos.x, pos.z)+2.0;// + 0.5;        // TODO take a real hitbox size
-            if (pos.y < minHeigth)
-            {
-                pos.y = minHeigth;
-            }
     }
 }

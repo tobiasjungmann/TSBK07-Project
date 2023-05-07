@@ -114,8 +114,17 @@ namespace scn
         return (startingPoint + v1 + v2).y;
     }
 
-    Model *Terrain::getModel()
+    Model *Terrain::getModel()const
     {
         return model;
+    }
+
+    float Terrain::nextInsideFieldWidth(float input) const
+    {
+        if (input < 0.0)
+            return 0.0;
+        if (input > terrain_width)
+            return terrain_width;
+        return input;
     }
 }
