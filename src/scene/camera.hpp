@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "event.hpp"
+#include "scene/terrain.hpp"
 
 namespace scn
 {
@@ -76,7 +77,7 @@ namespace scn
          * setMousePosition and setPressedKeys must be called before calling this function.
          *
          */
-        void updateCameraPosition();
+        void updateCameraPosition(const Terrain & terrain);
 
 
         mat4 matrix() const;

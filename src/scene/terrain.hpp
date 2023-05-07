@@ -1,3 +1,4 @@
+#pragma once
 /*
 Todo compute terrain here -> p
 return model for main.init()
@@ -13,7 +14,9 @@ namespace scn
     class Terrain
     {
     public:
-    
+    Terrain(){
+
+    }
     Terrain(std::string filename);
         Model *generateTerrain(TextureData *tex);
 
@@ -28,7 +31,7 @@ namespace scn
         float computeHeight(float x, float z)const;
 
         Model *getModel();
-
+        Model *model;
     private:
         /**
          * @brief
@@ -47,8 +50,6 @@ namespace scn
         void addTriangle(GLuint *indexArray, vec3 *normalArray, vec3 *vertexArray, int first, int second, int third, int offset, int width, int x, int z);
         void addToNormalArray(vec3 *normalarray, vec3 *vertexarray, int previousVertexIndex, int thisVertexIndex, int nextVertexIndex);
         int terrain_width;
-        int terrain_height;
-        Model *m_terrain;
-        
+        int terrain_height;        
     };
 }

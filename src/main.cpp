@@ -94,19 +94,18 @@ void init(void)
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 	auto programShader = std::make_unique<scn::SceneShader>("src/shaders/light.vert", "src/shaders/light.frag", "projectionMatrix", "w2vMatrix", "m2wMatrix");
-	const scn::Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
+	const scn::Camera camera{{10.f, 2.f, 10.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
 
 	scn::Terrain terrain("rc/models/fft-terrain.tga");
 	InitModel(terrain.getModel(), programShader->hndl, "in_Position", "in_Normal", NULL);
+	setMaterial(terrain.getModel(), 1.0, 1.0, 1.0, 100.0);
 
 	Model *green_reef;
 	green_reef = ResourceManager::get().getModel("green_reef", "green_reef.obj");
 	InitModel(green_reef, programShader->hndl, "in_Position", "in_Normal", NULL);
-	// obj::Fish fish(green_reef, vec3(0),vec3(1,0,0));
 
-	mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix);
+	mainScene = scn::Scene(std::move(programShader), camera, terrain, projectionMatrix);
 	setMaterial(green_reef, 1.0, 1.0, 1.0, 100.0);
-	setMaterial(terrain.getModel(), 1.0, 1.0, 1.0, 100.0);
 
 	mainScene.shader->initLighting("lightSourcesDirPosArr", "lightSourcesColorArr", "isDirectional", "specularExponent");
 	mainScene.addLightSource(redLight);
@@ -114,11 +113,9 @@ void init(void)
 	mainScene.addLightSource(blueLight);
 	mainScene.addLightSource(whiteLight);
 
-	mainScene.pushModel(terrain.getModel());
-	
-	auto fish =std::make_unique<obj::Fish>(green_reef, vec3(0), vec3(1, 0, 0));
+	auto fish = std::make_unique<obj::Fish>(green_reef, vec3(0), vec3(1, 0, 0));
 	mainScene.pushMoveableObject(std::move(fish));
-	auto fish2 =std::make_unique<obj::Fish>(green_reef, vec3(1,0,0), vec3(0, 1, 0));
+	auto fish2 = std::make_unique<obj::Fish>(green_reef, vec3(1, 0, 0), vec3(0, 1, 0));
 	mainScene.pushMoveableObject(std::move(fish2));
 	glutRepeatingTimer(FRAME_GAP_MS);
 
@@ -127,11 +124,10 @@ void init(void)
 
 void display(void)
 {
+
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	keyControlCheck();
-
-	mainScene.camera.updateCameraPosition();
 	mainScene.draw();
 
 	// todo draw stuff here

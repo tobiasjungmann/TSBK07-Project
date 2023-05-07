@@ -17,18 +17,21 @@ namespace scn
 {
     Scene::Scene()
         : camera{0, 0, 0},
+        terrain{},
           projectionMatrix{IdentityMatrix()},
           skybox{nullptr}
     {
         invalid = true;
     }
 
-    Scene::Scene(std::unique_ptr<SceneShader> shader, const Camera &camera, mat4 projectionMatrix, std::unique_ptr<Skybox> skybox)
+    Scene::Scene(std::unique_ptr<SceneShader> shader, const Camera &camera,const Terrain ter, mat4 projectionMatrix, std::unique_ptr<Skybox> skybox)
         : camera{camera},
+        terrain{ter},
           projectionMatrix{projectionMatrix},
           m_shader{std::move(shader)},
           skybox{std::move(skybox)}
     {
+        pushModel(ter.model);
         invalid = false;
     }
 
@@ -39,6 +42,7 @@ namespace scn
         m_shader = std::move(moved.m_shader);
         projectionMatrix = moved.projectionMatrix;
         camera = moved.camera;
+        terrain = moved.terrain;
         invalid = moved.invalid;
         skybox = std::move(moved.skybox);
         model_m2w = std::move(moved.model_m2w);
@@ -98,14 +102,15 @@ namespace scn
         lightSourcesDirections.erase(lightSourcesDirections.begin() + index);
     }
 
+
     // BUG add management of the textures (upload them as necessary)
-    void Scene::draw(bool alsoSynthesisPreProj) const
+    void Scene::draw(bool alsoSynthesisPreProj)
     {
         if (invalid)
             throw std::invalid_argument("Tried to draw an invalid Scene.");
 
-        dbg::if_dlevel<dbg::Level::VERBOSE>([]()
-                                            { std::cerr << "Drawing scene." << std::endl; });
+            dbg::if_dlevel<dbg::Level::VERBOSE>([]()
+                                                { std::cerr << "Drawing scene." << std::endl; });
 
         if (skybox)
         {
@@ -127,8 +132,9 @@ namespace scn
         }
 
         // no need for upload if no models to render
-        if (!model_m2w.empty())
+        if (!model_m2w.empty() || objects.size()>0)
         {
+            camera.updateCameraPosition(terrain);
             shader->uploadMatrix(Shader::Matrices::w2v, camera.matrix());
             shader->uploadMatrix(Shader::Matrices::proj, projectionMatrix);
         }
@@ -137,6 +143,7 @@ namespace scn
 
         for (size_t i = 0; i < objects.size(); i++)
         {
+
             objects[i]->moveSingleStep();
             auto model = objects[i]->getModel();
             auto m2w = objects[i]->getM2W();

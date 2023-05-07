@@ -30,3 +30,6 @@ $(src_dir): $(common_dir)
 
 clean:
 	rm -r $(build_dir)
+	mkdir -p $(build_dir)/common/Linux
+	mkdir -p $(build_dir)/gameobj
+	mkdir -p $(build_dir)/scene

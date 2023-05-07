@@ -9,8 +9,9 @@ namespace scn
     {
         TextureData tex;
         LoadTGATextureData(filename.c_str(), &tex);
-        m_terrain = generateTerrain(&tex);
+        model = generateTerrain(&tex);
     }
+
     void Terrain::addToNormalArray(vec3 *normalarray, vec3 *vertexarray, int previousVertexIndex, int thisVertexIndex, int nextVertexIndex)
     {
         vec3 a = vertexarray[thisVertexIndex] - vertexarray[previousVertexIndex];
@@ -73,7 +74,7 @@ namespace scn
 
         // Create Model and upload to GPU:
 
-        m_terrain = LoadDataToModel(
+        model = LoadDataToModel(
             vertexArray,
             normalArray,
             texCoordArray,
@@ -82,30 +83,29 @@ namespace scn
             vertexCount,
             triangleCount * 3);
 
-        return m_terrain;
+        return model;
     }
 
-    float Terrain::computeHeight(float x, float z)const
+    float Terrain::computeHeight(float x, float z) const
     {
         float x_difference = x - int(x);
         float z_difference = z - int(z);
 
-        vec3 p_bottom_left = m_terrain->vertexArray[int(x) + (int(z) + 1) * terrain_width];
-        vec3 p_top_right = m_terrain->vertexArray[((int(x) + 1) + int(z) * terrain_width)];
+        vec3 p_bottom_left = model->vertexArray[int(x) + (int(z) + 1) * terrain_width];
+        vec3 p_top_right = model->vertexArray[((int(x) + 1) + int(z) * terrain_width)];
 
         vec3 startingPoint;
         vec3 v1, v2;
         if (x_difference + z_difference < 1.0)
         {
-            startingPoint = m_terrain->vertexArray[(int(x) + int(z) * terrain_width)]; // p_top_left;
+            startingPoint = model->vertexArray[(int(x) + int(z) * terrain_width)]; // p_top_left;
 
             v1 = (p_bottom_left - startingPoint) * z_difference; // movement on the x axis (top left to bottom left)
             v2 = (p_top_right - startingPoint) * x_difference;   // movement on the z axis (top left to top right)
         }
-
         else
         {
-            startingPoint = m_terrain->vertexArray[((int(x) + 1) + (int(z) + 1) * terrain_width)];
+            startingPoint = model->vertexArray[((int(x) + 1) + (int(z) + 1) * terrain_width)];
 
             v1 = (p_bottom_left - startingPoint) * (1 - x_difference); // movement on the x axis (top left to bottom left)
             v2 = (p_top_right - startingPoint) * (1 - z_difference);   // movement on the z axis (top left to top right)
@@ -116,6 +116,6 @@ namespace scn
 
     Model *Terrain::getModel()
     {
-        return m_terrain;
+        return model;
     }
 }

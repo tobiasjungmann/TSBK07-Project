@@ -105,7 +105,7 @@ namespace scn
         return degrees * (M_1_PI / 180);
     }
 
-    void Camera::updateCameraPosition()
+    void Camera::updateCameraPosition(const Terrain & terrain)
     {
        const float cameraSpeed = 0.5f;
         float sensitivity = 0.7f;
@@ -146,12 +146,10 @@ namespace scn
         viewingDirection = normalize(direction);
 
         // check for collisions with the ground
-        /* TODO probably move into the collision detection
-        float minHeigth = computeHeight(camera.x, camera.z) + 0.5;
-            if (camera.y < minHeigth)
+        float minHeigth = terrain.computeHeight(pos.x, pos.z)+2.0;// + 0.5;        // TODO take a real hitbox size
+            if (pos.y < minHeigth)
             {
-                camera.y = minHeigth;
-            }*/
-        // camera->lookat = lookat + camera->pos;
+                pos.y = minHeigth;
+            }
     }
 }

@@ -11,6 +11,7 @@
 #include "light.hpp"
 #include "gameobj/MoveableObject.hpp"
 #include "gameobj/fish.hpp"
+#include"scene/terrain.hpp"
 
 namespace scn
 {
@@ -25,6 +26,7 @@ public:
   /// @param skybox An optional skybox's pointer. Ownership onto the underlying skybox must be given to the Scene.
   Scene (std::unique_ptr<SceneShader> shader, 
    const Camera &camera, 
+   const Terrain ter,
    mat4 projectionMatrix, 
    std::unique_ptr<Skybox> skybox = nullptr);
   Scene& operator= (const Scene &cpy) = delete;
@@ -59,8 +61,8 @@ public:
   // Light management
   void addLightSource(const Light &light);
   void removeLightSource(long index);
-  
-  void draw(bool alsoSynthesisPreProj = false) const;
+ // void addTerrain(Terrain& ter);
+  void draw(bool alsoSynthesisPreProj = false);
 
 
 private:  
@@ -99,5 +101,6 @@ private:
   
   std::unique_ptr<SceneShader> m_shader;
   bool invalid;
+  Terrain terrain;
 };
 } // end namespace scene
