@@ -140,19 +140,66 @@ namespace scn
       throw std::logic_error("Lighting was not properly initialized before attempting data upload");
     useShader();
 
+    auto report = [](std::size_t i)
+    {
+      throw std::logic_error("Light " + std::to_string(i) + " could not be properly located in shader");
+    };
+
     for (std::size_t i = 0; i < lights.size(); i++)
     {
-      std::string currentLight = lightStructArrayName + '[' + std::to_string(i) + ']';
-      GLint lightDirLoc = glGetUniformLocation(hndl, (currentLight + ".dirPos").c_str());
-      GLint lightColorLoc = glGetUniformLocation(hndl, (currentLight + ".color").c_str());
-      GLint lightDirectionalLoc = glGetUniformLocation(hndl, (currentLight + ".directional").c_str());
+      std::string lightStr = lightStructArrayName + '[' + std::to_string(i) + ']';
+      Light const &curr{lights[i]};
 
-      if ((lightDirLoc == -1 or lightColorLoc == -1 or lightDirectionalLoc == -1) && !ENV_NOTHROW)
-        throw std::logic_error("Light " + std::to_string(i) + " could not be properly located in shader");
+      GLint colorLoc = glGetUniformLocation(hndl, (lightStr + ".color").c_str());
+      GLint directionalLoc = glGetUniformLocation(hndl, (lightStr + ".directional").c_str());
+      GLint attenuateLoc = glGetUniformLocation(hndl, (lightStr + ".attenuate").c_str());
+      GLint spotlightLoc = glGetUniformLocation(hndl, (lightStr + ".spotlight").c_str());
+      if ((colorLoc == -1 or attenuateLoc == -1 or directionalLoc == -1 or spotlightLoc == -1) && !ENV_NOTHROW)
+        report(i);
 
-      glUniform3f(lightDirLoc, lights[i].dirPos.x, lights[i].dirPos.y, lights[i].dirPos.z);
-      glUniform3f(lightColorLoc, lights[i].intensity.x, lights[i].intensity.y, lights[i].intensity.z);
-      glUniform1i(lightDirectionalLoc, lights[i].directional);
+      glUniform3f(colorLoc, curr.intensity.x, curr.intensity.y, curr.intensity.z);
+      glUniform1i(directionalLoc, curr.directional);
+      glUniform1i(attenuateLoc, curr.attenuate);
+      glUniform1i(spotlightLoc, curr.spotlight);
+
+      if (curr.attenuate)
+      {
+        GLint constLoc, linearLoc, squareLoc;
+        constLoc = glGetUniformLocation(hndl, (lightStr + ".attenuConst").c_str());
+        linearLoc = glGetUniformLocation(hndl, (lightStr + ".attenuLinear").c_str());
+        squareLoc = glGetUniformLocation(hndl, (lightStr + ".attenuSquare").c_str());
+        if (constLoc == -1 or linearLoc == -1 or squareLoc == -1)
+          report(i);
+        glUniform1f(constLoc, curr.attenuConst);
+        glUniform1f(linearLoc, curr.attenuLinear);
+        glUniform1f(squareLoc, curr.attenuSquare);
+      }
+
+      if (curr.spotlight)
+      {
+        GLint cutoffLoc, outerLoc;
+        cutoffLoc = glGetUniformLocation(hndl, (lightStr + ".cutOff").c_str());
+        outerLoc = glGetUniformLocation(hndl, (lightStr + ".outerEdgeCutOff").c_str());
+        if (cutoffLoc == -1 or outerLoc == -1)
+          report(i);
+        glUniform1f(cutoffLoc, curr.cutOff);
+        glUniform1f(outerLoc, curr.outerEdgeCutOff);
+      }
+
+      if (curr.directional or curr.spotlight)
+      {
+        if (GLint dirLoc = glGetUniformLocation(hndl, (lightStr + ".direction").c_str()) != -1)
+          glUniform3f(dirLoc, curr.direction.x, curr.direction.y, curr.direction.z);
+        else
+          report(i);
+      }
+      if (not curr.directional or curr.spotlight)
+      {
+        if (GLint posLoc = glGetUniformLocation(hndl, (lightStr + ".position").c_str()) != -1)
+          glUniform3f(posLoc, curr.position.x, curr.position.y, curr.position.z);
+        else
+          report(i);
+      }
     }
   }
 

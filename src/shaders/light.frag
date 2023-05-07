@@ -1,9 +1,17 @@
 #version 150
 
 struct Light {
-	vec3 dirPos;
-	vec3 color;
-	bool directional;
+    vec3 intensity;
+    vec3 direction;
+    vec3 position;
+    bool directional;
+    GLfloat attenuConst;
+    GLfloat attenuLinear;
+    GLfloat attenuSquare;
+    bool attenuate;
+    GLfloat cutOff;
+    GLfloat outerEdgeCutOff;
+    bool spotlight;
 };
 
 struct MaterialLight {
@@ -56,9 +64,9 @@ void main(void)
 {
 	for (int i =0; i < 4; i++) {
 		if (!lights[i].directional)
-			lightsViewCoords[i] = vec3(w2vMatrix * vec4(lights[i].dirPos, 1.0));
+			lightsViewCoords[i] = vec3(w2vMatrix * vec4(lights[i].position, 1.0));
 		else
-			lightsViewCoords[i] = vec3(w2vMatrix * vec4(lights[i].dirPos, 0.0)); // no translation for directional
+			lightsViewCoords[i] = vec3(w2vMatrix * vec4(lights[i].direction, 0.0)); // no translation for directional
 	}
 	vec3 normalizedNormal = normalize(normalInViewCoordinates);
 	vec3 camera = vec3(0.0, 0.0, 0.0);
