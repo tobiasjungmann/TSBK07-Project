@@ -118,7 +118,8 @@ void init(void)
 	
 	auto fish =std::make_unique<obj::Fish>(green_reef, vec3(0), vec3(1, 0, 0));
 	mainScene.pushMoveableObject(std::move(fish));
-	
+	auto fish2 =std::make_unique<obj::Fish>(green_reef, vec3(1,0,0), vec3(0, 1, 0));
+	mainScene.pushMoveableObject(std::move(fish2));
 	glutRepeatingTimer(FRAME_GAP_MS);
 
 	glutPassiveMotionFunc(mouseControlCallback);
