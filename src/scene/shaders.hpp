@@ -4,8 +4,14 @@
 #include "types_properties.hpp"
 #include <cstddef>
 #include <array>
+#include <vector>
+#include <string>
+#include "modelv2.hpp"
+#include "light.hpp"
+
 
 struct Model;
+
 
 namespace scn
 {
@@ -97,9 +103,6 @@ namespace scn
      */
     class SceneShader : public Shader
     {
-    private:
-        GLint lightDirsMtxLoc = -1, lightIntensitiesMtxLoc = -1, lightDirecnalMtxLoc = -1, specExponentLoc = -1;
-        bool lighting = false;
 
     public:
         SceneShader(
@@ -116,18 +119,16 @@ namespace scn
             const char *preProjMtxVarName);
 
 
-        void initLighting(
-            const char *lightSourcesDirPosArrName,
-            const char *lightSourcesColorArrName,
-            const char *lightDirectionalitiesArrName,
-            const char *specularExponentVarName);
+        void initLighting(std::string const& lightStructArrayName);
+        void initMaterialProps(std::string const& materialPropsStructName);
 
-        inline bool hasLighting() const noexcept { return lighting; }
+        inline bool hasLighting() const noexcept { return not lightStructArrayName.empty(); }
 
-        void uploadLighting(std::size_t nbLights,
-                            const GLfloat *sourcesDirs,
-                            const GLfloat *sourcesIntensities,
-                            const GLint *sourcesDirnalties) const;
-        void uploadSpecularExponent(GLfloat exponent) const;
+        void uploadLighting(std::vector<Light> const& lights) const;
+        void uploadModelLightProps(const Modelv2::MaterialLight* props) const;
+
+    private:
+        std::string lightStructArrayName;
+        std::string mtlPropsStructName;
     };
 }

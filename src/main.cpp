@@ -16,6 +16,7 @@
 #include "scene/scene.hpp"
 #include "scene/skybox.hpp"
 #include "scene/light.hpp"
+#include "scene/modelv2.hpp"
 #include "scene/shaders.hpp"
 #include "scene/camera.hpp"
 #include "scene/terrain.hpp"
@@ -37,29 +38,29 @@ const scn::Light whiteLight{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, true};
 #define bottom -0.5
 
 const mat4 projectionMatrix = {
-	2.0 * near / (right - left),
-	0.0,
-	(right + left) / (right - left),
-	0.0,
-	0.0,
-	2.0 * near / (top - bottom),
-	(top + bottom) / (top - bottom),
-	0.0,
-	0.0,
-	0.0,
-	-(far + near) / (far - near),
-	-2 * far *near / (far - near),
-	0.0,
-	0.0,
-	-1.0,
-	0.,
+    2.0 * near / (right - left),
+    0.0,
+    (right + left) / (right - left),
+    0.0,
+    0.0,
+    2.0 * near / (top - bottom),
+    (top + bottom) / (top - bottom),
+    0.0,
+    0.0,
+    0.0,
+    -(far + near) / (far - near),
+    -2 * far *near / (far - near),
+    0.0,
+    0.0,
+    -1.0,
+    0.,
 };
 
 static scn::Scene mainScene;
 
 void keyControlCheck()
 {
-	mainScene.camera.setPressedKeys(glutKeyIsDown(constants::KEY_FORWARD), glutKeyIsDown(constants::KEY_LEFT), glutKeyIsDown(constants::KEY_BACK), glutKeyIsDown(constants::KEY_RIGHT));
+  mainScene.camera.setPressedKeys(glutKeyIsDown(constants::KEY_FORWARD), glutKeyIsDown(constants::KEY_LEFT), glutKeyIsDown(constants::KEY_BACK), glutKeyIsDown(constants::KEY_RIGHT));
 }
 
 /**
@@ -70,80 +71,69 @@ void keyControlCheck()
  */
 void mouseControlCallback(int x, int y)
 {
-	mainScene.camera.setMousePosition(x, y);
-	glutPostRedisplay();
-}
-
-void setMaterial(Model *m, GLfloat Ka, GLfloat Kd, GLfloat Kspec, GLfloat alpha)
-{
-	if (!m->material)
-	{
-		m->material = (MtlPtr)malloc(sizeof(Mtl));
-	}
-	m->material->alpha = alpha;
-	m->material->specularity = Kspec;
-	m->material->diffuseness = Kd;
-	m->material->Ka = Ka;
+  mainScene.camera.setMousePosition(x, y);
+  glutPostRedisplay();
 }
 
 void init(void)
 {
-	// GL inits
-	glClearColor(0.2, 0.2, 0.5, 0);
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-	auto programShader = std::make_unique<scn::SceneShader>("src/shaders/light.vert", "src/shaders/light.frag", "projectionMatrix", "w2vMatrix", "m2wMatrix");
-	const scn::Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
+  // GL inits
+  glClearColor(0.2, 0.2, 0.5, 0);
+  glEnable(GL_DEPTH_TEST);
+  glDisable(GL_CULL_FACE);
+  auto programShader = std::make_unique<scn::SceneShader>("src/shaders/light.vert", "src/shaders/light.frag", "projectionMatrix", "w2vMatrix", "m2wMatrix");
+  const scn::Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
 
-	scn::Terrain terrain("rc/models/fft-terrain.tga");
-	InitModel(terrain.getModel(), programShader->hndl, "in_Position", "in_Normal", NULL);
+  scn::Terrain terrain("fft-terrain.tga");
+  terrain.model().init(programShader->hndl, "in_Position", "in_Normal", NULL);
+  terrain.model().setLightProps(1.0, 1.0, 1.0, 100.0);
 
-	Model *green_reef;
-	green_reef = ResourceManager::get().getModel("green_reef", "green_reef.obj");
-	InitModel(green_reef, programShader->hndl, "in_Position", "in_Normal", NULL);
+  Modelv2 green_reef{"green_reef", "green_reef.obj"};
+  green_reef.init(programShader->hndl, "in_Position", "in_Normal", NULL);
+  green_reef.setLightProps(1.0, 0.8, 0.5, 100.0);
 
-	mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix);
-	setMaterial(green_reef, 1.0, 1.0, 1.0, 100.0);
-	setMaterial(terrain.getModel(), 1.0, 1.0, 1.0, 100.0);
+  mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix);
+  // mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
 
-	mainScene.shader->initLighting("lightSourcesDirPosArr", "lightSourcesColorArr", "isDirectional", "specularExponent");
-	mainScene.addLightSource(redLight);
-	mainScene.addLightSource(greenLight);
-	mainScene.addLightSource(blueLight);
-	mainScene.addLightSource(whiteLight);
+  mainScene.shader->initMaterialProps("materialLight");
+  mainScene.shader->initLighting("lights");
+  mainScene.addLightSource(redLight);
+  mainScene.addLightSource(greenLight);
+  mainScene.addLightSource(blueLight);
+  mainScene.addLightSource(whiteLight);
 
-	mainScene.pushModel(terrain.getModel());
-	mainScene.pushModel(green_reef);
-	glutRepeatingTimer(FRAME_GAP_MS);
+  mainScene.pushModel(terrain.model());
+  mainScene.pushModel(green_reef);
+  glutRepeatingTimer(FRAME_GAP_MS);
 
-	glutPassiveMotionFunc(mouseControlCallback);
+  glutPassiveMotionFunc(mouseControlCallback);
 }
 
 void display(void)
 {
-	// clear the screen
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	keyControlCheck();
+  // clear the screen
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  keyControlCheck();
 
-	mainScene.camera.updateCameraPosition();
-	mainScene.draw();
+  mainScene.camera.updateCameraPosition();
+  mainScene.draw();
 
-	// todo draw stuff here
-	glutSwapBuffers();
+  // todo draw stuff here
+  glutSwapBuffers();
 }
 
 int main(int argc, char **argv)
 {
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
-	glutInitContextVersion(3, 2);
-	glutInitWindowSize(constants::display_size, constants::display_size);
-	glutCreateWindow("TSBK07 Lab 4");
-	glutDisplayFunc(display);
-	init();
+  glutInit(&argc, argv);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
+  glutInitContextVersion(3, 2);
+  glutInitWindowSize(constants::display_size, constants::display_size);
+  glutCreateWindow("Deep Sea");
+  glutDisplayFunc(display);
+  init();
 
-	glutRepeatingTimer(20);
+  glutRepeatingTimer(20);
 
-	glutMainLoop();
-	exit(0);
+  glutMainLoop();
+  exit(0);
 }

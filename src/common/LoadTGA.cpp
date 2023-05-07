@@ -212,6 +212,12 @@ bool LoadTGATextureData(const char *filename, TextureData *texture)	// Loads A T
 	return true;				// Texture loading Went Ok, Return True
 }
 
+void FreeTextureData(TextureDataPtr txt)
+{
+  free(txt->imageData);
+  free(txt);
+}
+
 bool LoadTGATexture(const char *filename, TextureData *texture)	// Loads A TGA File Into Memory and creates texture object
 {
 	char ok;

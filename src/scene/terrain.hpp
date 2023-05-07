@@ -5,50 +5,41 @@ provide height of terrain at given x & z position
 */
 
 #include "LittleOBJLoader.h"
-#include "LoadTGA.h"
+#include "./modelv2.hpp"
+#include <string>
+
+struct TextureData;
 
 namespace scn
 {
 
-    class Terrain
-    {
-    public:
-    
-    Terrain(std::string filename);
-        Model *generateTerrain(TextureData *tex);
+  class Terrain
+  {
+  private:
+    static Model* generateTerrain(TextureData *tex);
 
-        /**
-         * @brief Returns z coordinate of the terrain at a given point on the generated terrain.
-         * identifies corresponding nodes and then computes the vector on the plane to the given x and y coordinates.
-         *
-         * @param x - Coordinate
-         * @param z - Coordiante
-         * @return float
-         */
-        float computeHeight(float x, float z)const;
+  public:
+    Terrain(std::string const& path);
+    Terrain(std::string const& name, std::string const& path);
 
-        Model *getModel();
+    /**
+     * @brief Returns z coordinate of the terrain at a given point on the generated terrain.
+     * identifies corresponding nodes and then computes the vector on the plane to the given x and y coordinates.
+     *
+     * @param x - Coordinate
+     * @param z - Coordiante
+     * @return float
+     */
+    float computeHeight(float x, float z) const;
 
-    private:
-        /**
-         * @brief
-         *
-         * @param indexArray
-         * @param normalArray
-         * @param vertexArray
-         * @param first   index of node
-         * @param second  index of node
-         * @param third   index of node
-         * @param offset  current index in the array described triangles
-         * @param width   width of one line in the array -> jump in the next dimension
-         * @param x       x index of the first node of the triangle
-         * @param z       y index of the first node of the triangle
-         */
-        void addTriangle(GLuint *indexArray, vec3 *normalArray, vec3 *vertexArray, int first, int second, int third, int offset, int width, int x, int z);
-        void addToNormalArray(vec3 *normalarray, vec3 *vertexarray, int previousVertexIndex, int thisVertexIndex, int nextVertexIndex);
-        int terrain_width;
-        int terrain_height;
-        Model *m_terrain;
-        
-    };
+    inline Modelv2 model() {
+      return m_terrain;
+    }
+
+  private:
+    const std::string key;
+    Modelv2 m_terrain;
+    int m_width;
+    int m_height;
+  };
 }

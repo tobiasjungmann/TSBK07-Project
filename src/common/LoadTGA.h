@@ -48,6 +48,8 @@ bool LoadTGATexture(const char *filename, TextureData *texture);
 void LoadTGATextureSimple(const char *filename, GLuint *tex);
 void LoadTGASetMipmapping(bool active);
 bool LoadTGATextureData(const char *filename, TextureData *texture);
+void FreeTextureData (TextureDataPtr txt);
+
 
 // Constants for SaveTGA
 #define	TGA_ERROR_FILE_OPEN				-5
