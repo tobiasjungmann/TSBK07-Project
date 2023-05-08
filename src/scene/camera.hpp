@@ -23,16 +23,12 @@ namespace scn
             vec3 pos;
             vec3 position;
         };
-        GLfloat &x{pos.x};
-        GLfloat &y{pos.y};
-        GLfloat &z{pos.z};
-
+        vec3 viewingDirection;
         union
         {
             vec3 upVector;
             vec3 up;
         };
-        vec3 viewingDirection;
         float yaw = 0;   // yaw of the camera
         float pitch = 0; // pitch of the camera
 

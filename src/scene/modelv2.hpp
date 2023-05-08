@@ -9,8 +9,8 @@ class Modelv2
 public:
   struct MaterialLight
   {
-    MaterialLight(GLfloat ambiantCoeff, GLfloat diffuseness, GLfloat specularity, GLfloat specExponent)
-        : Ka{ambiantCoeff},
+    MaterialLight(GLfloat ambientCoeff, GLfloat diffuseness, GLfloat specularity, GLfloat specExponent)
+        : Ka{ambientCoeff},
           Kd{diffuseness},
           Ks{specularity},
           alpha{specExponent} {}
@@ -18,7 +18,7 @@ public:
     union
     {
       GLfloat Ka = 1.0;
-      GLfloat ambiantCoeff;
+      GLfloat ambientCoeff;
     };
     union
     {

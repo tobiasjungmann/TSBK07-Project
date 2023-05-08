@@ -24,10 +24,8 @@
 
 #define FRAME_GAP_MS 20
 
-const scn::Light redLight{{1.0f, 0.0f, 0.0f}, {10.0f, 5.0f, 0.0f}, false};
-const scn::Light greenLight{{0.0f, 1.0f, 0.0f}, {0.0f, 5.0f, 10.0f}, false};
-const scn::Light blueLight{{0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, true};
-const scn::Light whiteLight{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, true};
+// const scn::Light redLight{{1.0f, 0.0f, 0.0f}, {10.0f, 5.0f, 0.0f}, false};
+// const scn::Light greenLight{{0.0f, 1.0f, 0.0f}, {0.0f, 5.0f, 10.0f}, false};
 
 // frustum
 #define near 1.0
@@ -97,8 +95,16 @@ void init(void)
 
   mainScene.shader->initMaterialProps("materialLight");
   mainScene.shader->initLighting("lights");
-  mainScene.addLightSource(redLight);
-  mainScene.addLightSource(greenLight);
+
+  scn::Light blueLight{{0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, true};
+  scn::Light whiteLight{{1.0f, 1.0f, 1.0f}, {10.0f, 5.0f, 0.0f}, false};
+
+  blueLight.setCoefficients(0.3, 0.7, 0);
+
+  whiteLight.setCoefficients(0, 0.8, 0.4);
+  whiteLight.setSpotlight(cos(25), cos(35));
+  whiteLight.setAttenuation(1.0, 0.027, 0.0028);
+
   mainScene.addLightSource(blueLight);
   mainScene.addLightSource(whiteLight);
 

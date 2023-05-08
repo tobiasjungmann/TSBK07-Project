@@ -1,22 +1,28 @@
 #version 150
 
 struct Light {
-    vec3 intensity;
+    vec3 color;
     vec3 direction;
     vec3 position;
     bool directional;
-    GLfloat attenuConst;
-    GLfloat attenuLinear;
-    GLfloat attenuSquare;
+    
+    float ambientK;
+    float diffuseK;
+    float specularK;
+
+    float attenuConst;
+    float attenuLinear;
+    float attenuSquare;
     bool attenuate;
-    GLfloat cutOff;
-    GLfloat outerEdgeCutOff;
+    
+    float cutOff;
+    float outerEdgeCutOff;
     bool spotlight;
 };
 
 struct MaterialLight {
 	float diffuseness;
-	float ambiantCoeff;
+	float ambientCoeff;
 	float specularity;
 	float specularExponent;
 };
@@ -28,14 +34,26 @@ in vec3 normalInViewCoordinates;
 uniform mat4 w2vMatrix;
 uniform mat4 m2wMatrix;
 uniform MaterialLight materialLight;
-uniform Light lights[4];
+uniform Light lights[2];
 
 out vec4 out_Color;
 
 /************* GLOBALS **************/
-vec3 lightsViewCoords[4];
+vec3 lightsViewCoords[2];
 
+vec3 positionInView(int index) {
+    return vec3(w2vMatrix * vec4(lights[index].position, 1.0));
+}
 
+float withinSpotlight(int index) {
+    if (!lights[index].spotlight) return 1.0;
+    // have both direction and position if spotlight
+    // compute vectorS as in getVectorS
+    vec3 fragToLight = normalize(posInViewCoordinates - positionInView(index));
+    float spreading = dot(fragToLight, -normalize(lights[index].direction));
+    return clamp((lights[index].outerEdgeCutOff - spreading) / (lights[index].outerEdgeCutOff - lights[index].cutOff), 0.0, 1.0);
+    // FIXME compute outerEdge attenuation, dont return bool anymore probably
+}
 
 // vector s in the formula, light pointing to contact point on surface, normalized
 // FROM surface TO light for SPECULAR
@@ -47,7 +65,7 @@ vec3 getVectorS(int index, vec3 pos) {
 }
 
 vec3 computeSpecularLight(int index, vec3 camera, vec3 normal, vec3 pos) {
-	vec3 sourceIntensity = lights[index].color; // i_s variable in formula
+	vec3 sourceIntensity = lights[index].specularK * lights[index].color; // i_s variable in formula
 	vec3 lightDir = getVectorS(index, pos);
 	vec3 viewDir = normalize(camera - pos); // from surface contact point to camera, direction towards the viewer
 	vec3 reflectDir = normalize(reflect(lightDir, normal)); // mirror S relatively to NORMAL to get R.
@@ -56,29 +74,50 @@ vec3 computeSpecularLight(int index, vec3 camera, vec3 normal, vec3 pos) {
 }
 
 vec3 computeDiffuseLight(int index, vec3 normal, vec3 pos) {
-	vec3 sourceIntensity = lights[index].color;
+	vec3 sourceIntensity = lights[index].diffuseK * lights[index].color;
 	return sourceIntensity * max(0, dot(-getVectorS(index, pos), normal));
+}
+
+
+float computeAttenuation(int index) {
+    float attenuation = 1.0;
+    Light light = lights[index];
+    if (light.attenuate) {
+        float dist = length(positionInView(index) - posInViewCoordinates);
+        attenuation = 1.0 / (light.attenuConst + light.attenuLinear * dist + light.attenuSquare * dist * dist);
+    }
+    return attenuation;
 }
 
 void main(void)
 {
-	for (int i =0; i < 4; i++) {
+	for (int i =0; i < 2; i++) {
 		if (!lights[i].directional)
-			lightsViewCoords[i] = vec3(w2vMatrix * vec4(lights[i].position, 1.0));
+			lightsViewCoords[i] = positionInView(i);
 		else
 			lightsViewCoords[i] = vec3(w2vMatrix * vec4(lights[i].direction, 0.0)); // no translation for directional
 	}
 	vec3 normalizedNormal = normalize(normalInViewCoordinates);
 	vec3 camera = vec3(0.0, 0.0, 0.0);
+
+    vec3 ambientComponent = vec3(0);
 	vec3 specularComponent = vec3(0,0,0);
 	vec3 diffuseComponent = vec3(0,0,0);
 	
-	for (int i =0; i < 4; i++) {
-		specularComponent += computeSpecularLight(i, camera, normalizedNormal, posInViewCoordinates);
-		diffuseComponent += computeDiffuseLight(i, normalizedNormal, posInViewCoordinates);
+	for (int i =0; i < 2; i++) {
+        ambientComponent += lights[i].color * lights[i].ambientK;
+        float spot = withinSpotlight(i);
+        if (spot > 0) {
+            float attenuation = spot * computeAttenuation(i);
+	    	diffuseComponent += attenuation * computeDiffuseLight(i, normalizedNormal, posInViewCoordinates);
+    		specularComponent += attenuation * computeSpecularLight(i, camera, normalizedNormal, posInViewCoordinates); 
+        }
 	}
 
+    specularComponent *= materialLight.specularity;
+    diffuseComponent *= materialLight.diffuseness;
+    ambientComponent *= materialLight.ambientCoeff;
 
-	vec3 shade = materialLight.diffuseness*diffuseComponent + materialLight.specularity*specularComponent; // assuming k_d = 1
+	vec3 shade = ambientComponent + diffuseComponent + specularComponent;
 	out_Color = vec4(shade, 1.0);
 }

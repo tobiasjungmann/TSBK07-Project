@@ -17,13 +17,13 @@ namespace scn
         switch (axis)
         {
         case Axis::X:
-            y = z = 0;
+            pos.y = pos.z = 0;
             break;
         case Axis::Y:
-            x = z = 0;
+            pos.x = pos.z = 0;
             break;
         case Axis::Z:
-            x = y = 0;
+            pos.x = pos.y = 0;
             break;
         default:
             break;
@@ -36,16 +36,16 @@ namespace scn
         switch (axis)
         {
         case Axis::X:
-            y += cos(relativeAng) * radius;
-            z += sin(relativeAng) * radius;
+            pos.y += cos(relativeAng) * radius;
+            pos.z += sin(relativeAng) * radius;
             break;
         case Axis::Y:
-            x += sin(relativeAng) * radius;
-            z += cos(relativeAng) * radius;
+            pos.x += sin(relativeAng) * radius;
+            pos.z += cos(relativeAng) * radius;
             break;
         case Axis::Z:
-            x += cos(relativeAng) * radius;
-            y += sin(relativeAng) * radius;
+            pos.x += cos(relativeAng) * radius;
+            pos.y += sin(relativeAng) * radius;
             break;
         default:
             break;

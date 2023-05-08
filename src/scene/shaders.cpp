@@ -154,13 +154,26 @@ namespace scn
       GLint directionalLoc = glGetUniformLocation(hndl, (lightStr + ".directional").c_str());
       GLint attenuateLoc = glGetUniformLocation(hndl, (lightStr + ".attenuate").c_str());
       GLint spotlightLoc = glGetUniformLocation(hndl, (lightStr + ".spotlight").c_str());
-      if ((colorLoc == -1 or attenuateLoc == -1 or directionalLoc == -1 or spotlightLoc == -1) && !ENV_NOTHROW)
+      GLint ambientKLoc = glGetUniformLocation(hndl, (lightStr + ".ambientK").c_str());
+      GLint diffuseKLoc = glGetUniformLocation(hndl, (lightStr + ".diffuseK").c_str());
+      GLint specularKLoc = glGetUniformLocation(hndl, (lightStr + ".specularK").c_str());
+      if ((colorLoc == -1
+      or attenuateLoc == -1
+      or directionalLoc == -1
+      or spotlightLoc == -1
+      or ambientKLoc == -1
+      or diffuseKLoc == -1
+      or specularKLoc == -1)
+      && !ENV_NOTHROW)
         report(i);
 
-      glUniform3f(colorLoc, curr.intensity.x, curr.intensity.y, curr.intensity.z);
+      glUniform3f(colorLoc, curr.color.x, curr.color.y, curr.color.z);
       glUniform1i(directionalLoc, curr.directional);
       glUniform1i(attenuateLoc, curr.attenuate);
       glUniform1i(spotlightLoc, curr.spotlight);
+      glUniform1f(ambientKLoc, curr.ambientK);
+      glUniform1f(diffuseKLoc, curr.diffuseK);
+      glUniform1f(specularKLoc, curr.specularK);
 
       if (curr.attenuate)
       {
@@ -217,7 +230,7 @@ namespace scn
       useShader();
       GLint diffusenessLoc = glGetUniformLocation(hndl, (mtlPropsStructName + ".diffuseness").c_str());
       GLint specularityLoc = glGetUniformLocation(hndl, (mtlPropsStructName + ".specularity").c_str());
-      GLint ambiantCoeffLoc = glGetUniformLocation(hndl, (mtlPropsStructName + ".ambiantCoeff").c_str());
+      GLint ambientCoeffLoc = glGetUniformLocation(hndl, (mtlPropsStructName + ".ambientCoeff").c_str());
       GLint alphaLoc = glGetUniformLocation(hndl, (mtlPropsStructName + ".specularExponent").c_str());
 
       if (diffusenessLoc != -1)
@@ -226,8 +239,8 @@ namespace scn
         glUniform1f(specularityLoc, props->specularity);
       if (alphaLoc != -1)
         glUniform1f(alphaLoc, props->specularExponent);
-      if (ambiantCoeffLoc != -1)
-        glUniform1f(ambiantCoeffLoc, props->ambiantCoeff);
+      if (ambientCoeffLoc != -1)
+        glUniform1f(ambientCoeffLoc, props->ambientCoeff);
     }
   }
 
