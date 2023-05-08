@@ -9,7 +9,7 @@
 #include "camera.hpp"
 #include "skybox.hpp"
 #include "light.hpp"
-#include "gameobj/MoveableObject.hpp"
+#include "gameobj/moveableObject.hpp"
 #include "gameobj/fish.hpp"
 #include "scene/terrain.hpp"
 

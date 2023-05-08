@@ -4,6 +4,11 @@
 namespace obj
 {
 
+    Fish::Fish(Model *m, vec3 pos, vec3 dir, vec3 up) : MoveableObject{m, pos, dir, up}
+    {
+        updateM2W(dir,up);
+    };
+
     void copyMat3InMat4(mat4 &m2w, mat3 rotation)
     {
         for (size_t i = 0; i < 9; i++)
@@ -12,49 +17,23 @@ namespace obj
         }
     }
 
-    Fish::Fish(Model *m, vec3 pos, vec3 dir) : MoveableObject{m, pos}
-    {
-        updateMovementVector(normalize(dir), vec3(0, 1, 0));
-    };
-
-    void setVectorInLine(mat4 &matrix, vec3 input, int line)
-    {
-        matrix.m[0 + line * 4] = input.x;
-        matrix.m[1 + line * 4] = input.y;
-        matrix.m[2 + line * 4] = input.z;
-    }
-
     /*
     updatemovement vector - neuen übergebendann eine rotation in alle drei richtungen, wenn nötig
     */
-    void Fish::updateMovementVector(vec3 newMovement, vec3 newUp)
+    void Fish::updateM2W(vec3 newMovement, vec3 newUp) 
     {
-        float rotation_factor = M_1_PI * 5;
         mat3 rotateHelper = IdentityMatrix();
-        mat3 rotateX = IdentityMatrix();
-
         // rotate the fish model  so that the head is pointing along the x axis
-        rotateHelper.m[0] = cos(rotation_factor);
-        rotateHelper.m[2] = sin(rotation_factor);
-        rotateHelper.m[6] = -sin(rotation_factor);
-        rotateHelper.m[8] = cos(rotation_factor);
+        rotateHelper.m[0] = 0;
+        rotateHelper.m[1] = -1;
+        rotateHelper.m[4] = 0;
+        rotateHelper.m[5] = 1;
+        rotateHelper.m[6] = -1;
+        rotateHelper.m[8] = 0;
 
-        rotateX.m[0] = cos(rotation_factor);
-        rotateX.m[1] = -sin(rotation_factor);
-        rotateX.m[3] = sin(rotation_factor);
-        rotateX.m[4] = cos(rotation_factor);
-
-        rotateHelper = rotateX * rotateHelper;
-
-        vec3 zaxis = CrossProduct(vec3(0, 1, 0), newMovement);
-        vec3 yaxis = CrossProduct(newMovement, zaxis);
-       
-        setVectorInLine(m2w, newMovement, 0);
-        setVectorInLine(m2w, yaxis, 1);
-        setVectorInLine(m2w, zaxis, 2);
+        MoveableObject::updateM2W(direction,up);
 
         copyMat3InMat4(m2w, mat3(m2w) * rotateHelper);
-        movementDirection = newMovement;
     }
 
     bool Fish::isCollision(const MoveableObject &other) const
@@ -71,14 +50,9 @@ namespace obj
 
     void Fish::moveSingleStep()
     {
-        position += movementDirection * 0.05;
+        position += direction * 0.05;
         m2w.m[3] = position.x;
         m2w.m[7] = position.y;
         m2w.m[11] = position.z;
-    }
-
-    mat4 Fish::getM2W()
-    {
-        return m2w;
     }
 }
