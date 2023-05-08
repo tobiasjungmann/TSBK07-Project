@@ -9,7 +9,7 @@
 #include "camera.hpp"
 #include "skybox.hpp"
 #include "light.hpp"
-#include "gameobj/moveableObject.hpp"
+#include "gameobj/object.hpp"
 #include "gameobj/fish.hpp"
 #include "scene/terrain.hpp"
 
@@ -48,7 +48,7 @@ namespace scn
     void pushModel(const Model *newMdl);              // TODO should returns index of insertion in vector
     void pushModel(const Model *newMdl, mat4 m2wMtx); // TODO should returns index of insertion in vector
 
-    void pushMoveableObject(std::unique_ptr<obj::Fish> obj);
+    void pushMoveableObject(std::unique_ptr<obj::MoveableObject> obj);
 
     /**
      * @brief Update the model-to-world matrix with UPDATE of the model at MODELINDEX
@@ -95,7 +95,7 @@ namespace scn
   private:
     // TODO compare performance with a vector<pair<std::shared_ptr<Model>, vector<mat4>>> (comparison of cache proximity)
     [[deprecated("Use type specific objects to allow for a collision detection.")]] std::vector<std::pair<const Model *, mat4>> model_m2w;
-    std::vector<std::unique_ptr<obj::Fish>> allFish;
+    std::vector<std::unique_ptr<obj::MoveableObject>> allObjects;
 
     std::vector<vec4> lightSourcesIntensities;
     std::vector<vec3> lightSourcesDirections;

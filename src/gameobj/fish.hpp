@@ -1,7 +1,7 @@
 #pragma once
 
 #include "LittleOBJLoader.h"
-#include "moveableObject.hpp"
+#include "object.hpp"
 
 namespace obj
 {

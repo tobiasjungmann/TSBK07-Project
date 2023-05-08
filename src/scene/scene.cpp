@@ -67,9 +67,9 @@ namespace scn
         model_m2w.emplace_back(newMdl, m2wMtx);
     }
 
-    void Scene::pushMoveableObject(std::unique_ptr<obj::Fish> obj)
+    void Scene::pushMoveableObject(std::unique_ptr<obj::MoveableObject> obj)
     {
-        allFish.emplace_back(std::move(obj));
+        allObjects.emplace_back(std::move(obj));
     }
 
     void Scene::updateModelM2W(long modelIndex, mat4 update)
@@ -130,7 +130,7 @@ namespace scn
         }
 
         // no need for upload if no models to render
-        if (allFish.size() > 0)
+        if (allObjects.size() > 0)
         {
             camera.updateCameraPosition(terrain);
             shader->uploadMatrix(Shader::Matrices::w2v, camera.matrix());
@@ -153,11 +153,11 @@ namespace scn
             glDrawElements(GL_TRIANGLES, model->numIndices, GL_UNSIGNED_INT, 0L);
         }
 
-        for (size_t i = 0; i < allFish.size(); i++)
+        for (size_t i = 0; i < allObjects.size(); i++)
         {
-            allFish[i]->moveSingleStep();
-            auto model = allFish[i]->getModel();
-            auto m2w = allFish[i]->getM2W();
+            allObjects[i]->moveSingleStep();
+            auto model = allObjects[i]->getModel();
+            auto m2w = allObjects[i]->getM2W();
 
             glBindVertexArray(model->vao);
             // TODO apply transfo only if one was provided

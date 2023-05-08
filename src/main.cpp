@@ -21,6 +21,7 @@
 #include "scene/terrain.hpp"
 #include "resource_manager.hpp"
 #include "gameobj/fish.hpp"
+#include "gameobj/coral.hpp"
 
 #define FRAME_GAP_MS 20
 
@@ -100,12 +101,16 @@ void init(void)
 	InitModel(terrain.getModel(), programShader->hndl, "in_Position", "in_Normal", NULL);
 	setMaterial(terrain.getModel(), 1.0, 1.0, 1.0, 100.0);
 
-	Model *green_reef;
-	green_reef = ResourceManager::get().getModel("green_reef", "green_reef.obj");
-	InitModel(green_reef, programShader->hndl, "in_Position", "in_Normal", NULL);
+	Model *fish_m;
+	fish_m = ResourceManager::get().getModel("green_reef", "green_reef.obj");
+	InitModel(fish_m, programShader->hndl, "in_Position", "in_Normal", NULL);
+
+	Model *coral_m;
+	coral_m = ResourceManager::get().getModel("new_key", "tree_coral.obj");
+	InitModel(coral_m, programShader->hndl, "in_Position", "in_Normal", NULL);
 
 	mainScene = scn::Scene(std::move(programShader), camera, terrain, projectionMatrix);
-	setMaterial(green_reef, 1.0, 1.0, 1.0, 100.0);
+	setMaterial(fish_m, 1.0, 1.0, 1.0, 100.0);
 
 	mainScene.shader->initLighting("lightSourcesDirPosArr", "lightSourcesColorArr", "isDirectional", "specularExponent");
 	mainScene.addLightSource(redLight);
@@ -113,13 +118,18 @@ void init(void)
 	mainScene.addLightSource(blueLight);
 	mainScene.addLightSource(whiteLight);
 
-	auto fish = std::make_unique<obj::Fish>(green_reef, vec3(10,4,15), normalize(vec3(0, 0, 1)),normalize(vec3(0, 1, 0)));
-	auto fish2 = std::make_unique<obj::Fish>(green_reef, vec3(15, 4, 10), normalize(vec3(5, 1, 0)),normalize(vec3(0, 1, 0)));
-	auto fish3 = std::make_unique<obj::Fish>(green_reef, vec3(10,4,15), normalize(vec3(1, 1, 0)),normalize(vec3(0, 1, 0)));
+	auto fish = std::make_unique<obj::Fish>(fish_m, vec3(10,4,15), normalize(vec3(0, 0, 1)),normalize(vec3(0, 1, 0)));
+	auto fish2 = std::make_unique<obj::Fish>(fish_m, vec3(15, 4, 10), normalize(vec3(5, 1, 0)),normalize(vec3(0, 1, 0)));
+	auto fish3 = std::make_unique<obj::Fish>(fish_m, vec3(10,4,15), normalize(vec3(1, 1, 0)),normalize(vec3(0, 1, 0)));
+
+float x=20;
+float z=20;
+	auto coral = std::make_unique<obj::Coral>(coral_m, vec3(x,terrain.computeHeight(x,z),z), normalize(vec3(1, 0, 0)),normalize(vec3(0, 1, 0)));
 
 	mainScene.pushMoveableObject(std::move(fish));
 	mainScene.pushMoveableObject(std::move(fish2));
 	mainScene.pushMoveableObject(std::move(fish3));
+	mainScene.pushMoveableObject(std::move(coral));
 
 	glutRepeatingTimer(FRAME_GAP_MS);
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "LittleOBJLoader.h"
-#include "moveableObject.hpp"
+#include "object.hpp"
 
 namespace obj
 {
@@ -13,6 +13,7 @@ namespace obj
     void moveSingleStep();
     bool isCollision(const MoveableObject &other) const;
     void collide(vec3 position, vec3 normalToCollisionPoint);
+    
     private:
     void updateMovementVector(vec3 newMovement,vec3 newUp);
   };
