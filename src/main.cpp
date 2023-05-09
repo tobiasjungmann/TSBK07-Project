@@ -118,13 +118,14 @@ void init(void)
 	mainScene.addLightSource(blueLight);
 	mainScene.addLightSource(whiteLight);
 
-	auto fish = std::make_unique<obj::Fish>(fish_m, vec3(10,4,15), normalize(vec3(0, 0, 1)),normalize(vec3(0, 1, 0)));
-	auto fish2 = std::make_unique<obj::Fish>(fish_m, vec3(15, 4, 10), normalize(vec3(5, 1, 0)),normalize(vec3(0, 1, 0)));
-	auto fish3 = std::make_unique<obj::Fish>(fish_m, vec3(10,4,15), normalize(vec3(1, 1, 0)),normalize(vec3(0, 1, 0)));
+	auto fish = std::make_unique<obj::Fish>(fish_m, vec3(10, 4, 15), normalize(vec3(0, 0, 1)), normalize(vec3(0, 1, 0)));
+	auto fish2 = std::make_unique<obj::Fish>(fish_m, vec3(15, 4, 10), normalize(vec3(5, 1, 0)), normalize(vec3(0, 1, 0)));
+	auto fish3 = std::make_unique<obj::Fish>(fish_m, vec3(10, 4, 15), normalize(vec3(1, 1, 0)), normalize(vec3(0, 1, 0)));
 
-float x=20;
-float z=20;
-	auto coral = std::make_unique<obj::Coral>(coral_m, vec3(x,terrain.computeHeight(x,z),z), normalize(vec3(1, 0, 0)),normalize(vec3(0, 1, 0)));
+	float x = 18;
+	float z = 18;
+	vec3 up=terrain.getNormal(x,z);
+	auto coral = std::make_unique<obj::Coral>(coral_m, vec3(x, terrain.computeHeight(x, z), z), normalize(up), vec3(0,1,0));
 
 	mainScene.pushMoveableObject(std::move(fish));
 	mainScene.pushMoveableObject(std::move(fish2));

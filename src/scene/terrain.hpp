@@ -29,6 +29,7 @@ namespace scn
          * @return float
          */
         float computeHeight(float x, float z) const;
+         vec3 getNormal(float x, float z) const;
 
         Model *getModel() const;
         float nextInsideFieldWidth(float input) const;
@@ -50,6 +51,7 @@ namespace scn
          */
         void addTriangle(GLuint *indexArray, vec3 *normalArray, vec3 *vertexArray, int first, int second, int third, int offset, int width, int x, int z);
         void addToNormalArray(vec3 *normalarray, vec3 *vertexarray, int previousVertexIndex, int thisVertexIndex, int nextVertexIndex);
+        void getTriangleVectors(float x, float z, vec3 &v1, vec3 &v2, vec3& startingPoint) const;
 
         int terrain_width;
         int terrain_height;

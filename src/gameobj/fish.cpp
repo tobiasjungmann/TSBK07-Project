@@ -3,19 +3,17 @@
 
 namespace obj
 {
-
-    Fish::Fish(Model *m, vec3 pos, vec3 dir, vec3 up) : MoveableObject{m, pos, dir, up}
-    {
-        updateM2W(dir,up);
-    };
-
-    void copyMat3InMat4(mat4 &m2w, mat3 rotation)
+        void copyMat3InMat4(mat4 &m2w, mat3 rotation)
     {
         for (size_t i = 0; i < 9; i++)
         {
             m2w.m[i + i / 3] = rotation.m[i]; // leave out the field in the last column
         }
     }
+    Fish::Fish(Model *m, vec3 pos, vec3 dir, vec3 up) : MoveableObject{m, pos, dir, up}
+    {
+        updateM2W(dir,up);
+    };
 
     /*
     updatemovement vector - neuen übergebendann eine rotation in alle drei richtungen, wenn nötig

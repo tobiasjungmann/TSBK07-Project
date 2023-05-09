@@ -13,8 +13,9 @@ namespace obj
     void moveSingleStep();
     bool isCollision(const MoveableObject &other) const;
     void collide(vec3 position, vec3 normalToCollisionPoint);
-    
+
     private:
     void updateMovementVector(vec3 newMovement,vec3 newUp);
+    void alignyaxis(vec3 newMovement, vec3 newUp);
   };
 }

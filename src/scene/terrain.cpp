@@ -86,35 +86,61 @@ namespace scn
         return model;
     }
 
+    void Terrain::getTriangleVectors(float x, float z, vec3 &v1, vec3 &v2, vec3 &startingPoint) const
+    {
+        float x_difference = x - int(x);
+        float z_difference = z - int(z);
+        vec3 p_bottom_left = model->vertexArray[int(x) + (int(z) + 1) * terrain_width];
+        vec3 p_top_right = model->vertexArray[((int(x) + 1) + int(z) * terrain_width)];
+        if (x_difference + z_difference < 1.0)
+        {
+            startingPoint = model->vertexArray[(int(x) + int(z) * terrain_width)]; // p_top_left;
+        }
+        else
+        {
+            startingPoint = model->vertexArray[((int(x) + 1) + (int(z) + 1) * terrain_width)];
+        }
+        v1 = (p_bottom_left - startingPoint); // movement on the x axis (top left to bottom left)
+        v2 = (p_top_right - startingPoint);   // movement on the z axis (top left to top right)
+    }
+
     float Terrain::computeHeight(float x, float z) const
     {
         float x_difference = x - int(x);
         float z_difference = z - int(z);
 
-        vec3 p_bottom_left = model->vertexArray[int(x) + (int(z) + 1) * terrain_width];
-        vec3 p_top_right = model->vertexArray[((int(x) + 1) + int(z) * terrain_width)];
+        vec3 v1, v2, startingPoint;
+        getTriangleVectors(x, z, v1, v2, startingPoint);
 
-        vec3 startingPoint;
-        vec3 v1, v2;
         if (x_difference + z_difference < 1.0)
         {
-            startingPoint = model->vertexArray[(int(x) + int(z) * terrain_width)]; // p_top_left;
-
-            v1 = (p_bottom_left - startingPoint) * z_difference; // movement on the x axis (top left to bottom left)
-            v2 = (p_top_right - startingPoint) * x_difference;   // movement on the z axis (top left to top right)
+            v1 = v1 * z_difference; // movement on the x axis (top left to bottom left)
+            v2 = v2 * x_difference; // movement on the z axis (top left to top right)
         }
         else
         {
-            startingPoint = model->vertexArray[((int(x) + 1) + (int(z) + 1) * terrain_width)];
-
-            v1 = (p_bottom_left - startingPoint) * (1 - x_difference); // movement on the x axis (top left to bottom left)
-            v2 = (p_top_right - startingPoint) * (1 - z_difference);   // movement on the z axis (top left to top right)
+            v1 = v1 * (1 - x_difference); // movement on the x axis (top left to bottom left)
+            v2 = v2 * (1 - z_difference); // movement on the z axis (top left to top right)
         }
-
         return (startingPoint + v1 + v2).y;
     }
 
-    Model *Terrain::getModel()const
+    vec3 Terrain::getNormal(float x, float z) const
+    {
+        vec3 v1, v2, startingPoint;
+        getTriangleVectors(x, z, v1, v2, startingPoint);
+        vec3 normal = CrossProduct(v1, v2);
+        if (normal.y < 0)
+        {
+            return -normal;
+        }
+        else
+        {
+            return normal;
+        }
+    }
+
+    Model *Terrain::getModel() const
     {
         return model;
     }

@@ -12,7 +12,21 @@ namespace obj
 
         virtual void moveSingleStep() = 0;
 
+/**
+ * @brief Checks if this model and the other are overlapping at any point
+ * 
+ * @param other model to have contact
+ * @return true boundary boxes of the models are overlapping
+ * @return false no overlap
+ */
         virtual bool isCollision(const MoveableObject &other) const = 0;
+
+        /**
+         * @brief Change the movement of the model after it collided on the point given by the position with the given normal
+         * 
+         * @param position 
+         * @param normalToCollisionPoint 
+         */
         virtual void collide(vec3 position, vec3 normalToCollisionPoint) = 0;
 
         const Model *getModel() const noexcept
@@ -44,6 +58,12 @@ namespace obj
         matrix.m[2 + line * 4] = input.z;
     }
 
+/**
+ * @brief Alligns the x axis of the model with the movement vector and teh up vector
+ * 
+ * @param newMovement 
+ * @param newUp 
+ */
         void updateM2W(vec3 newMovement, vec3 newUp)
         {
             vec3 zaxis = CrossProduct(newUp, newMovement);
@@ -57,4 +77,6 @@ namespace obj
             up=newUp;
         }
     };
+
+
 }
