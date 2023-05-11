@@ -43,8 +43,8 @@ namespace obj
 
         vec3 position = vec3(0, 0, 0);
         vec3 direction = vec3(0, 1, 0); // (fish) model is pointing upwards by default
-        float velocity = 1;             // how fast is the object moving
-        const float longestDistanceFormCenter;
+        float speed = 1;             // how fast is the object moving
+        float longestDistanceFormCenter;
 
     protected:
         mat4 m2w = IdentityMatrix();
@@ -109,6 +109,7 @@ namespace obj
             vec3 zaxis = CrossProduct(newUp, newMovement);
             vec3 yaxis = CrossProduct(newMovement, zaxis);
 
+//yaxis.y=-yaxis.y;
             setVectorInLine(m2w, newMovement, 0);
             setVectorInLine(m2w, yaxis, 1);
             setVectorInLine(m2w, zaxis, 2);
@@ -118,13 +119,16 @@ namespace obj
 
             mat3 combinedRotation = mat3(m2w) * additionalModelRotation;
             copyMat3InMat4(m2w, combinedRotation);
+            m2w.m[2]=-m2w.m[2];
+            m2w.m[5]=-m2w.m[5];
             rotateHitbox(hitbox, combinedRotation);
 
+/*
             mat4 scaling = IdentityMatrix();
             scaling.m[0] = sizeInDirection.x;
             scaling.m[5] = sizeInDirection.y;
             scaling.m[8] = sizeInDirection.z;
-            m2w = m2w * scaling;
+            m2w = m2w * scaling;*/
         }
     };
 

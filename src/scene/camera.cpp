@@ -154,5 +154,7 @@ namespace scn
         direction.y = sin(toRadians(pitch));
         direction.z = sin(toRadians(yaw)) * cos(toRadians(pitch));
         viewingDirection = normalize(direction);
+
+          //std::cout << "Camera: "<< position.x<<" "<<position.y<<" "<<position.z<<std::endl;
     }
 }
