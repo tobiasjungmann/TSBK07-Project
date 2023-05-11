@@ -7,7 +7,7 @@
 #include <vector>
 #include <string>
 #include "modelv2.hpp"
-#include "light.hpp"
+#include "gameobj/light.hpp"
 
 
 struct Model;

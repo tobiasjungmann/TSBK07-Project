@@ -7,8 +7,8 @@
 
 Model *ResourceManager::getModel(std::string const &key, std::string const &path)
 {
-  auto fullpath = std::string("rc/models/") + path; // MUST BE USED from root folder of project
-  Model *model;
+  auto &&fullpath = std::string("rc/models/") + path; // MUST BE USED from root folder of project
+  Model *model{nullptr};
   if (auto occ = modelsMap.find(key); occ == modelsMap.end())
   {
     if (!(model = LoadModel(fullpath.c_str())))
@@ -29,7 +29,7 @@ Model *ResourceManager::getModel(std::string const &key,
                                  int numVert,
                                  int numInd)
 {
-  Model *model;
+  Model *model{nullptr};
   if (auto occ = modelsMap.find(key); occ == modelsMap.end())
   {
     if (!(model = LoadDataToModel(vert, norm, texCoords, colors, indices, numVert, numInd)))
@@ -48,9 +48,9 @@ GLuint ResourceManager::getTexture(std::string const &key)
 
 TextureDataPtr ResourceManager::getTextureData(std::string const &key, std::string const &path)
 {
-  auto fullpath = std::string("rc/textures/") + path; // MUST BE USED from root folder of project
+  auto &&fullpath = std::string("rc/textures/") + path; // MUST BE USED from root folder of project
 
-  TextureData *txtData = new TextureData;
+  TextureData *txtData = (TextureData *)malloc(sizeof(TextureData));
   if (auto occ = texturesDataMap.find(key); occ == texturesDataMap.end())
   {
     if (!(LoadTGATextureData(fullpath.c_str(), txtData)))

@@ -1,157 +1,113 @@
-#include "camera.hpp"
-
 #include <cmath>
-#include "constants.hpp"
+#include "camera.hpp"
+#include "../constants.hpp"
+#include "../event.hpp"
+#include "gameobj/gameobj.hpp"
 
 #define min(a, b) ((a) > (b) ? (b) : (a))
 #define max(a, b) ((a) < (b) ? (b) : (a))
 
 namespace scn
 {
-
-    evt::MovementKeys currentPressedKeys;
-    evt::Mouse currentMousePosition;
-
-    void Camera::rotateAround(Axis axis, float angle, float radius) noexcept
+  namespace helpers
+  {
+    /**
+     * @brief Computes the minimum amount of camera rotation dependeing on the placement of the of teh mouse on the scree
+     * If the current moevement is too smallcomapred to the camera position, the new minimum will be returned. Otherwise, the current
+     * movement offest is returned.
+     *
+     * @param last last mouse cordinate (either x or y direction)
+     * @param current current mouse coordniate
+     * @return float
+     */
+    static float computeMinMovement(int last, int current)
     {
-        switch (axis)
-        {
-        case Axis::X:
-            pos.y = pos.z = 0;
-            break;
-        case Axis::Y:
-            pos.x = pos.z = 0;
-            break;
-        case Axis::Z:
-            pos.x = pos.y = 0;
-            break;
-        default:
-            break;
-        }
-        rotateRelAround(axis, angle, radius);
-    }
+      int offset = last - current;
+      float noMovement = (constants::display_size >> 2);
+      float minMovementScaling = 0.05;
 
-    void Camera::rotateRelAround(Axis axis, float relativeAng, float radius) noexcept
-    {
-        switch (axis)
-        {
-        case Axis::X:
-            pos.y += cos(relativeAng) * radius;
-            pos.z += sin(relativeAng) * radius;
-            break;
-        case Axis::Y:
-            pos.x += sin(relativeAng) * radius;
-            pos.z += cos(relativeAng) * radius;
-            break;
-        case Axis::Z:
-            pos.x += cos(relativeAng) * radius;
-            pos.y += sin(relativeAng) * radius;
-            break;
-        default:
-            break;
-        }
-    }
-
-    void Camera::translate(vec3 offset) noexcept
-    {
-        pos += offset;
-    }
-
-    void Camera::setMousePosition(int x, int y)noexcept
-    {
-        currentMousePosition.update(x, y);
-    }
-
-    void Camera::setPressedKeys(bool forward,bool left,bool back,bool right)noexcept
-    {
-        currentPressedKeys.w = forward;
-        currentPressedKeys.a = left;
-        currentPressedKeys.s = back;
-        currentPressedKeys.d = right;
-    }
-
-    mat4 Camera::matrix() const
-    {
-        return lookAt(pos, pos + viewingDirection, upVector);
-    }
-
-    std::ostream &operator<<(std::ostream &os, Camera const &camera)
-    {
-        os << "pos:" << camera.pos << ' ';
-        os << "viewingDirection:" << camera.viewingDirection << ' ';
-        os << "upVector:" << camera.up;
-        return os;
-    }
-
-  float Camera::computeMinMovement(int last, int current)
-    {
-        int offset = last - current;
-        float noMovement = (constants::display_size >> 2);
-        float minMovementScaling = 0.05;
-
-        if (last < (constants::display_size >> 1))
-        {
-            return min((last - (constants::display_size >> 1) + noMovement), 0.0f) * minMovementScaling;
-        }
-        else
-        {
-            return max((last - (constants::display_size >> 1) - noMovement), 0.0f) * minMovementScaling;
-        }
+      if (last < (constants::display_size >> 1))
+      {
+        return min((last - (constants::display_size >> 1) + noMovement), 0.0f) * minMovementScaling;
+      }
+      else
+      {
+        return max((last - (constants::display_size >> 1) - noMovement), 0.0f) * minMovementScaling;
+      }
     }
 
     // FIXME there should be this function in header <cmath>
     float toRadians(float degrees)
     {
-        return degrees * (M_1_PI / 180);
+      return degrees * (M_PI / 180);
     }
+  }
 
-    void Camera::updateCameraPosition()
+  mat4 Camera::matrix() const
+  {
+    return lookAt(pos, pos + viewingDirection, upVector);
+  }
+
+  std::ostream &operator<<(std::ostream &os, Camera const &camera)
+  {
+    os << "pos:" << camera.pos << ' ';
+    os << "viewingDirection:" << camera.viewingDirection << ' ';
+    os << "upVector:" << camera.up;
+    return os;
+  }
+
+  void Camera::updateCameraPosition(evt::Context const&ctxt)
+  {
+    const float cameraSpeed = 0.5f;
+    float sensitivity = 0.7f;
+    if (ctxt.keys.w)
     {
-       const float cameraSpeed = 0.5f;
-        float sensitivity = 0.7f;
-       if (currentPressedKeys.w)
-        {
-            pos += cameraSpeed * viewingDirection;
-        }
-        if (currentPressedKeys.s)
-        {
-            pos -= cameraSpeed * viewingDirection;
-        }
-        if (currentPressedKeys.a)
-        {
-            pos -= normalize(cross(viewingDirection, up)) * cameraSpeed;
-        }
-        if (currentPressedKeys.d)
-        {
-            pos += normalize(cross(viewingDirection, up)) * cameraSpeed;
-        }
-
-        float xmovement = computeMinMovement(currentMousePosition.previousPosition.x, currentMousePosition.currentPosition.x) * sensitivity;
-        float ymovement = -computeMinMovement(currentMousePosition.currentPosition.y, currentMousePosition.previousPosition.y) * sensitivity;
-
-        yaw += xmovement;
-        pitch += ymovement;
-
-        /* Add if loopings should be forbidden
-        if (pitch > 179.0f)
-            pitch = 179.0f;
-        if (pitch < -179.0f)
-            pitch = -179.0f;*/
-
-        // TODO only compute when mouse was updated between the last two dispalys
-        vec3 direction;
-        direction.x = cos(toRadians(yaw)) * cos(toRadians(pitch));
-        direction.y = sin(toRadians(pitch));
-        direction.z = sin(toRadians(yaw)) * cos(toRadians(pitch));
-        viewingDirection = normalize(direction);
-
-        // check for collisions with the ground
-        /* TODO probably move into the collision detection
-        float minHeigth = computeHeight(camera.x, camera.z) + 0.5;
-            if (camera.y < minHeigth)
-            {
-                camera.y = minHeigth;
-            }*/
-        // camera->lookat = lookat + camera->pos;
+      pos += cameraSpeed * viewingDirection;
     }
+    if (ctxt.keys.s)
+    {
+      pos -= cameraSpeed * viewingDirection;
+    }
+    if (ctxt.keys.a)
+    {
+      pos -= normalize(cross(viewingDirection, up)) * cameraSpeed;
+    }
+    if (ctxt.keys.d)
+    {
+      pos += normalize(cross(viewingDirection, up)) * cameraSpeed;
+    }
+
+    float xmovement = helpers::computeMinMovement(ctxt.mouse.prevPos.x, ctxt.mouse.currPos.x) * sensitivity;
+    float ymovement = -helpers::computeMinMovement(ctxt.mouse.currPos.y, ctxt.mouse.prevPos.y) * sensitivity;
+
+    yaw += xmovement;
+    pitch += ymovement;
+
+    /* Add if loopings should be forbidden
+    if (pitch > 179.0f)
+        pitch = 179.0f;
+    if (pitch < -179.0f)
+        pitch = -179.0f;*/
+
+    using helpers::toRadians;
+    // TODO only compute when mouse was updated between the last two dispalys
+    vec3 direction;
+    direction.x = cos(0.1 * toRadians(yaw)) * cos(0.1 * toRadians(pitch));
+    direction.y = sin(0.1 * toRadians(pitch));
+    direction.z = sin(0.1 * toRadians(yaw)) * cos(0.1 * toRadians(pitch));
+    viewingDirection = normalize(direction);
+
+    // FIXME probably updateProps requirements of attached to have a relative position setter, instead of setPos
+    m_attachedDir.updateProps(viewingDirection);
+    m_attachedPos.updateProps(0);
+
+    // check for collisions with the ground
+    /* TODO probably move into the collision detection
+    float minHeigth = computeHeight(camera.x, camera.z) + 0.5;
+        if (camera.y < minHeigth)
+        {
+            camera.y = minHeigth;
+        }*/
+    // camera->lookat = lookat + camera->pos;
+  }
 }

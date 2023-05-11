@@ -5,6 +5,7 @@ struct Light {
     vec3 direction;
     vec3 position;
     bool directional;
+    bool inView;
     
     float ambientK;
     float diffuseK;
@@ -42,7 +43,12 @@ out vec4 out_Color;
 vec3 lightsViewCoords[2];
 
 vec3 positionInView(int index) {
-    return vec3(w2vMatrix * vec4(lights[index].position, 1.0));
+    return lights[index].inView ? lights[index].position : vec3(w2vMatrix * vec4(lights[index].position, 1.0));
+}
+
+vec3 directionInView(int index) {
+    // no translation for directional so zero out last component of vec4
+    return vec3(w2vMatrix * vec4(lights[index].direction, 0.0));
 }
 
 float withinSpotlight(int index) {
@@ -50,8 +56,8 @@ float withinSpotlight(int index) {
     // have both direction and position if spotlight
     // compute vectorS as in getVectorS
     vec3 fragToLight = normalize(posInViewCoordinates - positionInView(index));
-    float spreading = dot(fragToLight, -normalize(lights[index].direction));
-    return clamp((lights[index].outerEdgeCutOff - spreading) / (lights[index].outerEdgeCutOff - lights[index].cutOff), 0.0, 1.0);
+    float spreading = dot(fragToLight, normalize(directionInView(index)));
+    return clamp((spreading - lights[index].outerEdgeCutOff) / (lights[index].cutOff - lights[index].outerEdgeCutOff), 0.0, 1.0);
     // FIXME compute outerEdge attenuation, dont return bool anymore probably
 }
 
@@ -91,14 +97,12 @@ float computeAttenuation(int index) {
 
 void main(void)
 {
-	for (int i =0; i < 2; i++) {
-		if (!lights[i].directional)
-			lightsViewCoords[i] = positionInView(i);
-		else
-			lightsViewCoords[i] = vec3(w2vMatrix * vec4(lights[i].direction, 0.0)); // no translation for directional
-	}
-	vec3 normalizedNormal = normalize(normalInViewCoordinates);
 	vec3 camera = vec3(0.0, 0.0, 0.0);
+
+	for (int i =0; i < 2; i++) {
+        lightsViewCoords[i] = lights[i].directional ? directionInView(i) : positionInView(i);
+    }
+	vec3 normalizedNormal = normalize(normalInViewCoordinates);
 
     vec3 ambientComponent = vec3(0);
 	vec3 specularComponent = vec3(0,0,0);
@@ -119,5 +123,8 @@ void main(void)
     ambientComponent *= materialLight.ambientCoeff;
 
 	vec3 shade = ambientComponent + diffuseComponent + specularComponent;
-	out_Color = vec4(shade, 1.0);
+    // vec3 fragToLight = normalize(posInViewCoordinates - positionInView(1));
+    // float spreading = dot(fragToLight, -normalize(directionInView(1)));
+    // shade = withinSpotlight(1) > 0 ? vec3(0,1,0) : vec3(1,0,0);
+	out_Color = vec4(shade * materialLight.diffuseness, 1.0);
 }

@@ -8,7 +8,7 @@
 #include <cstddef>
 #include "camera.hpp"
 #include "skybox.hpp"
-#include "light.hpp"
+#include "gameobj/light.hpp"
 
 #include "modelv2.hpp"
 

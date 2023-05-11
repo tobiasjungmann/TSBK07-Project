@@ -15,9 +15,6 @@ namespace scn
 
   class Terrain
   {
-  private:
-    static Model* generateTerrain(TextureData *tex);
-
   public:
     Terrain(std::string const& path);
     Terrain(std::string const& name, std::string const& path);

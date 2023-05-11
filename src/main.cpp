@@ -10,17 +10,16 @@
 #include "constants.hpp"
 #include "LoadTGA.h"
 
-#define MAIN
-#include "LittleOBJLoader.h"
-#include "LoadTGA.h"
 #include "scene/scene.hpp"
 #include "scene/skybox.hpp"
-#include "scene/light.hpp"
+#include "scene/gameobj/light.hpp"
 #include "scene/modelv2.hpp"
 #include "scene/shaders.hpp"
 #include "scene/camera.hpp"
 #include "scene/terrain.hpp"
 #include "resource_manager.hpp"
+#include "event.hpp"
+#include "debugging.h"
 
 #define FRAME_GAP_MS 20
 
@@ -55,10 +54,17 @@ const mat4 projectionMatrix = {
 };
 
 static scn::Scene mainScene;
+static evt::Context context;
+// scn::Light whiteLight{{1.0f, 1.0f, 1.0f}, {10.0f, 5.0f, 0.0f}, false};
+scn::Light whiteLight{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, false};
 
 void keyControlCheck()
 {
-  mainScene.camera.setPressedKeys(glutKeyIsDown(constants::KEY_FORWARD), glutKeyIsDown(constants::KEY_LEFT), glutKeyIsDown(constants::KEY_BACK), glutKeyIsDown(constants::KEY_RIGHT));
+  context.setPressedKeys(
+      glutKeyIsDown(constants::KEY_FORWARD),
+      glutKeyIsDown(constants::KEY_LEFT),
+      glutKeyIsDown(constants::KEY_BACK),
+      glutKeyIsDown(constants::KEY_RIGHT));
 }
 
 /**
@@ -69,7 +75,7 @@ void keyControlCheck()
  */
 void mouseControlCallback(int x, int y)
 {
-  mainScene.camera.setMousePosition(x, y);
+  context.setMousePosition(x, y);
   glutPostRedisplay();
 }
 
@@ -97,13 +103,14 @@ void init(void)
   mainScene.shader->initLighting("lights");
 
   scn::Light blueLight{{0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, true};
-  scn::Light whiteLight{{1.0f, 1.0f, 1.0f}, {10.0f, 5.0f, 0.0f}, false};
 
   blueLight.setCoefficients(0.3, 0.7, 0);
 
-  whiteLight.setCoefficients(0, 0.8, 0.4);
-  whiteLight.setSpotlight(cos(25), cos(35));
-  whiteLight.setAttenuation(1.0, 0.027, 0.0028);
+  whiteLight.setCoefficients(0, 2.0, 0.6);
+  whiteLight.setSpotlight(25, 35);
+  whiteLight.setAttenuation(1.0, 0.027, 0.0015);
+
+  whiteLight.attachToCamera(mainScene.camera);
 
   mainScene.addLightSource(blueLight);
   mainScene.addLightSource(whiteLight);
@@ -121,8 +128,9 @@ void display(void)
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   keyControlCheck();
 
-  mainScene.camera.updateCameraPosition();
+  mainScene.camera.updateCameraPosition(context);
   mainScene.draw();
+
 
   // todo draw stuff here
   glutSwapBuffers();
@@ -139,6 +147,7 @@ int main(int argc, char **argv)
   init();
 
   glutRepeatingTimer(20);
+
 
   glutMainLoop();
   exit(0);

@@ -15,6 +15,12 @@ private:
     }
   };
 
+  struct ModelDeleter {
+    void operator()(Model *ptr) {
+      DisposeModel(ptr);
+    }
+  };
+
 public:
   static ResourceManager &get()
   {
@@ -61,16 +67,23 @@ private:
   ResourceManager() = default;
 
 private:
+  /* // BUG singleton with unique ptr preent from freeing models that is no longer used
+  // would be better to instead store raw pointer here, then give out shared_ptr when getModel is called
+  // and provide a custom deleter that on deletion remove the the resource from this Store.
+  */ 
   using txtDataUnqPtr_t = std::unique_ptr<TextureData, TextureDataDeleter>;
-  std::unordered_map<std::string, std::unique_ptr<Model>> modelsMap;
-  std::unordered_map<std::string, GLuint> texturesMap;
-  std::unordered_map<std::string, txtDataUnqPtr_t> texturesDataMap;
+  using modelUnqPtr_t = std::unique_ptr<Model, ModelDeleter>;
+  template <typename T>
+  using store_t = std::unordered_map<std::string, T>; 
+  store_t<modelUnqPtr_t> modelsMap;
+  store_t<GLuint> texturesMap;
+  store_t<txtDataUnqPtr_t> texturesDataMap;
 };
 
 template <typename Generator, typename... With>
 inline Model *ResourceManager::getModel(std::string const &key, Generator mdlGenerator, With... with)
 {
-  Model *model;
+  Model *model {nullptr};
   if (auto occ = modelsMap.find(key); occ == modelsMap.end())
   {
     if (!(model = mdlGenerator(with...)))

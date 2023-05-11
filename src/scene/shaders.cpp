@@ -3,10 +3,11 @@
 #include "GL_utilities.h"
 #include <stdexcept>
 #include <algorithm>
+#include <iostream>
 #include "LittleOBJLoader.h"
 #include "types_properties.hpp"
 #include "debugging.h"
-#include "light.hpp"
+#include "gameobj/light.hpp"
 
 using std::size_t;
 
@@ -142,18 +143,19 @@ namespace scn
 
     auto report = [](std::size_t i)
     {
-      throw std::logic_error("Light " + std::to_string(i) + " could not be properly located in shader");
+      // std::cerr << "Light " + std::to_string(i) + " could not be properly located in shader";
     };
 
     for (std::size_t i = 0; i < lights.size(); i++)
     {
-      std::string lightStr = lightStructArrayName + '[' + std::to_string(i) + ']';
+      auto && lightStr = lightStructArrayName + '[' + std::to_string(i) + ']';
       Light const &curr{lights[i]};
 
       GLint colorLoc = glGetUniformLocation(hndl, (lightStr + ".color").c_str());
       GLint directionalLoc = glGetUniformLocation(hndl, (lightStr + ".directional").c_str());
       GLint attenuateLoc = glGetUniformLocation(hndl, (lightStr + ".attenuate").c_str());
       GLint spotlightLoc = glGetUniformLocation(hndl, (lightStr + ".spotlight").c_str());
+      GLint inViewLoc = glGetUniformLocation(hndl, (lightStr + ".inView").c_str());
       GLint ambientKLoc = glGetUniformLocation(hndl, (lightStr + ".ambientK").c_str());
       GLint diffuseKLoc = glGetUniformLocation(hndl, (lightStr + ".diffuseK").c_str());
       GLint specularKLoc = glGetUniformLocation(hndl, (lightStr + ".specularK").c_str());
@@ -161,6 +163,7 @@ namespace scn
       or attenuateLoc == -1
       or directionalLoc == -1
       or spotlightLoc == -1
+      or inViewLoc == -1
       or ambientKLoc == -1
       or diffuseKLoc == -1
       or specularKLoc == -1)
@@ -171,6 +174,7 @@ namespace scn
       glUniform1i(directionalLoc, curr.directional);
       glUniform1i(attenuateLoc, curr.attenuate);
       glUniform1i(spotlightLoc, curr.spotlight);
+      glUniform1i(inViewLoc, curr.position.inView);
       glUniform1f(ambientKLoc, curr.ambientK);
       glUniform1f(diffuseKLoc, curr.diffuseK);
       glUniform1f(specularKLoc, curr.specularK);
@@ -190,9 +194,8 @@ namespace scn
 
       if (curr.spotlight)
       {
-        GLint cutoffLoc, outerLoc;
-        cutoffLoc = glGetUniformLocation(hndl, (lightStr + ".cutOff").c_str());
-        outerLoc = glGetUniformLocation(hndl, (lightStr + ".outerEdgeCutOff").c_str());
+        GLint cutoffLoc = glGetUniformLocation(hndl, (lightStr + ".cutOff").c_str());
+        GLint outerLoc = glGetUniformLocation(hndl, (lightStr + ".outerEdgeCutOff").c_str());
         if (cutoffLoc == -1 or outerLoc == -1)
           report(i);
         glUniform1f(cutoffLoc, curr.cutOff);
@@ -201,15 +204,16 @@ namespace scn
 
       if (curr.directional or curr.spotlight)
       {
-        if (GLint dirLoc = glGetUniformLocation(hndl, (lightStr + ".direction").c_str()) != -1)
-          glUniform3f(dirLoc, curr.direction.x, curr.direction.y, curr.direction.z);
+        if (GLint dirLoc = glGetUniformLocation(hndl, (lightStr + ".direction").c_str()); dirLoc != -1) {
+          glUniform3f(dirLoc, curr.direction().x, curr.direction().y, curr.direction().z);
+        }
         else
           report(i);
       }
       if (not curr.directional or curr.spotlight)
       {
-        if (GLint posLoc = glGetUniformLocation(hndl, (lightStr + ".position").c_str()) != -1)
-          glUniform3f(posLoc, curr.position.x, curr.position.y, curr.position.z);
+        if (GLint posLoc = glGetUniformLocation(hndl, (lightStr + ".position").c_str()); posLoc != -1)
+          glUniform3f(posLoc, curr.position().x, curr.position().y, curr.position().z);
         else
           report(i);
       }
