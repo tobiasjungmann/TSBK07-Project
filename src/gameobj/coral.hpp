@@ -13,6 +13,8 @@ namespace obj
     void moveSingleStep();
     bool isCollision(const MoveableObject &other) const;
     void collide(vec3 position, vec3 normalToCollisionPoint);
+            void adaptToTerrain(scn::Terrain &terrain);
+        void handleObjectCollision(MoveableObject * other);
 
     private:
     void updateMovementVector(vec3 newMovement,vec3 newUp);

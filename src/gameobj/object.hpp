@@ -1,5 +1,6 @@
 #pragma once
 #include "VectorUtils4.h"
+#include "scene/terrain.hpp"
 
 namespace obj
 {
@@ -27,6 +28,9 @@ namespace obj
          */
         virtual void collide(vec3 position, vec3 normalToCollisionPoint) = 0;
 
+        virtual void adaptToTerrain(scn::Terrain &terrain) = 0;
+        virtual void handleObjectCollision(MoveableObject *other) = 0;
+
         const Model *getModel() const noexcept
         {
             return model;
@@ -39,6 +43,7 @@ namespace obj
 
         vec3 position = vec3(0, 0, 0);
         vec3 direction = vec3(0, 1, 0); // (fish) model is pointing upwards by default
+        float velocity = 1;             // how fast is the object moving
         const float longestDistanceFormCenter;
 
     protected:
@@ -69,7 +74,12 @@ namespace obj
             return vec3(matrix.m[i * 3], matrix.m[i * 3 + 1], matrix.m[i * 3 + 2]);
         }
 
-        void updateModelRotation(vec3 newMovement)
+        void updateModelToWorldRotation()
+        {
+            updateModelToWorldRotation(direction, up);
+        }
+
+        void updateModelToWorldRotation(vec3 newMovement)
         {
             updateModelToWorldRotation(newMovement, up);
         }
@@ -109,14 +119,12 @@ namespace obj
             mat3 combinedRotation = mat3(m2w) * additionalModelRotation;
             copyMat3InMat4(m2w, combinedRotation);
             rotateHitbox(hitbox, combinedRotation);
-            
+
             mat4 scaling = IdentityMatrix();
             scaling.m[0] = sizeInDirection.x;
             scaling.m[5] = sizeInDirection.y;
             scaling.m[8] = sizeInDirection.z;
             m2w = m2w * scaling;
-
-
         }
     };
 

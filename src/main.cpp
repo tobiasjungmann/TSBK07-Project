@@ -129,13 +129,13 @@ auto fish = std::make_unique<obj::Fish>(fish_m, vec3(10, 0, 10), normalize(vec3(
 	float x = 18;
 	float z = 18;
 	vec3 up=terrain.getNormal(x,z);
-	auto coral = std::make_unique<obj::Coral>(coral_m, vec3(x, terrain.computeHeight(x, z), z), normalize(up), vec3(0,1,0),vec3(1,1,1));
+	auto coral = std::make_unique<obj::Coral>(coral_m, vec3(x, terrain.computeHeight(x, z), z), normalize(up), vec3(0,1,0),vec3(2,1,1));
 	z = 25;
 	up=terrain.getNormal(x,z);
 	auto coral1 = std::make_unique<obj::Coral>(coral_m, vec3(x, terrain.computeHeight(x, z), z), normalize(up), vec3(0,1,0),vec3(1,1,1));
 	x = 25;
 	up=terrain.getNormal(x,z);
-	auto coral2 = std::make_unique<obj::Coral>(coral_m, vec3(x, terrain.computeHeight(x, z), z), normalize(up), vec3(0,1,0),vec3(5,1,1));
+	auto coral2 = std::make_unique<obj::Coral>(coral_m, vec3(x, terrain.computeHeight(x, z), z), normalize(up), vec3(0,1,0),vec3(1,1,1));
 
 	mainScene.pushMoveableObject(std::move(fish));
 	mainScene.pushMoveableObject(std::move(fish2));

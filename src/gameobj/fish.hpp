@@ -13,7 +13,10 @@ namespace obj
     void moveSingleStep();
     bool isCollision(const MoveableObject &other) const;
     void collide(vec3 position, vec3 normalToCollisionPoint);
-void updateModelRotation(vec3 newMovement, vec3 newUp) ;
+            void adaptToTerrain(scn::Terrain &terrain);
+        void handleObjectCollision(MoveableObject * other);
+
+void updateModelToWorldRotation(vec3 newMovement, vec3 newUp) ;
   private:
  void rotateHitbox(mat3 rotation);
   };

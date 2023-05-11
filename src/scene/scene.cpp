@@ -155,6 +155,11 @@ namespace scn
 
         for (size_t i = 0; i < allObjects.size(); i++)
         {
+            allObjects[i]->adaptToTerrain(terrain);
+            for (size_t u = 0; u < i; u++){
+                auto test=allObjects[u].get();
+                allObjects[i]->handleObjectCollision(allObjects[u].get());
+            }
             allObjects[i]->moveSingleStep();
             auto model = allObjects[i]->getModel();
             auto m2w = allObjects[i]->getM2W();
