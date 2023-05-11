@@ -28,6 +28,14 @@ namespace obj
          */
         virtual void collide(vec3 position, vec3 normalToCollisionPoint) = 0;
 
+        /**
+         * @brief Precomputes the next positions of the model based on the movement direction and the
+         * speed at which it is moving. If the fish won't make it over one of the next obstacles
+         * the direction vector is adapted so that it will go over the obstacle.
+         * Only adapts movement in the y direction.
+         *
+         * @param terrain
+         */
         virtual void adaptToTerrain(scn::Terrain &terrain) = 0;
         virtual void handleObjectCollision(MoveableObject *other) = 0;
 
@@ -43,16 +51,19 @@ namespace obj
 
         vec3 position = vec3(0, 0, 0);
         vec3 direction = vec3(0, 1, 0); // (fish) model is pointing upwards by default
-        float speed = 1;             // how fast is the object moving
+        float speed = 1;                // how fast is the object moving
         float longestDistanceFormCenter;
 
     protected:
         mat4 m2w = IdentityMatrix();
 
-        vec3 up = vec3(0, 0, -1);
+        vec3 up = vec3(0, 1, 0);
         const Model *model;
 
+        // Models do not point in the right direction as default (e.g. Fish downwards) - exztra rotation to apply to the m2w matrix
         mat3 additionalModelRotation = IdentityMatrix();
+
+        // Size of the object in all three directions will be rotated accordingly and can be used as the hitbox object
         const vec3 sizeInDirection;
 
         /**
@@ -74,16 +85,6 @@ namespace obj
             return vec3(matrix.m[i * 3], matrix.m[i * 3 + 1], matrix.m[i * 3 + 2]);
         }
 
-        void updateModelToWorldRotation()
-        {
-            updateModelToWorldRotation(direction, up);
-        }
-
-        void updateModelToWorldRotation(vec3 newMovement)
-        {
-            updateModelToWorldRotation(newMovement, up);
-        }
-
         void setVectorInLine(mat4 &matrix, vec3 input, int line)
         {
             matrix.m[0 + line * 4] = input.x;
@@ -99,6 +100,17 @@ namespace obj
             baseHitbox.m[8] = sizeInDirection.z;
             hitbox = baseHitbox * rotation;
         }
+
+        void updateModelToWorldRotation()
+        {
+            updateModelToWorldRotation(direction, up);
+        }
+
+        void updateModelToWorldRotation(vec3 newMovement)
+        {
+            updateModelToWorldRotation(newMovement, up);
+        }
+
         /**
          * @brief Alligns the x axis of the model with the movement vector and teh up vector
          * @param newMovement
@@ -109,7 +121,6 @@ namespace obj
             vec3 zaxis = CrossProduct(newUp, newMovement);
             vec3 yaxis = CrossProduct(newMovement, zaxis);
 
-//yaxis.y=-yaxis.y;
             setVectorInLine(m2w, newMovement, 0);
             setVectorInLine(m2w, yaxis, 1);
             setVectorInLine(m2w, zaxis, 2);
@@ -119,12 +130,10 @@ namespace obj
 
             mat3 combinedRotation = mat3(m2w) * additionalModelRotation;
             copyMat3InMat4(m2w, combinedRotation);
-            m2w.m[2]=-m2w.m[2];
-            m2w.m[5]=-m2w.m[5];
+
             rotateHitbox(hitbox, combinedRotation);
 
-/*
-            mat4 scaling = IdentityMatrix();
+            /*mat4 scaling = IdentityMatrix();
             scaling.m[0] = sizeInDirection.x;
             scaling.m[5] = sizeInDirection.y;
             scaling.m[8] = sizeInDirection.z;
