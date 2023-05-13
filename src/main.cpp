@@ -20,6 +20,7 @@
 #include "resource_manager.hpp"
 #include "event.hpp"
 #include "debugging.h"
+#include "scene/gameobj/fish.hpp"
 
 #define FRAME_GAP_MS 20
 
@@ -87,16 +88,17 @@ void init(void)
   glDisable(GL_CULL_FACE);
   auto programShader = std::make_unique<scn::SceneShader>("src/shaders/light.vert", "src/shaders/light.frag", "projectionMatrix", "w2vMatrix", "m2wMatrix");
   const scn::Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
+  mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix); // FIXME give terrain
 
   scn::Terrain terrain("fft-terrain.tga");
-  terrain.model().init(programShader->hndl, "in_Position", "in_Normal", NULL);
+  terrain.model().init(mainScene.shader->hndl, "in_Position", "in_Normal", NULL);
   terrain.model().setLightProps(1.0, 1.0, 1.0, 100.0);
+  mainScene.addTerrain(std::move(terrain));
 
-  Modelv2 fish{"green_reef", "green_reef.obj"};
-  fish.init(programShader->hndl, "in_Position", "in_Normal", NULL);
-  fish.setLightProps(1.0, 0.8, 0.5, 100.0);
-
-  mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix); // FIXME give terrain
+  Modelv2 fish_m{"green_reef", "green_reef.obj"};
+  fish_m.init(mainScene.shader->hndl, "in_Position", "in_Normal", NULL);
+  fish_m.setLightProps(1.0, 0.8, 0.5, 100.0);
+  obj::Fish* fish = new obj::Fish(fish_m, 0, vec3(1,0,0), 0.1f);
   // mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
 
   mainScene.shader->initMaterialProps("materialLight");
@@ -115,8 +117,8 @@ void init(void)
   mainScene.addLightSource(blueLight);
   mainScene.addLightSource(whiteLight);
 
-  mainScene.pushModel(terrain.model()); // FIXME remove this once the terrain is managed by Scene
-  mainScene.pushModel(fish);
+  // mainScene.pushObject(terrain.model()); // FIXME remove this once the terrain is managed by Scene
+  mainScene.pushObject(fish);
   glutRepeatingTimer(FRAME_GAP_MS);
 
   glutPassiveMotionFunc(mouseControlCallback);
@@ -132,15 +134,7 @@ void display(void)
 
   // FIXME move this out of the way
   // update all objects
-  for (auto& object: gameObjects) {
-    object.update();
-    colldingObjects[i]->adaptToTerrain(mainScene.terrain);
-    for (size_t u = 0; u < i; u++){
-        auto test=allObjects[u].get();
-        allObjects[i]->handleObjectCollision(allObjects[u].get());
-    }
-    allObjects[i]->moveSingleStep();
-  }
+  mainScene.update();
 
   mainScene.draw();
 

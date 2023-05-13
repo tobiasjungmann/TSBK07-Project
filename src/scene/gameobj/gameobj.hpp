@@ -4,6 +4,8 @@
 #include <unordered_set>
 #include "../modelv2.hpp"
 #include "../types_properties.hpp"
+#include <vector>
+#include <memory>
 
 /*******
  * ****************
@@ -14,33 +16,41 @@
 namespace scn
 {
   class Terrain;
+  class Scene;
 }
 
 namespace obj
 {
-  struct GameObj
-  {
-    virtual void update() = 0;
-  };
-
   // Forward Decl
+  struct GameObj;
+  struct MutableObj;
+  class ModelledObject;
+  class CollidingObject;
+
   template <typename>
   class Property;
   template <typename>
   class AnchoredProp;
   template <typename>
   class Anchor;
-  class CollidingObject;
 
   namespace prop
   {
     struct Position;
     struct ModelProp;
   }
-}
 
-namespace obj
-{
+  struct GameObj
+  {
+  };
+
+  class MutableObj : public GameObj
+  {
+  public:
+    virtual void update(scn::Scene &) = 0;
+    virtual void update(scn::Scene &, size_t) = 0;
+  };
+
 }
 
 namespace obj
@@ -52,6 +62,28 @@ namespace obj
                                              std::decay_t<T>,
                                              std::add_const_t<std::add_lvalue_reference_t<T>>>;
 
+    namespace _impl
+    {
+      template <class Obj>
+      constexpr auto IsMutableT(int i) -> decltype(std::declval<Obj>().update, true) { return true; }
+      template <class Obj>
+      constexpr bool IsMutableT(double i) { return false; }
+      template <class Obj>
+      constexpr auto IsMutableV(Obj *obj, int i) -> decltype(obj->update, true) { return true; }
+      template <class Obj>
+      constexpr bool IsMutableV(Obj *obj, double i) { return false; }
+    }
+
+    template <class Obj>
+    struct Mutable
+    {
+      static constexpr bool value{_impl::IsMutableT<Obj>(1)};
+    };
+
+    template <class Obj> 
+    constexpr bool IsMutable(Obj *obj){ return _impl::IsMutableV<Obj>(obj, 1);}
+    template <class Obj>
+    constexpr bool Mutable_v{Mutable<Obj>::value};
   }
 
   template <class ArgType>
@@ -164,7 +196,8 @@ namespace obj
   public:
     class Anchor
     {
-    friend class AnchoredProp<ArgType>;
+      friend class AnchoredProp<ArgType>;
+
     public:
       Anchor() = default; // delete all copy and move operations
       ~Anchor()
@@ -249,7 +282,7 @@ namespace obj
 namespace obj
 {
 
-  class ModelledObject : public GameObj
+  class ModelledObject : public MutableObj
   {
   protected:
     void updateModelToWorldRotation()
@@ -265,7 +298,7 @@ namespace obj
     void updateModelToWorldRotation(vec3 newDirection, vec3 newUp);
 
   protected:
-    inline mat3 orientationMtx() const noexcept
+    virtual inline mat3 orientationMtx() const noexcept
     {
       return IdentityMatrix();
     }
@@ -284,9 +317,8 @@ namespace obj
     {
     }
 
-    inline void update() override {
-
-    }
+    void update(scn::Scene &) override {};
+    void update(scn::Scene &, size_t) override {};
 
     inline Modelv2 model()
     {
@@ -312,8 +344,6 @@ namespace obj
         : ModelledObject(mdl, pos, dir, up, size),
           m_longestDistanceFromCenter{Norm(size)} {};
 
-    virtual void moveSingleStep() = 0;
-
     /**
      * @brief Change the movement of the model after it collided on the point given by the position with the given normal
      *
@@ -321,6 +351,9 @@ namespace obj
      * @param normalToCollisionPoint
      */
     virtual void collide(vec3 position, vec3 normalToCollisionPoint) = 0;
+
+    void update(scn::Scene &) override {};
+    void update(scn::Scene &, size_t) override {};
 
     /**
      * @brief Precomputes the next positions of the model based on the movement direction and the

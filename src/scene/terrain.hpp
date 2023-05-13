@@ -36,13 +36,17 @@ namespace scn
 
     vec3 getNormal(float x, float z) const;
 
-    inline Modelv2 model() const {
-      return m_terrain;
+    inline Modelv2 const& model() const {
+      return m_model;
+    }
+
+    inline Modelv2& model() {
+      return m_model;
     }
 
   private:
     const std::string key;
-    Modelv2 m_terrain;
+    Modelv2 m_model;
     int m_width;
     int m_height;
   };

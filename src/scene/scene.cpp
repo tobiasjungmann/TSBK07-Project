@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include "types_properties.hpp"
+#include "gameobj/fish.hpp"
 
 using std::get;
 using std::size_t;
@@ -58,12 +59,11 @@ namespace scn
   Scene::Scene(std::unique_ptr<SceneShader> shader,
                const Camera &camera,
                mat4 projectionMatrix,
-               std::unique_ptr<Terrain> terrain,
                std::unique_ptr<Skybox> skybox)
       : camera{camera},
         projectionMatrix{projectionMatrix},
         m_shader{std::move(shader)},
-        terrain{std::move(terrain)},
+        m_terrain{nullptr},
         skybox{std::move(skybox)}
   {
     invalid = false;
@@ -71,15 +71,13 @@ namespace scn
 
   Scene &Scene::operator=(Scene &&moved) noexcept
   {
-    if (moved.invalid)
-      throw std::invalid_argument("Tried to assign an invalid Scene.");
     m_shader = std::move(moved.m_shader);
     projectionMatrix = moved.projectionMatrix;
     camera = moved.camera;
     invalid = moved.invalid;
     skybox = std::move(moved.skybox);
-    terrain = std::move(moved.terrain); // BUG write move operator for Terrain
-    m_models = std::move(moved.m_models);
+    m_terrain = std::move(moved.m_terrain);
+    m_objs = std::move(moved.m_objs);
 
     dbg::if_dlevel<dbg::Level::VERBOSE>([]()
                                         { std::cerr << "move assigment" << std::endl; });
@@ -87,27 +85,31 @@ namespace scn
     return *this;
   }
 
+  void Scene::addTerrain(scn::Terrain&& terrain) {
+    m_terrain = std::make_unique<scn::Terrain>(terrain);
+  }
+
   void Scene::popModel()
   {
-    m_models.pop_back();
+    m_objs.pop_back();
   }
 
-  void Scene::pushModel(Modelv2 newMdl)
+  void Scene::pushObject(obj::ModelledObject* newObj)
   {
-    m_models.emplace_back(newMdl);
+      m_objs.push_back(newObj);
   }
 
-  void Scene::pushModel(Modelv2 newMdl, mat4 m2wMtx)
+  void Scene::pushObject(obj::ModelledObject* newObj, mat4 m2wMtx)
   {
-    newMdl.matrix(m2wMtx);
-    pushModel(newMdl);
+    newObj->model().matrix(m2wMtx);
+    pushObject(newObj);
   }
 
   void Scene::updateModelM2W(long modelIndex, mat4 update)
   {
     if (modelIndex < 0)
-      modelIndex += m_models.size();
-    m_models[modelIndex].matrix(update);
+      modelIndex += m_objs.size();
+    m_objs[modelIndex]->model().matrix(update);
   }
 
   void Scene::addLightSource(const Light &light)
@@ -126,6 +128,13 @@ namespace scn
       index += m_lights.size();
 
     m_lights.erase(std::begin(m_lights) + index);
+  }
+
+  void Scene::update() {
+    for (size_t i =0; i < m_objs.size(); i++) {
+      auto obj {m_objs[i]};
+      obj->update(*this, i);
+    }
   }
 
   // BUG add management of the textures (upload them as necessary)
@@ -156,21 +165,21 @@ namespace scn
     }
 
     // If there is any model, initialize shaders' matrices with dummy
-    if (not m_models.empty() or terrain != nullptr)
+    if (not m_objs.empty() or m_terrain != nullptr)
     {
       shader->uploadMatrix(Shader::Matrices::w2v, camera.matrix());
       shader->uploadMatrix(Shader::Matrices::proj, projectionMatrix);
       shader->uploadMatrix(Shader::Matrices::m2w, IdentityMatrix());
     }
 
-    if (terrain)
-      _helpers::uploadModelData(*this, terrain->model(), alsoSynthesisPreProj);
+    if (m_terrain)
+      _helpers::uploadModelData(*this, m_terrain->model(), alsoSynthesisPreProj);
 
     // Draw every Model
-    for (auto const &model : m_models)
+    for (auto const &obj : m_objs)
     {
       // TODO call update on object ?
-      _helpers::uploadModelData(*this, model, alsoSynthesisPreProj);
+      _helpers::uploadModelData(*this, obj->model(), alsoSynthesisPreProj);
     }
     dbg::if_dlevel<dbg::Level::VERBOSE>([]()
                                         { std::cerr << "Scene drawn successfully" << std::endl; });

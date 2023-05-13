@@ -12,7 +12,7 @@ namespace obj
     Coral(Modelv2 m, vec3 pos, vec3 dir, vec3 up = vec3(0,1,0), vec3 size = vec3(1));
 
   protected:
-    mat3 orientationMtx() const noexcept;
+    mat3 orientationMtx() const noexcept override;
 
   private:
     // void alignyaxis(vec3 newMovement, vec3 newUp);

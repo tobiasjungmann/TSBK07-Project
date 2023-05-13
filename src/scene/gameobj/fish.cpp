@@ -2,6 +2,7 @@
 #include <cmath>
 #include "../terrain.hpp"
 #include "gameobj.hpp"
+#include "../scene.hpp"
 
 namespace obj
 {
@@ -14,8 +15,8 @@ namespace obj
              vec3 size) : CollidingObject{mdl, pos, dir, up, size},
                           m_speed{speed}
   {
-    if (mdl.matrix() == nullptr)
-      mdl.matrix(IdentityMatrix());
+    if (m_model.matrix() == nullptr)
+      m_model.matrix(IdentityMatrix());
     m_longestDistanceFromCenter = 8;
     // rotate the fish model  so that the head is pointing along the x axis
     updateModelToWorldRotation();
@@ -36,13 +37,18 @@ namespace obj
     model().matrix()->m[5] *= -1;// FIXME check here that it was like that
   }
 
-  void Fish::update() {
+  void Fish::update(scn::Scene &scene) {
+    
+  }
+  void Fish::update(scn::Scene &scene, size_t index) {
     rotateHitbox(mat3(*model().matrix()) * orientationMtx());
     
-    adaptToTerrain(mainScene.terrain);
-    for (size_t u = 0; u < i; u++){
-        auto test= allObjects[u].get();
-        handleObjectCollision(allObjects[u].get());
+    if (scene.terrain)
+      adaptToTerrain(*scene.terrain);
+    for (size_t u = 0; u < index; u++){
+      auto collideObj {dynamic_cast<obj::CollidingObject*>(scene.getObj(u))};
+      if (collideObj)
+        handleObjectCollision(collideObj);
     }
     moveSingleStep();
   }

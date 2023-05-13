@@ -7,6 +7,8 @@
 
 namespace scn
 {
+  struct Camera;
+
   struct Light
   {
     Light(vec3 color, vec3 posOrDir, bool directional);

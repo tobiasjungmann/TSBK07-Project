@@ -39,16 +39,26 @@ public:
 
 public:
   // Modelv2() : raw{nullptr}, lightProps{nullptr} {}
-  Modelv2(Model *raw) : raw{raw}, lightProps{nullptr} {}
+  Modelv2(Model *raw) : raw{raw} {}
   Modelv2(Model *raw, MaterialLight &&props) : raw{raw}, lightProps{std::make_unique<MaterialLight>(props)} {}
   Modelv2(std::string const &key, std::string const &path = "") : Modelv2(ResourceManager::get().getModel(key, path)) {}
-  Modelv2(Modelv2 const &other) : raw{other.raw}, lightProps{nullptr}
+  Modelv2(Modelv2 const &other) : raw{other.raw}
   {
     if (other.lightProps)
     {
       lightProps = std::make_unique<MaterialLight>(*other.lightProps.get());
     }
+    if (other.m_matrix)
+    {
+      m_matrix = std::make_unique<mat4>(*other.m_matrix.get());
+    }
   }
+  Modelv2(Modelv2 &&other) : raw{other.raw}
+  {
+    lightProps = std::move(other.lightProps);
+    m_matrix = std::move(other.m_matrix);
+  }
+  
   Modelv2 &operator=(Modelv2 other)
   {
     // swap:
@@ -74,16 +84,12 @@ public:
     *m_matrix = matrix;
   }
 
-  inline void draw(GLuint program)
+  inline void draw(GLuint program) const
   {
     DrawModel(raw, program);
   }
-  inline void init(GLuint program, const char *vertexVariableName, const char *normalVariableName, const char *texCoordVariableName)
-  {
-    init(program, vertexVariableName, normalVariableName, texCoordVariableName, -1, -1);
-  }
 
-  inline void init(GLuint program, const char *vertexVariableName, const char *normalVariableName, const char *texCoordVariableName, GLint texUnit, GLint texReferenceID)
+  inline void init(GLuint program, const char *vertexVariableName, const char *normalVariableName, const char *texCoordVariableName, GLint texUnit = -1, GLint texReferenceID = -1)
   {
     InitModel(raw, program, vertexVariableName, normalVariableName, texCoordVariableName, texUnit, texReferenceID);
   }
@@ -97,6 +103,6 @@ public:
 
 private:
   Model *raw;
-  std::unique_ptr<MaterialLight> lightProps;
-  std::unique_ptr<mat4> m_matrix;
+  std::unique_ptr<MaterialLight> lightProps {nullptr};
+  std::unique_ptr<mat4> m_matrix {nullptr};
 };

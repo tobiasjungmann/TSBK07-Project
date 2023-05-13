@@ -5,10 +5,12 @@
 #include <utility>
 #include <memory>
 #include <cstddef>
+#include "gameobj/gameobj.hpp"
 #include "camera.hpp"
 #include "skybox.hpp"
 #include "terrain.hpp"
 #include "gameobj/light.hpp"
+
 
 #include "modelv2.hpp"
 
@@ -34,11 +36,12 @@ namespace scn
     Scene(std::unique_ptr<SceneShader> shader,
           const Camera &camera,
           mat4 projectionMatrix,
-          std::unique_ptr<Terrain> terrain = nullptr,
           std::unique_ptr<Skybox> skybox = nullptr);
     Scene &operator=(const Scene &cpy) = delete;
     Scene &operator=(Scene &&cpy) noexcept;
     ~Scene() = default;
+
+    void addTerrain(scn::Terrain&& terrain);
 
     // Model & Transformation Management
     /**
@@ -47,13 +50,13 @@ namespace scn
      */
     void popModel();
     /**
-     * @brief Add a NEWMDL to the scene, with an optional M2W matrix.
+     * @brief Add a NEWOBJ to the scene, with an optional M2W matrix.
      *
-     * @param newMdl
+     * @param newObj
      * @param m2wMtx
      */
-    void pushModel(Modelv2 newMdl);              // TODO should returns index of insertion in vector
-    void pushModel(Modelv2 newMdl, mat4 m2wMtx); // TODO should returns index of insertion in vector
+    void pushObject(obj::ModelledObject* newObj);              // TODO should returns index of insertion in vector
+    void pushObject(obj::ModelledObject* newObj, mat4 m2wMtx); // TODO should returns index of insertion in vector
 
     /**
      * @brief Update the model-to-world matrix with UPDATE of the model at MODELINDEX
@@ -67,6 +70,17 @@ namespace scn
     void addLightSource(const Light &light);
     void removeLightSource(long index);
 
+    inline std::vector<obj::ModelledObject*>::iterator iterateObjs()
+    {
+      return m_objs.begin();
+    }
+
+    inline obj::ModelledObject* getObj(long index) {
+      return m_objs[index];
+    }
+
+    void update();
+  
     void draw(bool alsoSynthesisPreProj = false) const;
 
   public:
@@ -78,14 +92,15 @@ namespace scn
     };
 
     std::unique_ptr<SceneShader> const &shader{m_shader};
-    std::unique_ptr<Terrain> terrain = nullptr;
+    std::unique_ptr<Terrain> const& terrain {m_terrain};
     std::unique_ptr<Skybox> skybox = nullptr;
 
   private:
-    std::vector<Modelv2> m_models;
+    std::vector<obj::ModelledObject*> m_objs; // BUG memory leak, no one manage the objects except scene, can't have unique_ptr for polymorphism though
     std::vector<Light> m_lights;
 
     std::unique_ptr<SceneShader> m_shader = nullptr;
+    std::unique_ptr<Terrain> m_terrain {nullptr};
     bool invalid;
   };
 } // end namespace scene

@@ -30,7 +30,6 @@ namespace obj
         mat3 combinedRotation = mat3(m2w) * orientationMtx();
         m2w = mat3tomat4(combinedRotation);
 
-        // rotateHitbox(combinedRotation); // BUG should be elsewhere
       }
     }
 

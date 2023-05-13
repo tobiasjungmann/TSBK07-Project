@@ -104,14 +104,14 @@ namespace scn
 {
   Terrain::Terrain(std::string const &name, std::string const &path)
       : key{name},
-        m_terrain{nullptr}
+        m_model{nullptr}
   {
     auto &rmgr{ResourceManager::get()};
     TextureData *texp{rmgr.getTextureData(name, path)};
     m_width = texp->width;
     m_height = texp->height;
     auto mdl{rmgr.getModel(key, generateTerrain, texp)};
-    m_terrain = Modelv2(mdl);
+    m_model = Modelv2(mdl);
   }
 
   Terrain::Terrain(std::string const &path)
