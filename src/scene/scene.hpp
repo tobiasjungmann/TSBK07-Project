@@ -4,94 +4,88 @@
 #include <vector>
 #include <utility>
 #include <memory>
-#include <initializer_list>
 #include <cstddef>
 #include "camera.hpp"
 #include "skybox.hpp"
+#include "terrain.hpp"
 #include "gameobj/light.hpp"
 
 #include "modelv2.hpp"
 
+namespace _helpers
+{
+  void uploadModelData(scn::Scene const &scene, Modelv2 model, bool alsoSynthesisPreProj);
+}
+
 namespace scn
 {
-class Scene
-{
-public:
-  Scene ();
-  /// @brief Construct a scene without prior information of the projection matrix
-  /// @param shader A pointer to shader instance, whose ownership will be acquired by the scene.
-  /// @param camera The camera used for this Scenes
-  /// @param projectionMatrix The projection matrix shared between all models of the scene, sent to the shaders" "projName" uniform
-  /// @param skybox An optional skybox's pointer. Ownership onto the underlying skybox must be given to the Scene.
-  Scene (std::unique_ptr<SceneShader> shader, 
-   const Camera &camera, 
-   mat4 projectionMatrix, 
-   std::unique_ptr<Skybox> skybox = nullptr);
-  Scene& operator= (const Scene &cpy) = delete;
-  Scene& operator= (Scene &&cpy) noexcept;
-  ~Scene() = default;
-  
-  // Model & Transformation Management
-  /**
-   * @brief Remove the last pushed model
-   * 
-   */
-  void popModel ();
-  /**
-   * @brief Add a NEWMDL to the scene, with an optional M2W matrix. 
-   * 
-   * @param newMdl 
-   * @param m2wMtx 
-   */
-  void pushModel (Modelv2 newMdl); // TODO should returns index of insertion in vector
-  void pushModel (Modelv2 newMdl, mat4 m2wMtx); // TODO should returns index of insertion in vector
-  
-  
-  /**
-   * @brief Update the model-to-world matrix with UPDATE of the model at MODELINDEX
-   * 
-   * @param modelIndex The index of the model to be updated. 
-   * @param update The model-to-world matrix that should replace the current one
-   */
-  void updateModelM2W (long modelIndex, mat4 update);
-  
-  // Light management
-  void addLightSource(const Light &light);
-  void removeLightSource(long index);
-  
-  void draw(bool alsoSynthesisPreProj = false) const;
+  class Scene
+  {
+  private:
+    friend void _helpers::uploadModelData(Scene const &scene, Modelv2 model, bool alsoSynthesisPreProj);
 
+  public:
+    Scene();
+    /// @brief Construct a scene without prior information of the projection matrix
+    /// @param shader A pointer to shader instance, whose ownership will be acquired by the scene.
+    /// @param camera The camera used for this Scenes
+    /// @param projectionMatrix The projection matrix shared between all models of the scene, sent to the shaders" "projName" uniform
+    /// @param skybox An optional skybox's pointer. Ownership onto the underlying skybox must be given to the Scene.
+    Scene(std::unique_ptr<SceneShader> shader,
+          const Camera &camera,
+          mat4 projectionMatrix,
+          std::unique_ptr<Terrain> terrain = nullptr,
+          std::unique_ptr<Skybox> skybox = nullptr);
+    Scene &operator=(const Scene &cpy) = delete;
+    Scene &operator=(Scene &&cpy) noexcept;
+    ~Scene() = default;
 
-private:  
-  inline mat4 getM2W (std::size_t index) const {
-    return model_m2w[index].second;
-  }
+    // Model & Transformation Management
+    /**
+     * @brief Remove the last pushed model
+     *
+     */
+    void popModel();
+    /**
+     * @brief Add a NEWMDL to the scene, with an optional M2W matrix.
+     *
+     * @param newMdl
+     * @param m2wMtx
+     */
+    void pushModel(Modelv2 newMdl);              // TODO should returns index of insertion in vector
+    void pushModel(Modelv2 newMdl, mat4 m2wMtx); // TODO should returns index of insertion in vector
 
-  inline mat4 getPreProj(std::size_t index) const {
-    auto m2w = getM2W(index);
-    return camera.matrix () * m2w;
-  }
-  
-  inline mat4 getPreProj(mat4 const& m2w) const {
-    return camera.matrix () * m2w;
-  }
+    /**
+     * @brief Update the model-to-world matrix with UPDATE of the model at MODELINDEX
+     *
+     * @param modelIndex The index of the model to be updated.
+     * @param update The model-to-world matrix that should replace the current one
+     */
+    void updateModelM2W(long modelIndex, mat4 update);
 
+    // Light management
+    void addLightSource(const Light &light);
+    void removeLightSource(long index);
 
-public:
-  Camera camera;
-  union {
-    mat4 proj;
-    mat4 projectionMatrix;
+    void draw(bool alsoSynthesisPreProj = false) const;
+
+  public:
+    Camera camera;
+    union
+    {
+      mat4 proj;
+      mat4 projectionMatrix;
+    };
+
+    std::unique_ptr<SceneShader> const &shader{m_shader};
+    std::unique_ptr<Terrain> terrain = nullptr;
+    std::unique_ptr<Skybox> skybox = nullptr;
+
+  private:
+    std::vector<Modelv2> m_models;
+    std::vector<Light> m_lights;
+
+    std::unique_ptr<SceneShader> m_shader = nullptr;
+    bool invalid;
   };
-
-  const std::unique_ptr<SceneShader>& shader {m_shader};
-  std::unique_ptr<Skybox> skybox;
-
-private:
-  std::vector<std::pair<Modelv2, mat4>> model_m2w;
-  std::vector<Light> lights;
-  
-  std::unique_ptr<SceneShader> m_shader;
-  bool invalid;
-};
 } // end namespace scene

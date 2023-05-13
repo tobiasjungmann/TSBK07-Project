@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "event.hpp"
-#include "gameobj/traits.hpp"
 #include "gameobj/gameobj.hpp"
 
 namespace obj {
@@ -55,7 +54,7 @@ namespace scn
     inline void attachPosition(obj::prop::Position &pos) {
       pos.attach(m_attachedPos);
     }
-    inline void attachDirection(obj::Property<vec3> &dir) {
+    inline void attachDirection(obj::AnchoredProp<vec3> &dir) {
       dir.attach(m_attachedDir);
     }
 
@@ -77,8 +76,8 @@ namespace scn
     float pitch = 0; // pitch of the camera
 
   private:
-    obj::Anchor<vec3> m_attachedPos;
-    obj::Anchor<vec3> m_attachedDir;
+    obj::AnchoredProp<vec3>::Anchor m_attachedPos;
+    obj::AnchoredProp<vec3>::Anchor m_attachedDir;
   };
 
   std::ostream &operator<<(std::ostream &os, Camera const &camera);

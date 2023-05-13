@@ -1,3 +1,4 @@
+#include "VectorUtils4.h"
 
 #ifdef __cplusplus
 	//	vec3::vec3(vec4 v) : x(v.x), y(v.y), z(v.z) {}
@@ -37,7 +38,15 @@
 		x.m[6],  x.m[7],  x.m[8],  0,
 		x.m[0],  x.m[0],  x.m[0],  1} {}
 
-	constexpr mat3::mat3() : m{} {}
+  inline void mat4::setLine(unsigned char line, vec4 lineValue) noexcept
+  {
+    m[0 + (line << 2)] = lineValue.x;
+    m[1 + (line << 2)] = lineValue.y;
+    m[2 + (line << 2)] = lineValue.z;
+    m[3 + (line << 2)] = lineValue.a;
+  }
+
+  constexpr mat3::mat3() : m{} {}
 	constexpr mat3::mat3(GLfloat x2) :
 	m{x2, 0, 0, 0, x2, 0, 0, 0, x2}
 	{}
@@ -56,4 +65,11 @@
 	m{x1.x, x1.y, x1.z, x2.x, x2.y, x2.z, x3.x, x3.y, x3.z}
 	{}
 
+
+  inline void mat3::setLine(unsigned char line, vec3 lineValue) noexcept
+  {
+    m[0 + line * 3] = lineValue.x;
+    m[1 + line * 3] = lineValue.y;
+    m[2 + line * 3] = lineValue.z;
+  }
 #endif // __cplusplus

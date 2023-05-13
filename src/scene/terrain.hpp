@@ -3,6 +3,7 @@ Todo compute terrain here -> p
 return model for main.init()
 provide height of terrain at given x & z position
 */
+#pragma once
 
 #include "LittleOBJLoader.h"
 #include "./modelv2.hpp"
@@ -15,6 +16,9 @@ namespace scn
 
   class Terrain
   {
+  private:
+  void getTriangleVectors(float x, float z, vec3 &v1, vec3 &v2, vec3 &startingPoint) const;
+
   public:
     Terrain(std::string const& path);
     Terrain(std::string const& name, std::string const& path);
@@ -29,7 +33,9 @@ namespace scn
      */
     float computeHeight(float x, float z) const;
 
-    inline Modelv2 model() {
+    vec3 getNormal(float x, float z) const;
+
+    inline Modelv2 model() const {
       return m_terrain;
     }
 

@@ -92,11 +92,11 @@ void init(void)
   terrain.model().init(programShader->hndl, "in_Position", "in_Normal", NULL);
   terrain.model().setLightProps(1.0, 1.0, 1.0, 100.0);
 
-  Modelv2 green_reef{"green_reef", "green_reef.obj"};
-  green_reef.init(programShader->hndl, "in_Position", "in_Normal", NULL);
-  green_reef.setLightProps(1.0, 0.8, 0.5, 100.0);
+  Modelv2 fish{"green_reef", "green_reef.obj"};
+  fish.init(programShader->hndl, "in_Position", "in_Normal", NULL);
+  fish.setLightProps(1.0, 0.8, 0.5, 100.0);
 
-  mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix);
+  mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix); // FIXME give terrain
   // mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
 
   mainScene.shader->initMaterialProps("materialLight");
@@ -115,8 +115,8 @@ void init(void)
   mainScene.addLightSource(blueLight);
   mainScene.addLightSource(whiteLight);
 
-  mainScene.pushModel(terrain.model());
-  mainScene.pushModel(green_reef);
+  mainScene.pushModel(terrain.model()); // FIXME remove this once the terrain is managed by Scene
+  mainScene.pushModel(fish);
   glutRepeatingTimer(FRAME_GAP_MS);
 
   glutPassiveMotionFunc(mouseControlCallback);
@@ -129,6 +129,19 @@ void display(void)
   keyControlCheck();
 
   mainScene.camera.updateCameraPosition(context);
+
+  // FIXME move this out of the way
+  // update all objects
+  for (auto& object: gameObjects) {
+    object.update();
+    colldingObjects[i]->adaptToTerrain(mainScene.terrain);
+    for (size_t u = 0; u < i; u++){
+        auto test=allObjects[u].get();
+        allObjects[i]->handleObjectCollision(allObjects[u].get());
+    }
+    allObjects[i]->moveSingleStep();
+  }
+
   mainScene.draw();
 
 

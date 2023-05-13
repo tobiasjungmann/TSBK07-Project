@@ -28,7 +28,6 @@
 // Add vector operations for vec4? Other *essential* symmetry issues?
 // Names for functions when supporting both vec3 and vec4, mat3 and mat4? (vec3Add, vec4Add?)
 
-
 // History:
 
 // VectorUtils is a small (but growing) math unit by Ingemar Ragnemalm.
@@ -99,18 +98,17 @@
 #define VECTORUTILS4
 
 #ifdef __APPLE__
-	#define GL_SILENCE_DEPRECATION
-	#include <OpenGL/gl3.h>
+#define GL_SILENCE_DEPRECATION
+#include <OpenGL/gl3.h>
 #else
-	#if defined(_WIN32)
-		#include "glew.h"
-	#endif
-	#include <GL/gl.h>
+#if defined(_WIN32)
+#include "glew.h"
+#endif
+#include <GL/gl.h>
 #endif
 
-
 #ifndef M_PI
-#define M_PI           3.14159265358979323846
+#define M_PI 3.14159265358979323846
 #endif
 
 #define MAX(a, b) (a) >= (b) ? (a) : (b)
@@ -135,213 +133,249 @@
 // vec*() and it will work.
 // Note 2022: These are now back (and more), which is possible when doing this as a header only unit
 // so it works with both C and C++ and still allows the constructors.
-	
-	typedef struct vec4 vec4;
-	typedef struct vec3 vec3;
-	
-	// vec3 is very useful
-	typedef struct vec3
-	{
-//		GLfloat x, y, z;
-		union
-		{GLfloat x; GLfloat r;};
-		union
-		{GLfloat y; GLfloat g;};
-		union
-		{GLfloat z; GLfloat b;};
-		#ifdef __cplusplus
-//			vec3(vec4 v);
-            constexpr vec3();
-			constexpr vec3(GLfloat x2, GLfloat y2, GLfloat z2);
-			constexpr vec3(GLfloat x2);
-			constexpr vec3(vec4 v);
-		#endif
-	} vec3, *vec3Ptr;
-	
-	// vec4 is not as useful. Can be a color with alpha, or a quaternion, but IMHO you
-	// rarely need homogenous coordinate vectors on the CPU.
-	typedef struct vec4
-	{
-//		GLfloat x, y, z, w; // w or h
-		union
-		{GLfloat x; GLfloat r;};
-		union
-		{GLfloat y; GLfloat g;};
-		union
-		{GLfloat z; GLfloat b;};
-		union
-		{GLfloat h; GLfloat w; GLfloat a;};
-		#ifdef __cplusplus
-            constexpr vec4();
-			constexpr vec4(GLfloat x2, GLfloat y2, GLfloat z2, GLfloat w2);
-			constexpr vec4(GLfloat xyz, GLfloat w2);
-			constexpr vec4(vec3 v, GLfloat w2);
-			constexpr vec4(vec3 v);
-		#endif
-	} vec4, *vec4Ptr;
+
+typedef struct vec4 vec4;
+typedef struct vec3 vec3;
+typedef struct mat4 mat4;
+typedef struct mat3 mat3;
+
+mat4 mat3tomat4(mat3 m);
+
+// vec3 is very useful
+typedef struct vec3
+{
+  //		GLfloat x, y, z;
+  union
+  {
+    GLfloat x;
+    GLfloat r;
+  };
+  union
+  {
+    GLfloat y;
+    GLfloat g;
+  };
+  union
+  {
+    GLfloat z;
+    GLfloat b;
+  };
+#ifdef __cplusplus
+  //			vec3(vec4 v);
+  constexpr vec3();
+  constexpr vec3(GLfloat x2, GLfloat y2, GLfloat z2);
+  constexpr vec3(GLfloat x2);
+  constexpr vec3(vec4 v);
+#endif
+} vec3, *vec3Ptr;
+
+// vec4 is not as useful. Can be a color with alpha, or a quaternion, but IMHO you
+// rarely need homogenous coordinate vectors on the CPU.
+typedef struct vec4
+{
+  //		GLfloat x, y, z, w; // w or h
+  union
+  {
+    GLfloat x;
+    GLfloat r;
+  };
+  union
+  {
+    GLfloat y;
+    GLfloat g;
+  };
+  union
+  {
+    GLfloat z;
+    GLfloat b;
+  };
+  union
+  {
+    GLfloat h;
+    GLfloat w;
+    GLfloat a;
+  };
+#ifdef __cplusplus
+  constexpr vec4();
+  constexpr vec4(GLfloat x2, GLfloat y2, GLfloat z2, GLfloat w2);
+  constexpr vec4(GLfloat xyz, GLfloat w2);
+  constexpr vec4(vec3 v, GLfloat w2);
+  constexpr vec4(vec3 v);
+#endif
+} vec4, *vec4Ptr;
 
 // vec2 is mostly used for texture cordinates, so I havn't bothered defining any operations for it
-	typedef struct vec2
-	{
-//		GLfloat x, y;
-		union
-		{GLfloat x; GLfloat s;};
-		union
-		{GLfloat y; GLfloat t;};
-		
-		#ifdef __cplusplus
-            constexpr vec2();
-			constexpr vec2(GLfloat x2, GLfloat y2);
-		#endif
-	} vec2, *vec2Ptr;
-	
-	typedef struct mat3 mat3;
-	typedef struct mat4
-	{
-		GLfloat m[16];
-		#ifdef __cplusplus
-            constexpr mat4();
-			constexpr mat4(GLfloat x2);	
-			constexpr mat4(GLfloat p0, GLfloat p1, GLfloat p2, GLfloat p3,
-				GLfloat p4, GLfloat p5, GLfloat p6, GLfloat p7,
-				GLfloat p8, GLfloat p9, GLfloat p10, GLfloat p11, 
-				GLfloat p12, GLfloat p13, GLfloat p14, GLfloat p15);
-			constexpr mat4(mat3 x);
-		#endif
-	} mat4;
-	typedef struct mat3
-	{
-		GLfloat m[9];
-		#ifdef __cplusplus
-			constexpr mat3();
-			constexpr mat3(GLfloat x2);
-			constexpr mat3(GLfloat p0, GLfloat p1, GLfloat p2,
-				GLfloat p3, GLfloat p4, GLfloat p5,
-				GLfloat p6, GLfloat p7, GLfloat p8);
-			constexpr mat3(mat4 x);
-			constexpr mat3(vec3 x1, vec3 x2, vec3 x3);
-            /* constexpr mat3();
-			constexpr mat3(GLfloat x2);
-			constexpr mat3(GLfloat p0, GLfloat p1, GLfloat p2,
-				GLfloat p3, GLfloat p4, GLfloat p5,
-				GLfloat p6, GLfloat p7, GLfloat p8);
-			constexpr mat3(mat4 x);
-			constexpr mat3(vec3 x1, vec3 x2, vec3 x3);*/
-		#endif
-	} mat3;
+typedef struct vec2
+{
+  //		GLfloat x, y;
+  union
+  {
+    GLfloat x;
+    GLfloat s;
+  };
+  union
+  {
+    GLfloat y;
+    GLfloat t;
+  };
 
+#ifdef __cplusplus
+  constexpr vec2();
+  constexpr vec2(GLfloat x2, GLfloat y2);
+#endif
+} vec2, *vec2Ptr;
 
+typedef struct mat4
+{
+  GLfloat m[16];
+#ifdef __cplusplus
+  constexpr mat4();
+  constexpr mat4(GLfloat x2);
+  constexpr mat4(GLfloat p0, GLfloat p1, GLfloat p2, GLfloat p3,
+                 GLfloat p4, GLfloat p5, GLfloat p6, GLfloat p7,
+                 GLfloat p8, GLfloat p9, GLfloat p10, GLfloat p11,
+                 GLfloat p12, GLfloat p13, GLfloat p14, GLfloat p15);
+  constexpr mat4(mat3 x);
+  void setLine(unsigned char line, vec4 lineValue) noexcept;
+#endif
+} mat4;
+typedef struct mat3
+{
+  GLfloat m[9];
+#ifdef __cplusplus
+  constexpr mat3();
+  constexpr mat3(GLfloat x2);
+  constexpr mat3(GLfloat p0, GLfloat p1, GLfloat p2,
+                 GLfloat p3, GLfloat p4, GLfloat p5,
+                 GLfloat p6, GLfloat p7, GLfloat p8);
+  constexpr mat3(mat4 x);
+  constexpr mat3(vec3 x1, vec3 x2, vec3 x3);
+  explicit inline operator mat4() const noexcept
+  {
+    return mat3tomat4(*this);
+  }
 
-//#ifdef __cplusplus
-//extern "C" {
-//#endif
+  void setLine(unsigned char line, vec3 lineValue) noexcept;
+  /* constexpr mat3();
+constexpr mat3(GLfloat x2);
+constexpr mat3(GLfloat p0, GLfloat p1, GLfloat p2,
+GLfloat p3, GLfloat p4, GLfloat p5,
+GLfloat p6, GLfloat p7, GLfloat p8);
+constexpr mat3(mat4 x);
+constexpr mat3(vec3 x1, vec3 x2, vec3 x3);*/
+#endif
+} mat3;
+
+// #ifdef __cplusplus
+// extern "C" {
+// #endif
 
 // New better name for SetVector and replacements for constructors
-	vec2 SetVec2(GLfloat x, GLfloat y);
-	vec3 SetVec3(GLfloat x, GLfloat y, GLfloat z);
-	vec4 SetVec4(GLfloat x, GLfloat y, GLfloat z, GLfloat w);
+vec2 SetVec2(GLfloat x, GLfloat y);
+vec3 SetVec3(GLfloat x, GLfloat y, GLfloat z);
+vec4 SetVec4(GLfloat x, GLfloat y, GLfloat z, GLfloat w);
 
-	vec3 SetVector(GLfloat x, GLfloat y, GLfloat z);
-	mat3 SetMat3(GLfloat p0, GLfloat p1, GLfloat p2, GLfloat p3, GLfloat p4, GLfloat p5, GLfloat p6, GLfloat p7, GLfloat p8);
-	mat4 SetMat4(GLfloat p0, GLfloat p1, GLfloat p2, GLfloat p3,
-				GLfloat p4, GLfloat p5, GLfloat p6, GLfloat p7,
-				GLfloat p8, GLfloat p9, GLfloat p10, GLfloat p11, 
-				GLfloat p12, GLfloat p13, GLfloat p14, GLfloat p15
-				);
+vec3 SetVector(GLfloat x, GLfloat y, GLfloat z);
+mat3 SetMat3(GLfloat p0, GLfloat p1, GLfloat p2, GLfloat p3, GLfloat p4, GLfloat p5, GLfloat p6, GLfloat p7, GLfloat p8);
+mat4 SetMat4(GLfloat p0, GLfloat p1, GLfloat p2, GLfloat p3,
+             GLfloat p4, GLfloat p5, GLfloat p6, GLfloat p7,
+             GLfloat p8, GLfloat p9, GLfloat p10, GLfloat p11,
+             GLfloat p12, GLfloat p13, GLfloat p14, GLfloat p15);
 // Basic vector operations on vec3's. (vec4 not included since I never need them.)
 // Note: C++ users can also use operator overloading, defined below.
-	vec3 VectorSub(vec3 a, vec3 b);
-	vec3 VectorAdd(vec3 a, vec3 b);
-	vec3 cross(vec3 a, vec3 b);
-	GLfloat dot(vec3 a, vec3 b);
-	vec3 ScalarMult(vec3 a, GLfloat s);
-	GLfloat Norm(vec3 a);
-	vec3 normalize(vec3 a);
-	vec3 CalcNormalVector(vec3 a, vec3 b, vec3 c);
-	void SplitVector(vec3 v, vec3 n, vec3 *vn, vec3 *vp);
+vec3 VectorSub(vec3 a, vec3 b);
+vec3 VectorAdd(vec3 a, vec3 b);
+vec3 cross(vec3 a, vec3 b);
+GLfloat dot(vec3 a, vec3 b);
+vec3 ScalarMult(vec3 a, GLfloat s);
+GLfloat Norm(vec3 a);
+vec3 normalize(vec3 a);
+vec3 CalcNormalVector(vec3 a, vec3 b, vec3 c);
+void SplitVector(vec3 v, vec3 n, vec3 *vn, vec3 *vp);
 
 // Matrix operations primarily on 4x4 matrixes!
 // Row-wise by default but can be configured to column-wise (see SetTransposed)
 
-	mat4 IdentityMatrix();
-	mat4 Rx(GLfloat a);
-	mat4 Ry(GLfloat a);
-	mat4 Rz(GLfloat a);
-	mat4 T(GLfloat tx, GLfloat ty, GLfloat tz);
-	mat4 S(GLfloat sx, GLfloat sy, GLfloat sz);
-	mat4 Mult(mat4 a, mat4 b); // dest = a * b - rename to MultMat4 considered but I don't like to make the name of the most common operation longer
-	// but for symmetry, MultMat4 is made a synonym:
-	#define MultMat4 Mult
+mat4 IdentityMatrix();
+mat4 Rx(GLfloat a);
+mat4 Ry(GLfloat a);
+mat4 Rz(GLfloat a);
+mat4 T(GLfloat tx, GLfloat ty, GLfloat tz);
+mat4 S(GLfloat sx, GLfloat sy, GLfloat sz);
+mat4 Mult(mat4 a, mat4 b); // dest = a * b - rename to MultMat4 considered but I don't like to make the name of the most common operation longer
+// but for symmetry, MultMat4 is made a synonym:
+#define MultMat4 Mult
 
-	vec3 MultVec3(mat4 a, vec3 b); // result = a * b
-	vec4 MultVec4(mat4 a, vec4 b);
+vec3 MultVec3(mat4 a, vec3 b); // result = a * b
+vec4 MultVec4(mat4 a, vec4 b);
 
 // Mat3 operations (new)
-	mat3 MultMat3(mat3 a, mat3 b); // m = a * b
-	vec3 MultMat3Vec3(mat3 a, vec3 b); // result = a * b
+mat3 MultMat3(mat3 a, mat3 b);     // m = a * b
+vec3 MultMat3Vec3(mat3 a, vec3 b); // result = a * b
 
-	void OrthoNormalizeMatrix(mat4 *R);
-	mat4 transpose(mat4 m);
-	mat3 TransposeMat3(mat3 m);
-	mat4 ArbRotate(vec3 axis, GLfloat fi);
-	mat4 CrossMatrix(vec3 a);
-	mat4 MatrixAdd(mat4 a, mat4 b);
+void OrthoNormalizeMatrix(mat4 *R);
+mat4 transpose(mat4 m);
+mat3 TransposeMat3(mat3 m);
+mat4 ArbRotate(vec3 axis, GLfloat fi);
+mat4 CrossMatrix(vec3 a);
+mat4 MatrixAdd(mat4 a, mat4 b);
 
 // Configure, i.e. if you want matrices to be column-wise
-	void SetTransposed(char t);
+void SetTransposed(char t);
 
 // GLU replacement functions
-	mat4 lookAtv(vec3 p, vec3 l, vec3 v);
-	mat4 lookAt(GLfloat px, GLfloat py, GLfloat pz, 
-			GLfloat lx, GLfloat ly, GLfloat lz,
-			GLfloat vx, GLfloat vy, GLfloat vz);
-	mat4 perspective(float fovyInDegrees, float aspectRatio,
-                      float znear, float zfar);
-	mat4 frustum(float left, float right, float bottom, float top,
-                  float znear, float zfar);
-	mat4 ortho(GLfloat left, GLfloat right, GLfloat bottom,
-			GLfloat top, GLfloat near, GLfloat far);
+mat4 lookAtv(vec3 p, vec3 l, vec3 v);
+mat4 lookAt(GLfloat px, GLfloat py, GLfloat pz,
+            GLfloat lx, GLfloat ly, GLfloat lz,
+            GLfloat vx, GLfloat vy, GLfloat vz);
+mat4 perspective(float fovyInDegrees, float aspectRatio,
+                 float znear, float zfar);
+mat4 frustum(float left, float right, float bottom, float top,
+             float znear, float zfar);
+mat4 ortho(GLfloat left, GLfloat right, GLfloat bottom,
+           GLfloat top, GLfloat near, GLfloat far);
 
 // For creating a normal matrix
-	mat3 InvertMat3(mat3 in);
-	mat3 InverseTranspose(mat4 in);
-	mat4 InvertMat4(mat4 a);
+mat3 InvertMat3(mat3 in);
+mat3 InverseTranspose(mat4 in);
+mat4 InvertMat4(mat4 a);
 
 // Simple conversions
-	mat3 mat4tomat3(mat4 m);
-	mat4 mat3tomat4(mat3 m);
-	vec3 vec4tovec3(vec4 v);
-	vec4 vec3tovec4(vec3 v);
+mat3 mat4tomat3(mat4 m);
+mat4 mat3tomat4(mat3 m);
+
+vec3 vec4tovec3(vec4 v);
+vec4 vec3tovec4(vec3 v);
 
 // Convenient printing calls
-	void printMat4(mat4 m);
-	void printVec3(vec3 in);
+void printMat4(mat4 m);
+void printVec3(vec3 in);
 
 /* Utility functions for easier uploads to shaders with error messages. */
 // NEW as prototype 2022, added to VU 2023
-	void uploadMat4ToShader(GLuint shader, const char *nameInShader, mat4 m);
-	void uploadUniformIntToShader(GLuint shader, const char *nameInShader, GLint i);
-	void uploadUniformFloatToShader(GLuint shader, const char *nameInShader, GLfloat f);
-	void uploadUniformFloatArrayToShader(GLuint shader, const char *nameInShader, GLfloat *f, int arrayLength);
-	void uploadUniformVec3ToShader(GLuint shader, const char *nameInShader, vec3 v);
-	void uploadUniformVec3ArrayToShader(GLuint shader, const char *nameInShader, vec3 *a, int arrayLength);
-	void bindTextureToTextureUnit(GLuint tex, int unit);
+void uploadMat4ToShader(GLuint shader, const char *nameInShader, mat4 m);
+void uploadUniformIntToShader(GLuint shader, const char *nameInShader, GLint i);
+void uploadUniformFloatToShader(GLuint shader, const char *nameInShader, GLfloat f);
+void uploadUniformFloatArrayToShader(GLuint shader, const char *nameInShader, GLfloat *f, int arrayLength);
+void uploadUniformVec3ToShader(GLuint shader, const char *nameInShader, vec3 v);
+void uploadUniformVec3ArrayToShader(GLuint shader, const char *nameInShader, vec3 *a, int arrayLength);
+void bindTextureToTextureUnit(GLuint tex, int unit);
 
 #ifdef __cplusplus
 // Convenient overloads for C++, closer to GLSL
-	mat3 inverse(mat3 m);
-	mat4 inverse(mat4 m);
-	mat3 transpose(mat3 m);
-	mat4 S(GLfloat s);
-	mat4 S(vec3 s);
-	mat4 lookAt(vec3 p, vec3 l, vec3 u);
-	mat4 zeroOutTranslation(mat4 lhs);
+mat3 inverse(mat3 m);
+mat4 inverse(mat4 m);
+mat3 transpose(mat3 m);
+mat4 S(GLfloat s);
+mat4 S(vec3 s);
+mat4 lookAt(vec3 p, vec3 l, vec3 u);
+mat4 zeroOutTranslation(mat4 lhs);
 #else
 #endif // __cplusplus
 
-//#ifdef __cplusplus
-//}
-//#endif
+// #ifdef __cplusplus
+// }
+// #endif
 
 #ifdef __cplusplus
 #include <iostream>
@@ -354,27 +388,27 @@
 vec3 operator+(const vec3 &a, const vec3 &b); // vec3+vec3;
 vec3 operator-(const vec3 &a, const vec3 &b); // vec3-vec3;
 vec3 operator-(const vec3 &a);
-	// Questionable, not like GLSL
+// Questionable, not like GLSL
 float operator*(const vec3 &a, const vec3 &b); // vec3 dot vec3;
-vec3 operator*(const vec3 &b, double a); // vec3 * scalar;
-vec3 operator*(double a, const vec3 &b); // scalar * vec3;
-vec3 operator/(const vec3 &b, double a); // vec3 / scalar;
-void operator+=(vec3 &a, const vec3 &b); // vec3+=vec3;
-void operator-=(vec3 &a, const vec3 &b); // vec3-=vec3;
-void operator*=(vec3 &a, const float &b); // vec3*=scalar;
-void operator/=(vec3 &a, const float &b); // vec3/=scalar;
+vec3 operator*(const vec3 &b, double a);       // vec3 * scalar;
+vec3 operator*(double a, const vec3 &b);       // scalar * vec3;
+vec3 operator/(const vec3 &b, double a);       // vec3 / scalar;
+void operator+=(vec3 &a, const vec3 &b);       // vec3+=vec3;
+void operator-=(vec3 &a, const vec3 &b);       // vec3-=vec3;
+void operator*=(vec3 &a, const float &b);      // vec3*=scalar;
+void operator/=(vec3 &a, const float &b);      // vec3/=scalar;
 // --- vec4 operations ---
 
-vec4 operator+(const vec4 &a, const vec4 &b); // vec4+vec4;
-vec4 operator-(const vec4 &a, const vec4 &b); // vec4-vec4;
-	// Questionable, not like GLSL
+vec4 operator+(const vec4 &a, const vec4 &b);  // vec4+vec4;
+vec4 operator-(const vec4 &a, const vec4 &b);  // vec4-vec4;
+                                               // Questionable, not like GLSL
 float operator*(const vec4 &a, const vec4 &b); // vec4 dot vec4;
-vec4 operator*(const vec4 &b, double a); // vec4 * scalar;
-vec4 operator*(double a, const vec4 &b); // scalar * vec4;
-vec4 operator/(const vec4 &b, double a); // vec4 / scalar;
+vec4 operator*(const vec4 &b, double a);       // vec4 * scalar;
+vec4 operator*(double a, const vec4 &b);       // scalar * vec4;
+vec4 operator/(const vec4 &b, double a);       // vec4 / scalar;
 
-void operator+=(vec4 &a, const vec4 &b); // vec4+=vec4;
-void operator-=(vec4 &a, const vec4 &b); // vec4-=vec4;
+void operator+=(vec4 &a, const vec4 &b);  // vec4+=vec4;
+void operator-=(vec4 &a, const vec4 &b);  // vec4-=vec4;
 void operator*=(vec4 &a, const float &b); // vec4 *= scalar;
 void operator/=(vec4 &a, const float &b); // vec4 /= scalar;
 // --- Matrix multiplication ---
@@ -396,7 +430,7 @@ bool operator!=(const mat4 &a, const mat4 &b);
 
 // display
 
-std::ostream& operator<<(std::ostream& os, const vec3&v);
+std::ostream &operator<<(std::ostream &os, const vec3 &v);
 
 #include "VectorUtils4.inl"
 #endif // __cplusplus

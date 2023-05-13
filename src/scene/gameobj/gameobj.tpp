@@ -1,20 +1,61 @@
-namespace obj {
+#include <ostream>
 
-  template <class> class Property;
+namespace obj
+{
+
+  template <class>
+  class Property;
+  template <class>
+  class AnchoredProp;
+  using namespace traits;
+
+  // -------------- NON-MEMBER OPERATORS
+  template <class ArgType, class T>
+  auto operator+(Property<ArgType> prop, cpy_or_cref_t<T> rhs) -> decltype(prop() + rhs)
+  {
+    return prop() += rhs;
+  }
+
+  template <class ArgType, class T>
+  auto operator-(Property<ArgType> prop, cpy_or_cref_t<T> rhs) -> decltype(prop() - rhs)
+  {
+    return prop() -= rhs;
+  }
+
+  template <class ArgType, class T>
+  auto operator*(Property<ArgType> prop, cpy_or_cref_t<T> rhs) -> decltype(prop() * rhs)
+  {
+    return prop() -= rhs;
+  }
+
+  template <class ArgType, class T>
+  auto operator/(Property<ArgType> prop, cpy_or_cref_t<T> rhs) -> decltype(prop() / rhs)
+  {
+    return prop() /= rhs;
+  }
 
   template <class ArgType>
-  Property<ArgType>::Property(Property<ArgType> const &other) : m_prop{other.m_prop}
+  std::ostream &operator<<(std::ostream &os, Property<ArgType> const &prop)
   {
+    return os << prop();
+  }
+
+  // ---------- AnchoredProp
+
+  template <class ArgType>
+  AnchoredProp<ArgType>::AnchoredProp(AnchoredProp<ArgType> const &other)
+  {
+    Property<ArgType>::m_prop = other.m_prop;
     if (other.hasAnchor())
       attach(*other.m_anchor);
   }
 
   template <class ArgType>
-  Property<ArgType> &Property<ArgType>::operator=(Property<ArgType> const &other)
+  AnchoredProp<ArgType> &AnchoredProp<ArgType>::operator=(AnchoredProp<ArgType> const &other)
   {
     if (&other != this)
     {
-      m_prop = other.m_prop;
+      Property<ArgType>::m_prop = other.m_prop;
       if (other.hasAnchor())
         attach(*other.m_anchor);
     }
@@ -22,7 +63,7 @@ namespace obj {
   }
 
   template <class ArgType>
-  void Property<ArgType>::attach(Anchor<ArgType> &anchor)
+  void AnchoredProp<ArgType>::attach(Anchor &anchor)
   {
     if (hasAnchor())
     {
@@ -33,7 +74,7 @@ namespace obj {
   }
 
   template <class ArgType>
-  void Property<ArgType>::detach()
+  void AnchoredProp<ArgType>::detach()
   {
     if (not hasAnchor())
       return;

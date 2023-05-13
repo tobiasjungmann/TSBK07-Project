@@ -3,10 +3,10 @@
 
 namespace constants
 {
-    inline constexpr int display_size { 900 }; 
-    inline constexpr const char KEY_FORWARD = 'w';
-inline constexpr const char KEY_LEFT = 'a';
-inline constexpr const char KEY_BACK = 's';
-inline constexpr const char KEY_RIGHT = 'd';
+  constexpr int display_size{900};
+  constexpr const char KEY_FORWARD = 'w';
+  constexpr const char KEY_LEFT = 'a';
+  constexpr const char KEY_BACK = 's';
+  constexpr const char KEY_RIGHT = 'd';
 }
 #endif

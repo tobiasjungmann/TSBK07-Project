@@ -70,7 +70,8 @@
         "strstream": "cpp",
         "cfenv": "cpp",
         "codecvt": "cpp",
-        "*.tpp": "cpp"
+        "*.tpp": "cpp",
+        "*.ipp": "cpp"
     },
     "editor.detectIndentation": false
 }

@@ -17,3 +17,7 @@ template <typename T>
 constexpr std::underlying_type_t<T> to_underlying(T value) noexcept {
     return static_cast<std::underlying_type_t<T>>(value);
 }
+
+
+template <typename From, typename To>
+using Castable = std::enable_if_t<std::is_convertible_v<From, To>>;

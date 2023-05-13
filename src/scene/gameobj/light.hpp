@@ -18,7 +18,7 @@ namespace scn
     void detachOfCamera(scn::Camera &camera);
 
     vec3 color;
-    obj::Property<vec3> direction{vec3(0)};
+    obj::AnchoredProp<vec3> direction{vec3(0)};
     obj::prop::Position position;
 
     // coefficients for different effect

@@ -3,17 +3,33 @@
 #include "LittleOBJLoader.h"
 #include "gameobj.hpp"
 
+namespace scn
+{
+  struct Terrain;
+}
+
 namespace obj
 {
-  class Fish : public GameObj
+  class Fish : public CollidingObject
   {
   public:
-    Fish(std::string modelName, vec3 pos = vec3(0));
-    // FIXME call Base class constructor
+    Fish(Modelv2 mdl, vec3 pos, vec3 dir, float speed, vec3 up = vec3(0,1,0), vec3 size = vec3(1));
+    void moveSingleStep() override;
+    void adaptToTerrain(scn::Terrain &terrain) override;
+    void handleObjectCollision(CollidingObject *other) override;
+    void update() override;
+
+  protected:
+    void updateModelToWorldRotation();
+    inline mat3 orientationMtx() const noexcept
+    {
+      return {
+          0, -1, 0,
+          0, 0, 1,
+          -1, 0, 0};
+    }
 
   private:
-    vec3 pos;
-    vec3 vel;
-    vec3 acc;
+    float m_speed = 1.0f;
   };
 }

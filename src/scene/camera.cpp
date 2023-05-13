@@ -36,7 +36,6 @@ namespace scn
       }
     }
 
-    // FIXME there should be this function in header <cmath>
     float toRadians(float degrees)
     {
       return degrees * (M_PI / 180);

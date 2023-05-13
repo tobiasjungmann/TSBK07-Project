@@ -38,7 +38,7 @@ public:
   };
 
 public:
-  Modelv2() : raw{nullptr}, lightProps{nullptr} {}
+  // Modelv2() : raw{nullptr}, lightProps{nullptr} {}
   Modelv2(Model *raw) : raw{raw}, lightProps{nullptr} {}
   Modelv2(Model *raw, MaterialLight &&props) : raw{raw}, lightProps{std::make_unique<MaterialLight>(props)} {}
   Modelv2(std::string const &key, std::string const &path = "") : Modelv2(ResourceManager::get().getModel(key, path)) {}
@@ -55,6 +55,23 @@ public:
     std::swap(this->raw, other.raw);
     std::swap(this->lightProps, other.lightProps);
     return *this;
+  }
+
+  inline mat4 *matrix()
+  {
+    return m_matrix.get();
+  }
+
+  inline mat4 const *matrix() const
+  {
+    return m_matrix.get();
+  }
+
+  inline void matrix(mat4 matrix)
+  {
+    if (m_matrix == nullptr)
+      m_matrix = std::make_unique<mat4>();
+    *m_matrix = matrix;
   }
 
   inline void draw(GLuint program)
@@ -81,4 +98,5 @@ public:
 private:
   Model *raw;
   std::unique_ptr<MaterialLight> lightProps;
+  std::unique_ptr<mat4> m_matrix;
 };
