@@ -1,3 +1,4 @@
+#pragma once
 /*
 Todo compute terrain here -> p
 return model for main.init()

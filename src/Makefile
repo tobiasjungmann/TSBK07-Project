@@ -15,12 +15,12 @@ PROGRAM := $(build_dir)/$(TARGET)
 
 
 all: $(targets) | $(obj_dirs)
-	$(CXX) $(targets) $(common_objs) $(LDLIBS) -o $(PROGRAM)
+	$(CXX) $(targets) $(common_objs) $(LDLIBS) -o $(PROGRAM) -g
 
 .PHONY: create_objdirs all
 
 $(build_dir)/%.o: %.cpp
-	$(CXX) $(CPPOPTS) $(CPPFLAGS) -c $< -o $@ $(includes) $(MACROS) $(LDLIBS)
+	$(CXX) $(CPPOPTS) $(CPPFLAGS) -c $< -o $@ $(includes) $(MACROS) $(LDLIBS) -g
 
 $(obj_dirs):
 	for dir in $(obj_dirs); do \
