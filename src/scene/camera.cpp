@@ -79,7 +79,7 @@ namespace scn
     pos.x = terrain.nextInsideFieldWidth(pos.x, 10);
     pos.z = terrain.nextInsideFieldWidth(pos.z, 10);
 
-    const float maxAltitude = 25.f;
+    const float maxAltitude = 50.f;
     if (pos.y > maxAltitude)
       pos.y = maxAltitude;
 

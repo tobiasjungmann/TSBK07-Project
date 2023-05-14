@@ -58,7 +58,7 @@ namespace scn
       return m_height;
     }
 
-    constexpr static GLfloat scalingFactor = 10.0;
+    constexpr static GLfloat scalingFactor = 1.0;
 
   private:
     const std::string key;
