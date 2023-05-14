@@ -23,10 +23,11 @@ namespace obj
     updateModelToWorldRotation();
   };
 
+
   void Fish::moveSingleStep()
   {
     m_position += m_direction * m_speed;
-    model().matrix(3, m_position().x);
+    model().matrix()->m[3] = m_position().x;
     model().matrix()->m[7] = m_position().y;
     model().matrix()->m[11] = m_position().z;
   }
@@ -48,10 +49,6 @@ namespace obj
     if (scene.terrain)
     {
       adaptToTerrain(*scene.terrain);
-      /*
-      hälte des feldes -x als vorziechen nehmen
-      */
-      // TODO momentane movement dir beachten
       if (m_position().x != (*scene.terrain).nextInsideFieldWidth(m_position().x, 1))
       { // change direction only once until margin is left.
         if ((m_position().x < (*scene.terrain).height() / 2 && m_direction().x<0) || (m_position().x > (*scene.terrain).height() / 2 && m_direction().x>0))

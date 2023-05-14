@@ -21,6 +21,7 @@
 #include "event.hpp"
 #include "debugging.h"
 #include "scene/gameobj/fish.hpp"
+#include "scene/gameobj/fishCarp.hpp"
 
 #define FRAME_GAP_MS 20
 
@@ -97,7 +98,7 @@ void init(void)
   mainScene.addTerrain(std::move(terrain));
   mainScene.camera.position.x = mainScene.camera.position.z = - mainScene.terrain->width() / 2; 
 
-
+ 
   Modelv2 fish_m{"green_reef", "fish.obj",  "green_reef",4, "fish.png"};
   fish_m.setLightProps(0.9, 0.6, 0.7, 120.0);
 

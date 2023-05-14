@@ -36,7 +36,7 @@ namespace obj
           0, 0, 1,
           -1, 0, 0};
     }
-  private:
+  protected:
     float m_speed = 1.0f;
   };
 }

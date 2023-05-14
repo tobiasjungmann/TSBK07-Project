@@ -285,6 +285,7 @@ namespace obj
   class ModelledObject : public GameObj
   {
   protected:
+  // todo hiere
     void updateModelToWorldRotation()
     {
       updateModelToWorldRotation(m_direction, m_upVector);
