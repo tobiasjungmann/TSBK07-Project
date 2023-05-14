@@ -3,6 +3,7 @@
 #include "../terrain.hpp"
 #include "gameobj.hpp"
 #include "../scene.hpp"
+#include "../constants.hpp"
 
 namespace obj
 {
@@ -45,9 +46,31 @@ namespace obj
     rotateHitbox(mat3(*model().matrix()) * orientationMtx());
 
     if (scene.terrain)
-    adaptToTerrain(*scene.terrain);
-    for (size_t u = 0; u < index; u++){
-      auto collideObj {dynamic_cast<obj::CollidingObject*>(scene.getObj(u))};
+    {
+      adaptToTerrain(*scene.terrain);
+      /*
+      hälte des feldes -x als vorziechen nehmen
+      */
+      // TODO momentane movement dir beachten
+      if (m_position().x != (*scene.terrain).nextInsideFieldWidth(m_position().x, 1))
+      { // change direction only once until margin is left.
+        if ((m_position().x < (*scene.terrain).height() / 2 && m_direction().x<0) || (m_position().x > (*scene.terrain).height() / 2 && m_direction().x>0))
+        {
+          m_direction().x = -m_direction().x;
+        }
+      }
+      if (m_position().z != (*scene.terrain).nextInsideFieldWidth(m_position().z, 10))
+      {
+               if ((m_position().z < (*scene.terrain).width() / 2 && m_direction().z<0) || (m_position().z > (*scene.terrain).width() / 2 && m_direction().z>0))
+        {
+          m_direction().z = -m_direction().z;
+        }
+      }
+    }
+
+    for (size_t u = 0; u < index; u++)
+    {
+      auto collideObj{dynamic_cast<obj::CollidingObject *>(scene.getObj(u))};
       if (collideObj)
         handleObjectCollision(collideObj);
     }

@@ -91,6 +91,6 @@ inline Model *ResourceManager::getModel(std::string const &key, Generator mdlGen
     else
       modelsMap.emplace(key, model);
   }
-
+ 
   return modelsMap[key].get();
 }

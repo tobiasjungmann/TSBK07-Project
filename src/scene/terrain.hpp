@@ -45,17 +45,22 @@ namespace scn
       return m_model;
     }
 
-    inline int width() const noexcept {
+    inline float width() const noexcept {
       return m_width;
     }
-    inline int height() const noexcept {
+    inline float height() const noexcept {
       return m_height;
     }
+
+    constexpr static GLfloat scalingFactor=10.0;
 
   private:
     const std::string key;
     Modelv2 m_model;
-    int m_width;
-    int m_height;
+    float m_width;
+    float m_height;
+
+    int m_vertices_width;
+    int m_vertices_height;
   };
 }

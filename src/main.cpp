@@ -90,11 +90,10 @@ void init(void)
   const scn::Camera camera{{0.f, 10.f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
   mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix); // FIXME give terrain
 
-  scn::Terrain terrain("fft-terrain.tga");
+  scn::Terrain terrain("44-terrain.tga");
   terrain.model().init(mainScene.shader->hndl, "in_Position", "in_Normal", NULL);
   terrain.model().setLightProps(1.0, 1.0, 1.0, 100.0);
   mainScene.addTerrain(std::move(terrain));
-
   mainScene.camera.position.x = mainScene.camera.position.z = - mainScene.terrain->width() / 2; 
 
   Modelv2 fish_m{"green_reef", "green_reef.obj"};
