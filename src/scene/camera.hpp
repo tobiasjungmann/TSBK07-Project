@@ -13,6 +13,7 @@ namespace obj {
 
 namespace evt {
   struct Context;
+  class Terrain;
 }
 
 namespace scn
@@ -47,7 +48,7 @@ namespace scn
      * setMousePosition and setPressedKeys must be called before calling this function.
      *
      */
-    void updateCameraPosition(evt::Context const& ctxt);
+    void updateCameraPosition(evt::Context const& ctxt, Terrain const& terrain);
 
     // Requires that obj has a setPos() method
     // And that obj is a GameObj

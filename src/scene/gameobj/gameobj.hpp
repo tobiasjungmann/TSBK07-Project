@@ -282,7 +282,7 @@ namespace obj
 namespace obj
 {
 
-  class ModelledObject : public MutableObj
+  class ModelledObject : public GameObj
   {
   protected:
     void updateModelToWorldRotation()
@@ -297,12 +297,6 @@ namespace obj
      */
     void updateModelToWorldRotation(vec3 newDirection, vec3 newUp);
 
-  protected:
-    virtual inline mat3 orientationMtx() const noexcept
-    {
-      return IdentityMatrix();
-    }
-
   public:
     ModelledObject(Modelv2 model,
                    prop::Position pos,
@@ -316,11 +310,14 @@ namespace obj
 
     {
     }
+    virtual ~ModelledObject() = default;
 
-    void update(scn::Scene &) override {};
-    void update(scn::Scene &, size_t) override {};
+    virtual inline mat3 orientationMtx() const noexcept
+    {
+      return IdentityMatrix();
+    }
 
-    inline Modelv2 model()
+    inline Modelv2& model()
     {
       return m_model;
     }
@@ -351,9 +348,6 @@ namespace obj
      * @param normalToCollisionPoint
      */
     virtual void collide(vec3 position, vec3 normalToCollisionPoint) = 0;
-
-    void update(scn::Scene &) override {};
-    void update(scn::Scene &, size_t) override {};
 
     /**
      * @brief Precomputes the next positions of the model based on the movement direction and the

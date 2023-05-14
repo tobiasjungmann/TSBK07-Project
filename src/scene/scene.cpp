@@ -96,7 +96,7 @@ namespace scn
 
   void Scene::pushObject(obj::ModelledObject* newObj)
   {
-      m_objs.push_back(newObj);
+      m_objs.emplace_back(newObj);
   }
 
   void Scene::pushObject(obj::ModelledObject* newObj, mat4 m2wMtx)
@@ -132,8 +132,9 @@ namespace scn
 
   void Scene::update() {
     for (size_t i =0; i < m_objs.size(); i++) {
-      auto obj {m_objs[i]};
-      obj->update(*this, i);
+      auto obj {m_objs[i].get()};
+      if (auto mut {dynamic_cast<obj::MutableObj *>(obj)}; mut != nullptr)
+        mut->update(*this, i);
     }
   }
 

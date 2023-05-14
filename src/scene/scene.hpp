@@ -70,13 +70,13 @@ namespace scn
     void addLightSource(const Light &light);
     void removeLightSource(long index);
 
-    inline std::vector<obj::ModelledObject*>::iterator iterateObjs()
+    inline auto iterateObjs()
     {
       return m_objs.begin();
     }
 
     inline obj::ModelledObject* getObj(long index) {
-      return m_objs[index];
+      return m_objs[index].get();
     }
 
     void update();
@@ -96,7 +96,7 @@ namespace scn
     std::unique_ptr<Skybox> skybox = nullptr;
 
   private:
-    std::vector<obj::ModelledObject*> m_objs; // BUG memory leak, no one manage the objects except scene, can't have unique_ptr for polymorphism though
+    std::vector<std::unique_ptr<obj::ModelledObject>> m_objs; // BUG memory leak, no one manage the objects except scene, can't have unique_ptr for polymorphism though
     std::vector<Light> m_lights;
 
     std::unique_ptr<SceneShader> m_shader = nullptr;

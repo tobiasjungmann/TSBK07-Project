@@ -95,9 +95,11 @@ void init(void)
   scn::Terrain terrain("fft-terrain.tga");
   terrain.model().setLightProps(1.0, 1.0, 1.0, 100.0);
   mainScene.addTerrain(std::move(terrain));
+  mainScene.camera.position.x = mainScene.camera.position.z = - mainScene.terrain->width() / 2; 
+
 
   Modelv2 fish_m{"green_reef", "fish.obj",  "green_reef",4, "fish.png"};
-  fish_m.setLightProps(1.0, 0.8, 0.5, 100.0);
+  fish_m.setLightProps(0.9, 0.6, 0.7, 120.0);
 
   obj::Fish* fish = new obj::Fish(fish_m, 0, vec3(1,0,0), 0.1f);
   // mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
@@ -107,7 +109,7 @@ void init(void)
 
   scn::Light blueLight{{0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, true};
 
-  blueLight.setCoefficients(0.3, 0.7, 0);
+  blueLight.setCoefficients(0.3, 0.4, 0);
 
   whiteLight.setCoefficients(0, 2.0, 0.6);
   whiteLight.setSpotlight(25, 35);
@@ -119,7 +121,7 @@ void init(void)
   mainScene.addLightSource(whiteLight);
 
   // mainScene.pushObject(terrain.model()); // FIXME remove this once the terrain is managed by Scene
-  mainScene.pushObject(fish);
+  mainScene.pushObject(fish, fish->orientationMtx());
   glutRepeatingTimer(FRAME_GAP_MS);
 
   glutPassiveMotionFunc(mouseControlCallback);
@@ -131,7 +133,7 @@ void display(void)
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   keyControlCheck();
 
-  mainScene.camera.updateCameraPosition(context);
+  mainScene.camera.updateCameraPosition(context, *mainScene.terrain);
 
   // FIXME move this out of the way
   // update all objects
