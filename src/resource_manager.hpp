@@ -48,7 +48,7 @@ public:
     modelsMap.erase(key);
   }
 
-  GLuint getTexture(std::string const &key);
+  GLuint getTexture(std::string const &key, std::string const &path = "");
   inline void freeTexture(std::string const &key)
   {
     texturesMap.erase(key);

@@ -42,7 +42,7 @@ namespace _helpers
     }
 
     if (shader->hasTexturing())
-      shader->uploadTexture(model.get());
+      shader->uploadTexture(model.texture());
     glDrawElements(GL_TRIANGLES, model.get()->numIndices, GL_UNSIGNED_INT, 0L);
   }
 }

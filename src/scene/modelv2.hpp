@@ -39,9 +39,9 @@ public:
 
 public:
   // Modelv2() : raw{nullptr}, lightProps{nullptr} {}
-  Modelv2(Model *raw) : raw{raw} {}
+  Modelv2(Model *raw, GLuint tex) : raw{raw}, texture{tex} {}
   Modelv2(Model *raw, MaterialLight &&props) : raw{raw}, lightProps{std::make_unique<MaterialLight>(props)} {}
-  Modelv2(std::string const &key, std::string const &path = "") : Modelv2(ResourceManager::get().getModel(key, path)) {}
+  Modelv2(std::string const &key, std::string const &modelPath = "",std::string const &texturePath = "") : Modelv2(ResourceManager::get().getModel(key, modelPath),ResourceManager::get().getTexture(key, texturePath)) {}
   Modelv2(Modelv2 const &other) : raw{other.raw}
   {
     if (other.lightProps)
@@ -101,8 +101,11 @@ public:
   // Return underlying Model
   inline Model *get() const { return raw; }
 
+   inline  GLuint texture() const { return m_texture; }
+
 private:
   Model *raw;
+  GLuint texture;
   std::unique_ptr<MaterialLight> lightProps {nullptr};
   std::unique_ptr<mat4> m_matrix {nullptr};
 };
