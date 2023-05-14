@@ -25,7 +25,7 @@ namespace obj
   void Fish::moveSingleStep()
   {
     m_position += m_direction * m_speed;
-    model().matrix()->m[3] = m_position().x; // BUG check that matrix is not nullptr
+    model().matrix(3, m_position().x);
     model().matrix()->m[7] = m_position().y;
     model().matrix()->m[11] = m_position().z;
   }
@@ -34,17 +34,18 @@ namespace obj
   {
     CollidingObject::updateModelToWorldRotation();
     model().matrix()->m[2] *= -1;
-    model().matrix()->m[5] *= -1;// FIXME check here that it was like that
+    model().matrix()->m[5] *= -1; // FIXME check here that it was like that
   }
 
-  void Fish::update(scn::Scene &scene) {
-    
+  void Fish::update(scn::Scene &scene)
+  {
   }
-  void Fish::update(scn::Scene &scene, size_t index) {
+  void Fish::update(scn::Scene &scene, size_t index)
+  {
     rotateHitbox(mat3(*model().matrix()) * orientationMtx());
-    
+
     if (scene.terrain)
-      adaptToTerrain(*scene.terrain);
+    adaptToTerrain(*scene.terrain);
     for (size_t u = 0; u < index; u++){
       auto collideObj {dynamic_cast<obj::CollidingObject*>(scene.getObj(u))};
       if (collideObj)

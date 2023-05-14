@@ -108,7 +108,7 @@ namespace scn
   {
     auto &rmgr{ResourceManager::get()};
     TextureData *texp{rmgr.getTextureData(name, path)};
-    m_width = texp->width;
+    m_width = texp->width; // FIXME careful is texture is scaled, then this value is false.
     m_height = texp->height;
     auto mdl{rmgr.getModel(key, generateTerrain, texp)};
     m_model = Modelv2(mdl);
@@ -157,6 +157,15 @@ namespace scn
       v2 = v2 * (1 - z_difference); // movement on the z axis (top left to top right)
     }
     return (startingPoint + v1 + v2).y;
+  }
+
+  float Terrain::nextInsideFieldWidth(float input, float offset) const
+  {
+    if (input < offset)
+      return offset;
+    if (input > m_width - offset)
+      return m_width - offset;
+    return input;
   }
 
   vec3 Terrain::getNormal(float x, float z) const

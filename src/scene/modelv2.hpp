@@ -84,6 +84,13 @@ public:
     *m_matrix = matrix;
   }
 
+  inline void matrix(int idx, float value)
+  {
+    if (m_matrix == nullptr)
+      m_matrix = std::make_unique<mat4>();
+    m_matrix.get()->m[idx] = value;
+  }
+
   inline void draw(GLuint program) const
   {
     DrawModel(raw, program);

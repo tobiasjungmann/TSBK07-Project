@@ -33,6 +33,7 @@ namespace scn
      * @return float
      */
     float computeHeight(float x, float z) const;
+    float nextInsideFieldWidth(float input, float offset) const;
 
     vec3 getNormal(float x, float z) const;
 
@@ -42,6 +43,13 @@ namespace scn
 
     inline Modelv2& model() {
       return m_model;
+    }
+
+    inline int width() const noexcept {
+      return m_width;
+    }
+    inline int height() const noexcept {
+      return m_height;
     }
 
   private:

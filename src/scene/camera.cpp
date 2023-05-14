@@ -2,6 +2,7 @@
 #include "camera.hpp"
 #include "../constants.hpp"
 #include "../event.hpp"
+#include "scene/terrain.hpp"
 #include "gameobj/gameobj.hpp"
 
 #define min(a, b) ((a) > (b) ? (b) : (a))
@@ -55,7 +56,7 @@ namespace scn
     return os;
   }
 
-  void Camera::updateCameraPosition(evt::Context const&ctxt)
+  void Camera::updateCameraPosition(evt::Context const &ctxt, Terrain const &terrain)
   {
     const float cameraSpeed = 0.5f;
     float sensitivity = 0.7f;
@@ -74,6 +75,15 @@ namespace scn
     if (ctxt.keys.d)
     {
       pos += normalize(cross(viewingDirection, up)) * cameraSpeed;
+    }
+    pos.x = terrain.nextInsideFieldWidth(pos.x, 10);
+    pos.z = terrain.nextInsideFieldWidth(pos.z, 10);
+
+    // check for collisions with the ground
+    float minHeigth = terrain.computeHeight(pos.x, pos.z) + 2.0; // + 0.5;        // TODO take a real hitbox size
+    if (pos.y < minHeigth)
+    {
+      pos.y = minHeigth;
     }
 
     float xmovement = helpers::computeMinMovement(ctxt.mouse.prevPos.x, ctxt.mouse.currPos.x) * sensitivity;
