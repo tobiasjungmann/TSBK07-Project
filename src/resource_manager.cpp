@@ -24,9 +24,10 @@ namespace rc
     void initModel(Model *raw, GLint texID, GLint gpuSlot)
     {
       using RM = ResourceManager;
-      if (not RM::texCoordVarName.empty() and texID == -1)
-        throw std::runtime_error("Tried to init a model with texture but without a texture ID");
-      InitModel(raw, RM::program, RM::vertexVarName.c_str(), RM::normalVarName.c_str(), RM::texCoordVarName.c_str(), gpuSlot, texID);
+      const char * vtxName = RM::vertexVarName.empty() ? NULL : RM::vertexVarName.c_str(); 
+      const char * norName = RM::normalVarName.empty() ? NULL : RM::normalVarName.c_str(); 
+      const char * texName = RM::texCoordVarName.empty() ? NULL : RM::texCoordVarName.c_str(); 
+      InitModel(raw, RM::program, vtxName, norName, texName, gpuSlot, texID);
     }
   }
 }

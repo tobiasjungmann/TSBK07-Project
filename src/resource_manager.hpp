@@ -99,7 +99,7 @@ namespace rc
     }
 
     TextureDataPtr getTextureData(std::string const &key, std::string const &path = "");
-    inline void freeTextureData(std::string const &key)
+    inline void releaseTextureData(std::string const &key)
     {
       texturesDataMap.erase(key);
     }

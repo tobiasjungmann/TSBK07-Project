@@ -45,7 +45,7 @@ namespace scn
 
     Model *generateTerrain(TextureData *tex)
     {
-      GLfloat scalingFactor =Terrain::scalingFactor;
+      GLfloat scalingFactor = Terrain::scalingFactor;
       int vertexCount = tex->width * tex->height;
       int triangleCount = (tex->width - 1) * (tex->height - 1) * 2;
       unsigned int x, z;
@@ -58,9 +58,9 @@ namespace scn
         for (z = 0; z < tex->height; z++)
         {
           // Vertex array. You need to scale this properly
-          vertexArray[(x + z * tex->width)].x = x *scalingFactor;
-          vertexArray[(x + z * tex->width)].y = (tex->imageData[(x + z * tex->width) * (tex->bpp / 8)] / 10.0 - 20);//*scalingFactor;
-          vertexArray[(x + z * tex->width)].z = z *scalingFactor;
+          vertexArray[(x + z * tex->width)].x = x * scalingFactor;
+          vertexArray[(x + z * tex->width)].y = (tex->imageData[(x + z * tex->width) * (tex->bpp / 8)] / 10.0 - 20); //*scalingFactor;
+          vertexArray[(x + z * tex->width)].z = z * scalingFactor;
           // Normal vectors. You need to calculate these.
 
           normalArray[(x + z * tex->width)].x = 0.0; // normalvector for this vertex
@@ -68,8 +68,8 @@ namespace scn
           normalArray[(x + z * tex->width)].z = 0.0;
 
           // Texture coordinates. You may want to scale them.
-          texCoordArray[(x + z * tex->width)].x = x*scalingFactor; // * 10; // (float)x / tex->width;
-          texCoordArray[(x + z * tex->width)].y = z*scalingFactor; // * 10; // (float)z / tex->height;
+          texCoordArray[(x + z * tex->width)].x = x * scalingFactor; // * 10; // (float)x / tex->width;
+          texCoordArray[(x + z * tex->width)].y = z * scalingFactor; // * 10; // (float)z / tex->height;
         }
       for (x = 0; x < tex->width - 1; x++)
         for (z = 0; z < tex->height - 1; z++)
@@ -103,37 +103,42 @@ namespace scn
 
 namespace scn
 {
-  Terrain::Terrain(std::string const &name, std::string const &path)
+  Terrain::Terrain(std::string const &name,
+                   std::string const &path,
+                   std::string const &texKey,
+                   GLint texGPUSlot,
+                   std::string const &texPath)
       : key{name},
         m_model{nullptr}
   {
     auto &rmgr{rc::ResourceManager::get()};
     TextureData *texp{rmgr.getTextureData(name, path)};
-//    m_width = (texp->width-1)*scalingFactor +1;     // last position must not be scaled
- //   m_height = (texp->height-1)*scalingFactor+1;
-    m_width = (texp->width)*scalingFactor;     // last position must not be scaled
-    m_height = (texp->height)*scalingFactor;
-    m_vertices_height=texp->height;
-    m_vertices_width=texp->width;
+    //    m_width = (texp->width-1)*scalingFactor +1;     // last position must not be scaled
+    //   m_height = (texp->height-1)*scalingFactor+1;
+    m_width = (texp->width) * scalingFactor; // last position must not be scaled
+    m_height = (texp->height) * scalingFactor;
+    m_vertices_height = texp->height;
+    m_vertices_width = texp->width;
     auto mdl{rmgr.getModel(key, generateTerrain, texp)};
     m_model = Modelv2(mdl);
-  }
 
-  Terrain::Terrain(std::string const &path)
-      : Terrain(path, path)
-  {
+    if (not texKey.empty())
+    {
+      GLint texID = rc::ResourceManager::get().getTexture(texKey, texPath);
+      m_model.texture({texID, texGPUSlot});
+    }
+    rmgr.releaseTextureData(name);
   }
 
   void Terrain::getTriangleVectors(float x_scaled, float z_scaled, vec3 &v1, vec3 &v2, vec3 &startingPoint) const
   {
     auto model{this->model().get()};
 
+    float x = x_scaled / scalingFactor;
+    float z = z_scaled / scalingFactor;
 
-    float x = x_scaled/scalingFactor;
-    float z = z_scaled/scalingFactor;
-   
-    float x_difference = x - int(x);// /scalingFactor)*scalingFactor;     
-    float z_difference = z - int(z);// /scalingFactor)*scalingFactor;
+    float x_difference = x - int(x); // /scalingFactor)*scalingFactor;
+    float z_difference = z - int(z); // /scalingFactor)*scalingFactor;
     vec3 p_bottom_left = model->vertexArray[int(x) + (int(z) + 1) * m_vertices_width];
     vec3 p_top_right = model->vertexArray[((int(x) + 1) + int(z) * m_vertices_width)];
     if (x_difference + z_difference < 1.0)
@@ -150,8 +155,8 @@ namespace scn
 
   float Terrain::computeHeight(float x, float z) const
   {
-    float x_difference = x - int(x/scalingFactor)*scalingFactor;
-    float z_difference = z - int(z/scalingFactor)*scalingFactor;
+    float x_difference = x - int(x / scalingFactor) * scalingFactor;
+    float z_difference = z - int(z / scalingFactor) * scalingFactor;
 
     vec3 v1, v2, startingPoint;
     getTriangleVectors(x, z, v1, v2, startingPoint);

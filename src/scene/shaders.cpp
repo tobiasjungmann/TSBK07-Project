@@ -15,7 +15,7 @@ using std::size_t;
 namespace
 {
   // SPECIFY gpuSlot to override the value
-  void pushTexture(Modelv2 const &mdl, GLuint program, GLint texUnitLoc = -1, GLint gpuSlot = -1)
+  void pushTexture(Modelv2 const &mdl, GLuint program, GLint texUnitLoc)
   {
     if (not mdl.hasTexture())
       throw std::runtime_error("Tried to push the texture for a model that has none.");
@@ -28,12 +28,15 @@ namespace
 
     glUseProgram(program);
 
-    gpuSlot = (gpuSlot < 0) ? mdl.texture().texGPUSlot : gpuSlot;
+
+    auto gpuSlot = mdl.texture().texGPUSlot;
     if (mdl.get()->texCoordArray)
     {
       glActiveTexture(GL_TEXTURE0 + gpuSlot);
       glBindTexture(GL_TEXTURE_2D, mdl.texture().texID);
       glUniform1i(texUnitLoc, gpuSlot);
+      GLint texScalingLoc = glGetUniformLocation(program, "texScalingF");
+      glUniform1f(texScalingLoc, mdl.texture().factor);
     }
     else
     {

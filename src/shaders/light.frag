@@ -37,6 +37,10 @@ uniform mat4 m2wMatrix;
 uniform MaterialLight materialLight;
 uniform Light lights[2];
 
+uniform sampler2D texUnit;
+uniform float texScalingF;
+
+in vec2 texCoord;
 out vec4 out_Color;
 
 /************* GLOBALS **************/
@@ -123,8 +127,6 @@ void main(void)
     ambientComponent *= materialLight.ambientCoeff;
 
 	vec3 shade = ambientComponent + diffuseComponent + specularComponent;
-    // vec3 fragToLight = normalize(posInViewCoordinates - positionInView(1));
-    // float spreading = dot(fragToLight, -normalize(directionInView(1)));
-    // shade = withinSpotlight(1) > 0 ? vec3(0,1,0) : vec3(1,0,0);
-	out_Color = vec4(shade * materialLight.diffuseness, 1.0);
+	out_Color = vec4(shade, 1.0);
+    out_Color *= texture(texUnit, texScalingF*texCoord);
 }

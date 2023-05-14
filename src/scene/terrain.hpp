@@ -18,11 +18,13 @@ namespace scn
   class Terrain
   {
   private:
-  void getTriangleVectors(float x, float z, vec3 &v1, vec3 &v2, vec3 &startingPoint) const;
+    void getTriangleVectors(float x, float z, vec3 &v1, vec3 &v2, vec3 &startingPoint) const;
 
   public:
-    Terrain(std::string const& path);
-    Terrain(std::string const& name, std::string const& path);
+    Terrain(std::string const &name,
+            std::string const &path, std::string const &texKey = "",
+            GLint texGPUSlot = 0,
+            std::string const &texPath = "");
 
     /**
      * @brief Returns z coordinate of the terrain at a given point on the generated terrain.
@@ -37,22 +39,26 @@ namespace scn
 
     vec3 getNormal(float x, float z) const;
 
-    inline Modelv2 const& model() const {
+    inline Modelv2 const &model() const
+    {
       return m_model;
     }
 
-    inline Modelv2& model() {
+    inline Modelv2 &model()
+    {
       return m_model;
     }
 
-    inline float width() const noexcept {
+    inline float width() const noexcept
+    {
       return m_width;
     }
-    inline float height() const noexcept {
+    inline float height() const noexcept
+    {
       return m_height;
     }
 
-    constexpr static GLfloat scalingFactor=10.0;
+    constexpr static GLfloat scalingFactor = 10.0;
 
   private:
     const std::string key;

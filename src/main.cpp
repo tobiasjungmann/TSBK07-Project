@@ -57,7 +57,6 @@ const mat4 projectionMatrix = {
 
 static scn::Scene mainScene;
 static evt::Context context;
-// scn::Light whiteLight{{1.0f, 1.0f, 1.0f}, {10.0f, 5.0f, 0.0f}, false};
 scn::Light whiteLight{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, false};
 
 void keyControlCheck()
@@ -88,25 +87,37 @@ void init(void)
   glEnable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
   
+	auto skyboxShader = std::make_unique<scn::SkyboxShader>("src/shaders/skybox.vert", "src/shaders/skybox.frag", "projectionMatrix", "preProjTransform");
+  skyboxShader->initTexturing("texUnit", "inTexCoord");
+  rc::ResourceManager::config(skyboxShader->hndl, "in_Position", "", "inTexCoord"); // TODO write here name of texture coord variable 
+  Modelv2 skyboxModel{"skybox", "skyboxfull.obj",  "skybox", 0, "skybox.tga"};
+	scn::Skybox* skybox = new scn::Skybox(std::move(skyboxShader), skyboxModel);
+  
   auto programShader = std::make_unique<scn::SceneShader>("src/shaders/light.vert", "src/shaders/light.frag", "projectionMatrix", "w2vMatrix", "m2wMatrix");
-  rc::ResourceManager::config(programShader->hndl, "in_Position", "in_Normal"); // TODO write here name of texture coord variable 
+  rc::ResourceManager::config(programShader->hndl, "in_Position", "in_Normal", "inTexCoord"); // TODO write here name of texture coord variable 
   const scn::Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
-  mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix);
 
-  scn::Terrain terrain("fft-terrain.tga");
-  terrain.model().setLightProps(1.0, 1.0, 1.0, 100.0);
+  // Create Scene
+  mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix, skybox);
+
+  scn::Terrain terrain("terrain", "fft-terrain.tga");
+  terrain.model().setLightProps(0.1, 1, 0.0, 1.0);
+  terrain.model().texture({"terrainText", 1, "dirt.tga"});
+  terrain.model().textureFactor(0.01);
+  
   mainScene.addTerrain(std::move(terrain));
   mainScene.camera.position.x = mainScene.camera.position.z = - mainScene.terrain->width() / 2; 
 
  
-  Modelv2 fish_m{"green_reef", "fish.obj",  "green_reef",4, "fish.png"};
-  fish_m.setLightProps(0.9, 0.6, 0.7, 120.0);
+  Modelv2 fish_m{"green_reef", "green_reef.obj", "green_reef", 2, "fish.png"};
+  fish_m.setLightProps(0.9, 0.8, 0.8, 100.0);
 
   obj::Fish* fish = new obj::Fish(fish_m, 0, vec3(1,0,0), 0.1f);
   // mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
 
   mainScene.shader->initMaterialProps("materialLight");
   mainScene.shader->initLighting("lights");
+  mainScene.shader->initTexturing("texUnit", "inTexCoord");
 
   scn::Light blueLight{{0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, true};
 
@@ -121,7 +132,6 @@ void init(void)
   mainScene.addLightSource(blueLight);
   mainScene.addLightSource(whiteLight);
 
-  // mainScene.pushObject(terrain.model()); // FIXME remove this once the terrain is managed by Scene
   mainScene.pushObject(fish, fish->orientationMtx());
   glutRepeatingTimer(FRAME_GAP_MS);
 

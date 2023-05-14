@@ -3,6 +3,7 @@
 #include "LittleOBJLoader.h"
 
 #include "shaders.hpp"
+#include "../modelv2.hpp"
 #include <memory>
 
 namespace scn {
@@ -14,11 +15,11 @@ class Skybox {
     
     public:
     const std::unique_ptr<SkyboxShader>& shader{m_shader};
-    Model *const model;
+    Modelv2 model;
 
 
     // TODO add texture management to skybox
-    Skybox(std::unique_ptr<SkyboxShader> shaderp, Model* modelp);
+    Skybox(std::unique_ptr<SkyboxShader> shaderp, Modelv2 modelp);
     constexpr Skybox(Skybox const&) = delete;
     constexpr Skybox& operator=(Skybox const&) = delete;
     ~Skybox();

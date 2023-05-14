@@ -59,12 +59,12 @@ namespace scn
   Scene::Scene(std::unique_ptr<SceneShader> shader,
                const Camera &camera,
                mat4 projectionMatrix,
-               std::unique_ptr<Skybox> skybox)
+               Skybox* skybox)
       : camera{camera},
         projectionMatrix{projectionMatrix},
         m_shader{std::move(shader)},
         m_terrain{nullptr},
-        skybox{std::move(skybox)}
+        skybox{skybox}
   {
     invalid = false;
   }

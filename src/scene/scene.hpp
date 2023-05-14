@@ -36,7 +36,7 @@ namespace scn
     Scene(std::unique_ptr<SceneShader> shader,
           const Camera &camera,
           mat4 projectionMatrix,
-          std::unique_ptr<Skybox> skybox = nullptr);
+          Skybox* skybox = nullptr);
     Scene &operator=(const Scene &cpy) = delete;
     Scene &operator=(Scene &&cpy) noexcept;
     ~Scene() = default;

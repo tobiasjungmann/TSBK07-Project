@@ -79,6 +79,10 @@ namespace scn
     pos.x = terrain.nextInsideFieldWidth(pos.x, 10);
     pos.z = terrain.nextInsideFieldWidth(pos.z, 10);
 
+    const float maxAltitude = 25.f;
+    if (pos.y > maxAltitude)
+      pos.y = maxAltitude;
+
     // check for collisions with the ground
     float minHeigth = terrain.computeHeight(pos.x, pos.z) + 2.0; // + 0.5;        // TODO take a real hitbox size
     if (pos.y < minHeigth)
