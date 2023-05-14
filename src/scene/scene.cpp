@@ -41,8 +41,8 @@ namespace _helpers
       shader->uploadModelLightProps(model.getLightProps());
     }
 
-    if (shader->hasTexturing())
-      shader->uploadTexture(model.texture());
+    if (shader->hasTexturing() and model.hasTexture())
+      shader->uploadTexture(model);
     glDrawElements(GL_TRIANGLES, model.get()->numIndices, GL_UNSIGNED_INT, 0L);
   }
 }

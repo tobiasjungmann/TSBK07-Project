@@ -7,7 +7,7 @@ provide height of terrain at given x & z position
 #pragma once
 
 #include "LittleOBJLoader.h"
-#include "./modelv2.hpp"
+#include "../modelv2.hpp"
 #include <string>
 
 struct TextureData;

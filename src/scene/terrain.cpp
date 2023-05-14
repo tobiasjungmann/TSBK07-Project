@@ -106,7 +106,7 @@ namespace scn
       : key{name},
         m_model{nullptr}
   {
-    auto &rmgr{ResourceManager::get()};
+    auto &rmgr{rc::ResourceManager::get()};
     TextureData *texp{rmgr.getTextureData(name, path)};
     m_width = texp->width;
     m_height = texp->height;

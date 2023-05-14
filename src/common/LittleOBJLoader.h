@@ -74,11 +74,6 @@ void CenterModel(Model *m);
 void ScaleModel(Model *m, float sx, float sy, float sz);
 void DisposeModel(Model *m);
 
-void pushTexture(const Model *m, GLuint program, const char* unitName);
-#ifdef __cplusplus
-void pushTexture(const Model *m, GLuint program, GLint texUnitLoc);
-#endif // __cplusplus
-
 
 typedef struct Model
 {

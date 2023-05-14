@@ -1375,31 +1375,3 @@ Model::~Model() {
 	DisposeModel(this);
 }
 #endif
-
-void pushTexture(const Model *m, GLuint program, const char* unitName)
-{
-	#ifdef __cplusplus
-		pushTexture(m, program, glGetUniformLocation(program, unitName));
-		}
-		void pushTexture(const Model *m, GLuint program, GLint texUnitLoc)
-		{
-			#define unitName true
-			const auto& unit = m->material->texUnit;
-	#else
-		#define texUnitLoc glGetUniformLocation(program, unitName)
-		const GLint unit = m->material->texUnit;
-	#endif //__cplusplus
-
-	glUseProgram(program);
-	if (m->texCoordArray && unitName) {
-		glActiveTexture(GL_TEXTURE0 + unit);
-		glBindTexture(GL_TEXTURE_2D, m->material->texRefID);
-		glUniform1i(texUnitLoc, unit);
-	}
-
-	#ifdef __cplusplus
-	#undef unitName
-	#else
-	#undef texUnitLoc
-	#endif
-}

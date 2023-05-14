@@ -13,7 +13,7 @@
 #include "scene/scene.hpp"
 #include "scene/skybox.hpp"
 #include "scene/gameobj/light.hpp"
-#include "scene/modelv2.hpp"
+#include "modelv2.hpp"
 #include "scene/shaders.hpp"
 #include "scene/camera.hpp"
 #include "scene/terrain.hpp"
@@ -86,17 +86,17 @@ void init(void)
   glClearColor(0.2, 0.2, 0.5, 0);
   glEnable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
+  
   auto programShader = std::make_unique<scn::SceneShader>("src/shaders/light.vert", "src/shaders/light.frag", "projectionMatrix", "w2vMatrix", "m2wMatrix");
+  rc::ResourceManager::config(programShader->hndl, "in_Position", "in_Normal"); // TODO write here name of texture coord variable 
   const scn::Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
-  mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix); // FIXME give terrain
+  mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix);
 
   scn::Terrain terrain("fft-terrain.tga");
-  terrain.model().init(mainScene.shader->hndl, "in_Position", "in_Normal", NULL);
   terrain.model().setLightProps(1.0, 1.0, 1.0, 100.0);
   mainScene.addTerrain(std::move(terrain));
 
-  Modelv2 fish_m{"green_reef", "green_reef.obj","fish.png"};
-  fish_m.init(mainScene.shader->hndl, "in_Position", "in_Normal", NULL);
+  Modelv2 fish_m{"green_reef", "green_reef.obj", 4, "green_reef", "fish.png"};
   fish_m.setLightProps(1.0, 0.8, 0.5, 100.0);
 
   obj::Fish* fish = new obj::Fish(fish_m, 0, vec3(1,0,0), 0.1f);

@@ -70,8 +70,9 @@ namespace scn
         void uploadMatrix(Matrices index, const mat4 &matrixData) const;
         template <class InputIt>
         void uploadMatrices(std::size_t first, InputIt firstData, InputIt lastData) const;
-        void uploadTexture(const Model *model) const;
-        void uploadTexture(const Model *model, GLuint textureReferenceID, GLuint textureUnit) const;
+        void uploadTexture(Model *raw) const;
+        void uploadTexture(Modelv2 const& model) const;
+        void uploadTexture(Modelv2 const& model, GLuint textureReferenceID, GLuint textureUnit) const;
         void useShader() const;
     };
 

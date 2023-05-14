@@ -8,8 +8,39 @@
 #include "types_properties.hpp"
 #include "debugging.h"
 #include "gameobj/light.hpp"
+#include "../modelv2.hpp"
 
 using std::size_t;
+
+namespace
+{
+  // SPECIFY gpuSlot to override the value
+  void pushTexture(Modelv2 const &mdl, GLuint program, GLint texUnitLoc = -1, GLint gpuSlot = -1)
+  {
+    if (not mdl.hasTexture())
+      throw std::runtime_error("Tried to push the texture for a model that has none.");
+
+    if (texUnitLoc < 0)
+    {
+      std::cerr << "Couldn't not find the texture location in shader. " << std::endl;
+      return;
+    }
+
+    glUseProgram(program);
+
+    gpuSlot = (gpuSlot < 0) ? mdl.texture().texGPUSlot : gpuSlot;
+    if (mdl.get()->texCoordArray)
+    {
+      glActiveTexture(GL_TEXTURE0 + gpuSlot);
+      glBindTexture(GL_TEXTURE_2D, mdl.texture().texID);
+      glUniform1i(texUnitLoc, gpuSlot);
+    }
+    else
+    {
+      throw std::runtime_error("pushTexture: Raw model didn't have texCoordArray");
+    }
+  }
+}
 
 namespace scn
 {
@@ -82,21 +113,29 @@ namespace scn
     texturized = true;
   }
 
-  void Shader::uploadTexture(const Model *model) const
+  void Shader::uploadTexture(Model *raw) const
   {
-    uploadTexture(model, model->material->texRefID, model->material->texUnit);
+    if (not raw->material)
+      throw std::runtime_error("Tried to upload texture for a raw model without.");
+
+    // gpuSlot = (gpuSlot < 0) ? mdl->material->texUnit : gpuSlot;
+    auto model {Modelv2(raw, Modelv2::MaterialTexture{raw->material->texRefID})};
+    uploadTexture(model, model.texture().texID, model.texture().texGPUSlot);
   }
 
-  void Shader::uploadTexture(const Model *model, GLuint textureReferenceID, GLuint textureUnit) const
+  void Shader::uploadTexture(Modelv2 const &model) const
+  {
+    uploadTexture(model, model.texture().texID, model.texture().texGPUSlot);
+  }
+
+  void Shader::uploadTexture(Modelv2 const &model, GLuint textureReferenceID, GLuint textureUnit) const
   {
     if (not texturized)
       throw std::logic_error("Texture was not properly initialized before attempting texture data upload");
 
-    else if (not model->material)
-      throw std::logic_error("Given model has no material at the ready for a texture.");
+    else if (not model.hasTexture())
+      throw std::logic_error("Raw model has no material at the ready for a texture.");
 
-    model->material->texRefID = textureReferenceID;
-    model->material->texUnit = textureUnit;
     pushTexture(model, hndl, texUnitLoc);
   }
 
@@ -148,7 +187,7 @@ namespace scn
 
     for (std::size_t i = 0; i < lights.size(); i++)
     {
-      auto && lightStr = lightStructArrayName + '[' + std::to_string(i) + ']';
+      auto &&lightStr = lightStructArrayName + '[' + std::to_string(i) + ']';
       Light const &curr{lights[i]};
 
       GLint colorLoc = glGetUniformLocation(hndl, (lightStr + ".color").c_str());
@@ -159,15 +198,7 @@ namespace scn
       GLint ambientKLoc = glGetUniformLocation(hndl, (lightStr + ".ambientK").c_str());
       GLint diffuseKLoc = glGetUniformLocation(hndl, (lightStr + ".diffuseK").c_str());
       GLint specularKLoc = glGetUniformLocation(hndl, (lightStr + ".specularK").c_str());
-      if ((colorLoc == -1
-      or attenuateLoc == -1
-      or directionalLoc == -1
-      or spotlightLoc == -1
-      or inViewLoc == -1
-      or ambientKLoc == -1
-      or diffuseKLoc == -1
-      or specularKLoc == -1)
-      && !ENV_NOTHROW)
+      if ((colorLoc == -1 or attenuateLoc == -1 or directionalLoc == -1 or spotlightLoc == -1 or inViewLoc == -1 or ambientKLoc == -1 or diffuseKLoc == -1 or specularKLoc == -1) && !ENV_NOTHROW)
         report(i);
 
       glUniform3f(colorLoc, curr.color.x, curr.color.y, curr.color.z);
@@ -204,7 +235,8 @@ namespace scn
 
       if (curr.directional or curr.spotlight)
       {
-        if (GLint dirLoc = glGetUniformLocation(hndl, (lightStr + ".direction").c_str()); dirLoc != -1) {
+        if (GLint dirLoc = glGetUniformLocation(hndl, (lightStr + ".direction").c_str()); dirLoc != -1)
+        {
           glUniform3f(dirLoc, curr.direction().x, curr.direction().y, curr.direction().z);
         }
         else

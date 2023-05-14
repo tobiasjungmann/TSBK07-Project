@@ -2,7 +2,7 @@
 
 #include <string>
 #include <unordered_set>
-#include "../modelv2.hpp"
+#include "modelv2.hpp"
 #include "../types_properties.hpp"
 #include <vector>
 #include <memory>
