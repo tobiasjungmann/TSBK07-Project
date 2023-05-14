@@ -133,7 +133,7 @@ GLuint ResourceManager::getTexture(std::string const &key, const std::string &pa
   GLuint texture;
   if (auto occ = texturesMap.find(key); occ == texturesMap.end())
   {
-    if (texture = loadTexture(fullpath); texture != -1)
+    if (texture = loadTexture(fullpath); texture == -1)
       throw std::runtime_error("Could not load texture " + fullpath);
     else
       texturesMap.emplace(key, texture);

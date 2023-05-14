@@ -96,7 +96,7 @@ void init(void)
   terrain.model().setLightProps(1.0, 1.0, 1.0, 100.0);
   mainScene.addTerrain(std::move(terrain));
 
-  Modelv2 fish_m{"green_reef", "green_reef.obj", 4, "green_reef", "fish.png"};
+  Modelv2 fish_m{"green_reef", "fish.obj",  "green_reef",4, "fish.png"};
   fish_m.setLightProps(1.0, 0.8, 0.5, 100.0);
 
   obj::Fish* fish = new obj::Fish(fish_m, 0, vec3(1,0,0), 0.1f);

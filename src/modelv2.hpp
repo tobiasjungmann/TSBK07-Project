@@ -73,9 +73,9 @@ public:
         lightProps{std::make_unique<MaterialLight>(props)} {}
 
   Modelv2(std::string const &mdlKey,
+          std::string const &mdlPath = "",
           std::string const &texKey = "",
           GLint texGPUSlot = 0,
-          std::string const &mdlPath = "",
           std::string const &texPath = "")
       : Modelv2(rc::ResourceManager::get().getModel(mdlKey, mdlPath),
                 MaterialTexture(rc::ResourceManager::get().getTexture(texKey, texPath), texGPUSlot)) {}
