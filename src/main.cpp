@@ -17,6 +17,7 @@
 #include "scene/shaders.hpp"
 #include "scene/camera.hpp"
 #include "scene/terrain.hpp"
+#include "scene/gameobj/coral.hpp"
 #include "resource_manager.hpp"
 #include "event.hpp"
 #include "debugging.h"
@@ -30,7 +31,7 @@
 
 // frustum
 #define near 1.0
-#define far 80.0
+#define far 60.0
 #define right 0.5
 #define left -0.5
 #define top 0.5
@@ -90,7 +91,7 @@ void init(void)
 	auto skyboxShader = std::make_unique<scn::SkyboxShader>("src/shaders/skybox.vert", "src/shaders/skybox.frag", "projectionMatrix", "preProjTransform");
   skyboxShader->initTexturing("texUnit", "inTexCoord");
   rc::ResourceManager::config(skyboxShader->hndl, "in_Position", "", "inTexCoord"); // TODO write here name of texture coord variable 
-  Modelv2 skyboxModel{"skybox", "skyboxfull.obj",  "skybox", 0, "skybox.tga"};
+  Modelv2 skyboxModel{"skybox", "skyboxfull.obj",  "skybox", 0, "oceanbox.tga"};
 	scn::Skybox* skybox = new scn::Skybox(std::move(skyboxShader), skyboxModel);
   
   auto programShader = std::make_unique<scn::SceneShader>("src/shaders/light.vert", "src/shaders/light.frag", "projectionMatrix", "w2vMatrix", "m2wMatrix");
@@ -101,8 +102,8 @@ void init(void)
   mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix, skybox);
 
   scn::Terrain terrain("terrain", "fft-terrain.tga");
-  terrain.model().setLightProps(0.1, 1, 0.0, 1.0);
-  terrain.model().texture({"terrainText", 1, "dirt.tga"});
+  terrain.model().setLightProps(0.1, 0.7, 0.0, 1.0);
+  terrain.model().texture({"terrainText", 1, "beach_sand.tga"});
   terrain.model().textureFactor(0.01);
   
   mainScene.addTerrain(std::move(terrain));
@@ -111,21 +112,24 @@ void init(void)
  
   Modelv2 fish_m{"green_reef", "green_reef.obj", "green_reef", 2, "fish.png"};
   fish_m.setLightProps(0.9, 0.8, 0.8, 100.0);
-
   obj::Fish* fish = new obj::Fish(fish_m, 0, vec3(1,0,0), 0.1f);
+  
+  Modelv2 coral_m{"coral1", "tree_coral.obj", "coral1", 3, "knt-textures/IxirGround.png"};
+  coral_m.setLightProps(0.9, 1.0, 0.3, 50.0);
+  obj::ModelledObject* coral = new obj::Coral(coral_m, {10, 5, 2}, vec3(1,0,0));
   // mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
 
   mainScene.shader->initMaterialProps("materialLight");
   mainScene.shader->initLighting("lights");
   mainScene.shader->initTexturing("texUnit", "inTexCoord");
 
-  scn::Light blueLight{{0.0f, 0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, true};
+  scn::Light blueLight{{0.0f, 0.588f, 0.521f}, {-1.0f, 0.55f, 0.0f}, true};
+  blueLight.setCoefficients(0.5, 0.4, 0.2);
 
-  blueLight.setCoefficients(0.3, 0.4, 0);
 
-  whiteLight.setCoefficients(0, 2.0, 0.6);
-  whiteLight.setSpotlight(25, 35);
-  whiteLight.setAttenuation(1.0, 0.027, 0.0015);
+  whiteLight.setCoefficients(0, 15.0, 3.8);
+  whiteLight.setSpotlight(20, 30);
+  whiteLight.setAttenuation(1.0, 0.017, 0.0015);
 
   whiteLight.attachToCamera(mainScene.camera);
 
@@ -133,6 +137,7 @@ void init(void)
   mainScene.addLightSource(whiteLight);
 
   mainScene.pushObject(fish, fish->orientationMtx());
+  mainScene.pushObject(coral, coral->orientationMtx());
   glutRepeatingTimer(FRAME_GAP_MS);
 
   glutPassiveMotionFunc(mouseControlCallback);
