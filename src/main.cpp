@@ -62,11 +62,11 @@ scn::Light whiteLight{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, false};
 
 void keyControlCheck()
 {
-  context.setPressedKeys(
-      glutKeyIsDown(constants::KEY_FORWARD),
-      glutKeyIsDown(constants::KEY_LEFT),
-      glutKeyIsDown(constants::KEY_BACK),
-      glutKeyIsDown(constants::KEY_RIGHT));
+    context.setPressedKeys(
+        glutKeyIsDown(constants::KEY_FORWARD),
+        glutKeyIsDown(constants::KEY_LEFT),
+        glutKeyIsDown(constants::KEY_BACK),
+        glutKeyIsDown(constants::KEY_RIGHT));
 }
 
 /**
@@ -77,111 +77,129 @@ void keyControlCheck()
  */
 void mouseControlCallback(int x, int y)
 {
-  context.setMousePosition(x, y);
-  glutPostRedisplay();
+    context.setMousePosition(x, y);
+    glutPostRedisplay();
 }
 
 float rand1()
 {
-  return (float)(rand() / (float)RAND_MAX);
+    return (float)(rand() / (float)RAND_MAX);
 }
 
 void init(void)
 {
-  // GL inits
-  glClearColor(0.2, 0.2, 0.5, 0);
-  glEnable(GL_DEPTH_TEST);
-  glDisable(GL_CULL_FACE);
+    // GL inits
+    glClearColor(0.2, 0.2, 0.5, 0);
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
 
-  auto skyboxShader = std::make_unique<scn::SkyboxShader>("src/shaders/skybox.vert", "src/shaders/skybox.frag", "projectionMatrix", "preProjTransform");
-  skyboxShader->initTexturing("texUnit", "inTexCoord");
-  rc::ResourceManager::config(skyboxShader->hndl, "in_Position", "", "inTexCoord"); // TODO write here name of texture coord variable
-  Modelv2 skyboxModel{"skybox", "skyboxfull.obj", "skybox", 0, "oceanbox.tga"};
-  scn::Skybox *skybox = new scn::Skybox(std::move(skyboxShader), skyboxModel);
+    auto skyboxShader = std::make_unique<scn::SkyboxShader>("src/shaders/skybox.vert", "src/shaders/skybox.frag", "projectionMatrix", "preProjTransform");
+    skyboxShader->initTexturing("texUnit", "inTexCoord");
+    rc::ResourceManager::config(skyboxShader->hndl, "in_Position", "", "inTexCoord"); // TODO write here name of texture coord variable
+    Modelv2 skyboxModel{"skybox", "skyboxfull.obj", "skybox", 0, "oceanbox.tga"};
+    scn::Skybox *skybox = new scn::Skybox(std::move(skyboxShader), skyboxModel);
 
-  auto programShader = std::make_unique<scn::SceneShader>("src/shaders/light.vert", "src/shaders/light.frag", "projectionMatrix", "w2vMatrix", "m2wMatrix");
-  rc::ResourceManager::config(programShader->hndl, "in_Position", "in_Normal", "inTexCoord"); // TODO write here name of texture coord variable
-  const scn::Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
+    auto programShader = std::make_unique<scn::SceneShader>("src/shaders/light.vert", "src/shaders/light.frag", "projectionMatrix", "w2vMatrix", "m2wMatrix");
+    rc::ResourceManager::config(programShader->hndl, "in_Position", "in_Normal", "inTexCoord"); // TODO write here name of texture coord variable
+    const scn::Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
 
-  // Create Scene
-  mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix, skybox);
+    // Create Scene
+    mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix, skybox);
 
-  scn::Terrain terrain("terrain", "fft-terrain.tga");
-  terrain.model().setLightProps(0.1, 0.7, 0.0, 1.0);
-  terrain.model().texture({"terrainText", 1, "beach_sand.tga"});
-  terrain.model().textureFactor(0.01);
+    scn::Terrain terrain("terrain", "fft-terrain.tga");
+    terrain.model().setLightProps(0.1, 0.7, 0.0, 1.0);
+    terrain.model().texture({"terrainText", 1, "beach_sand.tga"});
+    terrain.model().textureFactor(0.01);
 
-  Modelv2 coral_m{"coral1", "tree_coral.obj", "coral1", 3, "knt-textures/IxirGround.png"};
-  coral_m.setLightProps(0.9, 1.0, 0.2, 50.0);
-  obj::ModelledObject *coral = new obj::Coral(coral_m, {10, 5, 2}, vec3(1, 0, 0));
-  // mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
+    // mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
 
-  mainScene.addTerrain(std::move(terrain));
-  mainScene.shader->initMaterialProps("materialLight");
-  mainScene.shader->initLighting("lights");
-  mainScene.shader->initTexturing("texUnit", "inTexCoord");
-  mainScene.camera.position.x = mainScene.camera.position.z = mainScene.terrain->width() / 2;
+    mainScene.addTerrain(std::move(terrain));
+    mainScene.shader->initMaterialProps("materialLight");
+    mainScene.shader->initLighting("lights");
+    mainScene.shader->initTexturing("texUnit", "inTexCoord");
+    mainScene.camera.position.x = mainScene.camera.position.z = mainScene.terrain->width() / 2;
 
-  scn::Light blueLight{{0.0f, 0.588f, 0.521f}, {-1.0f, 0.55f, 0.0f}, true};
-  blueLight.setCoefficients(0.5, 0.4, 0.2);
+    scn::Light blueLight{{0.0f, 0.588f, 0.521f}, {-1.0f, 0.55f, 0.0f}, true};
+    blueLight.setCoefficients(0.5, 0.4, 0.2);
 
-  whiteLight.setCoefficients(0, 15.0, 3.8);
-  whiteLight.setSpotlight(20, 30);
-  whiteLight.setAttenuation(1.0, 0.017, 0.0015);
-  srand(12);
+    whiteLight.setCoefficients(0, 15.0, 3.8);
+    whiteLight.setSpotlight(20, 30);
+    whiteLight.setAttenuation(1.0, 0.017, 0.0015);
+    srand(12);
+float coralRadius = 50;
+    for (size_t i = 0; i < 0; i++)
+    {
+     //   float x = rand1() * terrain.width();
+     //   float z = rand1() * terrain.width();
+        float x = rand1() * coralRadius * 2 + mainScene.terrain->width() / 2 - coralRadius;
+        float z = rand1() * coralRadius * 2 + mainScene.terrain->width() / 2 - coralRadius;
 
-  for (size_t i = 0; i < 10; i++)
-  {
-    float x = rand1();
-    float z = rand1();
-    Modelv2 fish_m{"green_reef", "green_reef.obj", "green_reef", 2, "fish.png"};
-    fish_m.setLightProps(0.9, 0.8, 0.9, 80.0);
-    obj::Fish *fish = new obj::Fish(fish_m, vec3(5 * rand1(), 4, 3 * rand1()), normalize(vec3(0, -1, 0)), 0.1f);
-    mainScene.pushObject(fish, fish->orientationMtx());
-  }
+        Modelv2 fish_m{"green_reef", "green_reef.obj", "green_reef", 2, "fish.png"};
+        fish_m.setLightProps(0.9, 0.8, 0.9, 80.0);
+        obj::Fish *fish = new obj::Fish(fish_m, vec3(x, terrain.computeHeight(x, z), z), normalize(vec3(rand1(), rand1(), rand1())), 0.1f);
+        mainScene.pushObject(fish, fish->orientationMtx());
+    }
+    /*for (size_t i = 0; i < 10; i++)
+    {
+        float x = rand1() * terrain.width();
+        float z = rand1() * terrain.width();
 
+        Modelv2 fish_m{"smallfish", "smallfish.obj", "smallfish", 2, "smallfish.png"};
+        fish_m.setLightProps(0.9, 0.8, 0.9, 80.0);
+        obj::Fish *fish = new obj::Fish(fish_m, vec3(x, terrain.computeHeight(x, z), z), normalize(vec3(rand1(), rand1(), rand1())), 0.1f);
+        mainScene.pushObject(fish, fish->orientationMtx());
+    }*/
+    for (size_t i = 0; i < 10; i++)
+    {
+        
+        float x = rand1() * coralRadius * 2 + mainScene.terrain->width() / 2 - coralRadius;
+        float z = rand1() * coralRadius * 2 + mainScene.terrain->width() / 2 - coralRadius;
+        Modelv2 coral_m{"coral1", "tree_coral.obj", "coral1", 3, "knt-textures/IxirGround.png"};
+        coral_m.setLightProps(0.9, 1.0, 0.2, 50.0);
+        obj::ModelledObject *coral = new obj::Coral(coral_m, vec3(x, terrain.computeHeight(x, z), z), vec3(1, 0, 0));
 
-  mainScene.pushObject(coral, coral->orientationMtx());
+        mainScene.pushObject(coral, coral->orientationMtx());
+    }
 
-  mainScene.addLightSource(blueLight);
-  whiteLight.attachToCamera(mainScene.camera);
-  mainScene.addLightSource(whiteLight);
+    mainScene.addLightSource(blueLight);
+    whiteLight.attachToCamera(mainScene.camera);
+    mainScene.addLightSource(whiteLight);
 
-  glutRepeatingTimer(FRAME_GAP_MS);
+    glutRepeatingTimer(FRAME_GAP_MS);
 
-  glutPassiveMotionFunc(mouseControlCallback);
+    glutPassiveMotionFunc(mouseControlCallback);
 }
 
 void display(void)
 {
-  // clear the screen
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  keyControlCheck();
+    // clear the screen
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    keyControlCheck();
 
-  mainScene.camera.updateCameraPosition(context, *mainScene.terrain);
+    mainScene.camera.updateCameraPosition(context, *mainScene.terrain);
 
-  // FIXME move this out of the way
-  // update all objects
-  mainScene.update();
+    // FIXME move this out of the way
+    // update all objects
+    mainScene.update();
 
-  mainScene.draw();
+    mainScene.draw();
 
-  // todo draw stuff here
-  glutSwapBuffers();
+    // todo draw stuff here
+    glutSwapBuffers();
 }
 
 int main(int argc, char **argv)
 {
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
-  glutInitContextVersion(3, 2);
-  glutInitWindowSize(constants::display_size, constants::display_size);
-  glutCreateWindow("Deep Sea");
-  glutDisplayFunc(display);
-  init();
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
+    glutInitContextVersion(3, 2);
+    glutInitWindowSize(constants::display_size, constants::display_size);
+    glutCreateWindow("Deep Sea");
+    glutDisplayFunc(display);
+    init();
 
-  glutRepeatingTimer(20);
+    glutRepeatingTimer(20);
 
-  glutMainLoop();
-  exit(0);
+    glutMainLoop();
+    exit(0);
 }
