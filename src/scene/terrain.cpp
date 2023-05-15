@@ -37,7 +37,7 @@ namespace scn
       indexArray[(x + z * (width - 1)) * 6 + 0 + offset] = first;
       indexArray[(x + z * (width - 1)) * 6 + 1 + offset] = second;
       indexArray[(x + z * (width - 1)) * 6 + 2 + offset] = third;
-
+//std::cout << "First: "<< first << " Second: "<< second << " Third: "<< third <<std::endl;
       addToNormalArray(normalArray, vertexArray, first, second, third);
       addToNormalArray(normalArray, vertexArray, third, first, second);
       addToNormalArray(normalArray, vertexArray, second, third, first);
@@ -59,7 +59,7 @@ namespace scn
         {
           // Vertex array. You need to scale this properly
           vertexArray[(x + z * tex->width)].x = x * scalingFactor;
-          vertexArray[(x + z * tex->width)].y = (tex->imageData[(x + z * tex->width) * (tex->bpp / 8)] / 10.0 - 20); //*scalingFactor;
+          vertexArray[(x + z * tex->width)].y = (tex->imageData[(x + z * tex->width) * (tex->bpp / 8)] / 10.0); //*scalingFactor;
           vertexArray[(x + z * tex->width)].z = z * scalingFactor;
           // Normal vectors. You need to calculate these.
 
@@ -68,8 +68,8 @@ namespace scn
           normalArray[(x + z * tex->width)].z = 0.0;
 
           // Texture coordinates. You may want to scale them.
-          texCoordArray[(x + z * tex->width)].x = x * scalingFactor; // * 10; // (float)x / tex->width;
-          texCoordArray[(x + z * tex->width)].y = z * scalingFactor; // * 10; // (float)z / tex->height;
+          texCoordArray[(x + z * tex->width)].x = x; // * 10; // (float)x / tex->width;
+          texCoordArray[(x + z * tex->width)].y = z; // * 10; // (float)z / tex->height;
         }
       for (x = 0; x < tex->width - 1; x++)
         for (z = 0; z < tex->height - 1; z++)
@@ -139,6 +139,7 @@ namespace scn
 
     float x_difference = x - int(x); // /scalingFactor)*scalingFactor;
     float z_difference = z - int(z); // /scalingFactor)*scalingFactor;
+    
     vec3 p_bottom_left = model->vertexArray[int(x) + (int(z) + 1) * m_vertices_width];
     vec3 p_top_right = model->vertexArray[((int(x) + 1) + int(z) * m_vertices_width)];
     if (x_difference + z_difference < 1.0)
