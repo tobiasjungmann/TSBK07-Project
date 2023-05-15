@@ -19,8 +19,8 @@ namespace obj
     m_direction = newDirection;
     m_upVector = newUp;
 
-    if (m_position.inView)
-    {
+ //   if (m_position.inView)
+ //   {
       if (auto m2w_p = m_model.matrix())
       {
         auto &m2w = *m2w_p;
@@ -31,7 +31,7 @@ namespace obj
         m2w = mat3tomat4(combinedRotation);
 
       }
-    }
+   // }
 
     /*mat4 scaling = IdentityMatrix();
     scaling.m[0] = sizeInDirection.x;
