@@ -31,7 +31,7 @@
 
 // frustum
 #define near 1.0
-#define far 60.0
+#define far 80.0
 #define right 0.5
 #define left -0.5
 #define top 0.5
@@ -103,13 +103,13 @@ void init(void)
   rc::ResourceManager::config(programShader->hndl, "in_Position", "in_Normal", "inTexCoord"); // TODO write here name of texture coord variable
   const scn::Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
 
+  // Create Scene
+  mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix, skybox);
+
   scn::Terrain terrain("terrain", "fft-terrain.tga");
   terrain.model().setLightProps(0.1, 0.7, 0.0, 1.0);
   terrain.model().texture({"terrainText", 1, "beach_sand.tga"});
   terrain.model().textureFactor(0.01);
-
-  mainScene.addTerrain(std::move(terrain));
-  mainScene.camera.position.x = mainScene.camera.position.z = -mainScene.terrain->width() / 2;
 
   Modelv2 coral_m{"coral1", "tree_coral.obj", "coral1", 3, "knt-textures/IxirGround.png"};
   coral_m.setLightProps(0.9, 1.0, 0.2, 50.0);
@@ -140,10 +140,9 @@ void init(void)
     mainScene.pushObject(fish, fish->orientationMtx());
   }
 
-  // mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
 
   mainScene.pushObject(coral, coral->orientationMtx());
-  
+
   mainScene.addLightSource(blueLight);
   whiteLight.attachToCamera(mainScene.camera);
   mainScene.addLightSource(whiteLight);
