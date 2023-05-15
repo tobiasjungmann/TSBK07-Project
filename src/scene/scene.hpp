@@ -68,6 +68,7 @@ namespace scn
 
     // Light management
     void addLightSource(const Light &light);
+    Light& getLight(long index);
     void removeLightSource(long index);
 
     inline auto iterateObjs()

@@ -15,7 +15,7 @@ namespace scn
 
     void setAttenuation(GLfloat konst, GLfloat linear, GLfloat square);
     void setSpotlight(GLfloat innerEdgeDegrees, GLfloat outerEdgeDegrees);
-    void setCoefficients(GLfloat ambient, GLfloat diffuse, GLfloat specular);
+    void setCoefficients(GLfloat ambient, GLfloat diffuse, GLfloat specular, GLfloat power = 1.0f);
     void attachToCamera(scn::Camera &camera);
     void detachOfCamera(scn::Camera &camera);
 
@@ -27,6 +27,7 @@ namespace scn
     GLfloat ambientK = 0.0;
     GLfloat diffuseK = 1.0;
     GLfloat specularK = 1.0;
+    GLfloat powerK = 1.0;
 
     // attenuation over distance
     GLfloat attenuConst = 1.0;

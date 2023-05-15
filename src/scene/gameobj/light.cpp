@@ -26,11 +26,12 @@ namespace scn
     outerEdgeCutOff = cos((outerEdgeDegrees * (M_PI / 180)));
   }
 
-  void Light::setCoefficients(GLfloat ambient, GLfloat diffuse, GLfloat specular)
+  void Light::setCoefficients(GLfloat ambient, GLfloat diffuse, GLfloat specular, GLfloat power)
   {
     ambientK = CLAMP(ambient, 0, 1.0);
     diffuseK = CLAMP(diffuse, 0, 1.0);
     specularK = CLAMP(specular, 0, 1.0);
+    powerK = power;
   }
 
   // empty parameter = detach

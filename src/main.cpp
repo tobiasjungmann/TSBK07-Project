@@ -22,6 +22,7 @@
 #include "event.hpp"
 #include "debugging.h"
 #include "scene/gameobj/fish.hpp"
+#include "types_properties.hpp"
 #include "scene/gameobj/fishCarp.hpp"
 
 #define FRAME_GAP_MS 20
@@ -58,15 +59,16 @@ const mat4 projectionMatrix = {
 
 static scn::Scene mainScene;
 static evt::Context context;
-scn::Light whiteLight{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, false};
 
 void keyControlCheck()
 {
   context.setPressedKeys(
-      glutKeyIsDown(constants::KEY_FORWARD),
-      glutKeyIsDown(constants::KEY_LEFT),
-      glutKeyIsDown(constants::KEY_BACK),
-      glutKeyIsDown(constants::KEY_RIGHT));
+      glutKeyIsDown(to_underlying(constants::Key::Forward)),
+      glutKeyIsDown(to_underlying(constants::Key::Left)),
+      glutKeyIsDown(to_underlying(constants::Key::Back)),
+      glutKeyIsDown(to_underlying(constants::Key::Right)),
+      glutKeyIsDown(to_underlying(constants::Key::Color))
+      );
 }
 
 /**
@@ -107,7 +109,7 @@ void init(void)
   mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix, skybox);
 
   scn::Terrain terrain("terrain", "fft-terrain.tga");
-  terrain.model().setLightProps(0.1, 0.7, 0.0, 1.0);
+  terrain.model().setLightProps(0.01, 0.8, 0.0, 1.0);
   terrain.model().texture({"terrainText", 1, "beach_sand.tga"});
   terrain.model().textureFactor(0.01);
 
@@ -122,12 +124,17 @@ void init(void)
   mainScene.shader->initTexturing("texUnit", "inTexCoord");
   mainScene.camera.position.x = mainScene.camera.position.z = mainScene.terrain->width() / 2;
 
-  scn::Light blueLight{{0.0f, 0.588f, 0.521f}, {-1.0f, 0.55f, 0.0f}, true};
-  blueLight.setCoefficients(0.5, 0.4, 0.2);
+  scn::Light mainLight{{0.2f, 0.788f, 0.721f}, {-1.0f, 0.55f, 0.0f}, true};
+  mainLight.setCoefficients(0.5, 0.4, 0.2);
+  scn::Light shinyLight{{0.631f, 0.988f, 0.945f}, {14.0f, 50.f, 20.0f}, false};
+  shinyLight.setCoefficients(0, 0.7, 0.6);
+  shinyLight.setSpotlight(40, 70);
+  shinyLight.setAttenuation(1.0, 0.0015, 0.010);
 
-  whiteLight.setCoefficients(0, 15.0, 3.8);
-  whiteLight.setSpotlight(20, 30);
-  whiteLight.setAttenuation(1.0, 0.017, 0.0015);
+  scn::Light spotlight{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, false};
+  spotlight.setCoefficients(0, 1.0, 0.8, 3);
+  spotlight.setSpotlight(8, 15);
+  spotlight.setAttenuation(1.0, 0.014, 0.015);
   srand(12);
 
   for (size_t i = 0; i < 10; i++)
@@ -143,9 +150,10 @@ void init(void)
 
   mainScene.pushObject(coral, coral->orientationMtx());
 
-  mainScene.addLightSource(blueLight);
-  whiteLight.attachToCamera(mainScene.camera);
-  mainScene.addLightSource(whiteLight);
+  mainScene.addLightSource(mainLight);
+  // mainScene.addLightSource(shinyLight);
+  spotlight.attachToCamera(mainScene.camera);
+  mainScene.addLightSource(spotlight);
 
   glutRepeatingTimer(FRAME_GAP_MS);
 
@@ -154,11 +162,27 @@ void init(void)
 
 void display(void)
 {
+  constexpr short nbColors = 4;
+  vec3 colors[nbColors] {
+    vec3{1, 1, 1},
+    vec3{1, 0, 0},
+    vec3{1, 1, 0},
+    vec3{0, 0, 1}
+  };
+  static short delay = 0;
+  delay = MAX(delay -1, 0);
+  static short nextColor = 1;
   // clear the screen
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   keyControlCheck();
 
   mainScene.camera.updateCameraPosition(context, *mainScene.terrain);
+
+  if (context.keys.color && delay == 0) {
+    mainScene.getLight(-1).color = colors[nextColor++];
+    nextColor %= nbColors;
+    delay = 15;
+  };
 
   // FIXME move this out of the way
   // update all objects
