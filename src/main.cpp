@@ -127,7 +127,7 @@ void init(void)
     whiteLight.setAttenuation(1.0, 0.017, 0.0015);
     srand(12);
 float coralRadius = 50;
-    for (size_t i = 0; i < 0; i++)
+    for (size_t i = 0; i < 1; i++)
     {
      //   float x = rand1() * terrain.width();
      //   float z = rand1() * terrain.width();

@@ -23,8 +23,31 @@ namespace obj
         updateModelToWorldRotation();
     };
 
+    float randomMovementInDir()
+    {
+        float r = (float)(rand() / (float)RAND_MAX);
+        if (r < 0.2)
+        {
+            float current=0.1;
+            if (r < 0.1)
+            {
+                current = current * (-1);
+            }
+            return current ;
+        }
+        return 0;
+    }
+
     void Fish::moveSingleStep()
     {
+        if ((float)(rand() / (float)RAND_MAX) < 0.1)
+        {
+            m_direction().y += randomMovementInDir();
+            m_direction().x += randomMovementInDir();
+            m_direction().z += randomMovementInDir();
+            m_direction() = normalize(m_direction());
+            updateModelToWorldRotation();
+        }
         m_position += m_direction * m_speed;
         model().matrix()->m[3] = m_position().x;
         model().matrix()->m[7] = m_position().y;
@@ -83,7 +106,7 @@ namespace obj
         {
 
             vec3 futurePos = m_position + m_direction * m_speed * i * 10; // would touch it in the next five steps
-    
+
             float futureHeight = terrain.computeHeight(futurePos.x, futurePos.z);
 
             if (maxHeightDifference < futureHeight - futurePos.y)
@@ -125,7 +148,7 @@ namespace obj
         if (distance <= Norm(this->m_size) + Norm(other->size()))
         {
             vec3 n = normalize(thisToOther);
-            other->reflectOnVector(n*(-1));
+            other->reflectOnVector(n * (-1));
             reflectOnVector(n);
         }
     }
