@@ -67,8 +67,7 @@ void keyControlCheck()
       glutKeyIsDown(to_underlying(constants::Key::Left)),
       glutKeyIsDown(to_underlying(constants::Key::Back)),
       glutKeyIsDown(to_underlying(constants::Key::Right)),
-      glutKeyIsDown(to_underlying(constants::Key::Color))
-      );
+      glutKeyIsDown(to_underlying(constants::Key::Color)));
 }
 
 /**
@@ -113,9 +112,6 @@ void init(void)
   terrain.model().texture({"terrainText", 1, "beach_sand.tga"});
   terrain.model().textureFactor(0.01);
 
-  Modelv2 coral_m{"coral1", "tree_coral.obj", "coral1", 3, "knt-textures/IxirGround.png"};
-  coral_m.setLightProps(0.9, 1.0, 0.2, 50.0);
-  obj::ModelledObject *coral = new obj::Coral(coral_m, {10, 5, 2}, vec3(1, 0, 0));
   // mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
 
   mainScene.addTerrain(std::move(terrain));
@@ -137,18 +133,40 @@ void init(void)
   spotlight.setAttenuation(1.0, 0.014, 0.015);
   srand(12);
 
-  for (size_t i = 0; i < 10; i++)
+  float coralRadius = 50;
+  for (size_t i = 0; i < 1; i++)
   {
-    float x = rand1();
-    float z = rand1();
+    //   float x = rand1() * terrain.width();
+    //   float z = rand1() * terrain.width();
+    float x = rand1() * coralRadius * 2 + mainScene.terrain->width() / 2 - coralRadius;
+    float z = rand1() * coralRadius * 2 + mainScene.terrain->width() / 2 - coralRadius;
+
     Modelv2 fish_m{"green_reef", "green_reef.obj", "green_reef", 2, "fish.png"};
     fish_m.setLightProps(0.9, 0.8, 0.9, 80.0);
-    obj::Fish *fish = new obj::Fish(fish_m, vec3(5 * rand1(), 4, 3 * rand1()), normalize(vec3(0, -1, 0)), 0.1f);
+    obj::Fish *fish = new obj::Fish(fish_m, vec3(x, terrain.computeHeight(x, z), z), normalize(vec3(rand1(), rand1(), rand1())), 0.1f);
     mainScene.pushObject(fish, fish->orientationMtx());
   }
+  /*for (size_t i = 0; i < 10; i++)
+  {
+      float x = rand1() * terrain.width();
+      float z = rand1() * terrain.width();
 
+      Modelv2 fish_m{"smallfish", "smallfish.obj", "smallfish", 2, "smallfish.png"};
+      fish_m.setLightProps(0.9, 0.8, 0.9, 80.0);
+      obj::Fish *fish = new obj::Fish(fish_m, vec3(x, terrain.computeHeight(x, z), z), normalize(vec3(rand1(), rand1(), rand1())), 0.1f);
+      mainScene.pushObject(fish, fish->orientationMtx());
+  }*/
+  for (size_t i = 0; i < 10; i++)
+  {
 
-  mainScene.pushObject(coral, coral->orientationMtx());
+    float x = rand1() * coralRadius * 2 + mainScene.terrain->width() / 2 - coralRadius;
+    float z = rand1() * coralRadius * 2 + mainScene.terrain->width() / 2 - coralRadius;
+    Modelv2 coral_m{"coral1", "tree_coral.obj", "coral1", 3, "knt-textures/IxirGround.png"};
+    coral_m.setLightProps(0.9, 1.0, 0.2, 50.0);
+    obj::ModelledObject *coral = new obj::Coral(coral_m, vec3(x, terrain.computeHeight(x, z), z), vec3(1, 0, 0));
+
+    mainScene.pushObject(coral, coral->orientationMtx());
+  }
 
   mainScene.addLightSource(mainLight);
   // mainScene.addLightSource(shinyLight);
@@ -163,14 +181,13 @@ void init(void)
 void display(void)
 {
   constexpr short nbColors = 4;
-  vec3 colors[nbColors] {
-    vec3{1, 1, 1},
-    vec3{1, 0, 0},
-    vec3{1, 1, 0},
-    vec3{0, 0, 1}
-  };
+  vec3 colors[nbColors]{
+      vec3{1, 1, 1},
+      vec3{1, 0, 0},
+      vec3{1, 1, 0},
+      vec3{0, 0, 1}};
   static short delay = 0;
-  delay = MAX(delay -1, 0);
+  delay = MAX(delay - 1, 0);
   static short nextColor = 1;
   // clear the screen
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -178,7 +195,8 @@ void display(void)
 
   mainScene.camera.updateCameraPosition(context, *mainScene.terrain);
 
-  if (context.keys.color && delay == 0) {
+  if (context.keys.color && delay == 0)
+  {
     mainScene.getLight(-1).color = colors[nextColor++];
     nextColor %= nbColors;
     delay = 15;
