@@ -96,11 +96,12 @@ namespace scn
     yaw += xmovement;
     pitch += ymovement;
 
-    /* Add if loopings should be forbidden
-    if (pitch > 179.0f)
-        pitch = 179.0f;
-    if (pitch < -179.0f)
-        pitch = -179.0f;*/
+ //    Add if loopings should be forbidden
+ float max_pitch=150.0f;
+    if (pitch > max_pitch)
+        pitch = max_pitch;
+    if (pitch < -max_pitch)
+        pitch = -max_pitch;
 
     using helpers::toRadians;
     // TODO only compute when mouse was updated between the last two dispalys
