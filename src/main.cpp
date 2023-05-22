@@ -107,7 +107,7 @@ void init(void)
   // Create Scene
   mainScene = scn::Scene(std::move(programShader), camera, projectionMatrix, skybox);
 
-  scn::Terrain terrain("terrain", "fft-terrain.tga");
+  scn::Terrain terrain("terrain", "box-terrain2.tga");
   terrain.model().setLightProps(0.01, 0.8, 0.0, 1.0);
   terrain.model().texture({"terrainText", 1, "beach_sand.tga"});
   terrain.model().textureFactor(0.01);
@@ -128,22 +128,23 @@ void init(void)
   shinyLight.setAttenuation(1.0, 0.0015, 0.010);
 
   scn::Light spotlight{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, false};
-  spotlight.setCoefficients(0, 1.0, 0.8, 3);
+  spotlight.setCoefficients(0, 0.7, 1.0, 3);
   spotlight.setSpotlight(8, 15);
   spotlight.setAttenuation(1.0, 0.014, 0.015);
   srand(12);
 
   float coralRadius = 50;
-  for (size_t i = 0; i < 1; i++)
+  for (size_t i = 0; i < 70; i++)
   {
     //   float x = rand1() * terrain.width();
     //   float z = rand1() * terrain.width();
-    float x = rand1() * coralRadius * 2 + mainScene.terrain->width() / 2 - coralRadius;
-    float z = rand1() * coralRadius * 2 + mainScene.terrain->width() / 2 - coralRadius;
+    float x = rand1() * (mainScene.terrain->width() - 30);
+    float z = rand1() * (mainScene.terrain->width() - 30);
 
     Modelv2 fish_m{"green_reef", "green_reef.obj", "green_reef", 2, "fish.png"};
-    fish_m.setLightProps(0.9, 0.8, 0.9, 80.0);
-    obj::Fish *fish = new obj::Fish(fish_m, vec3(x, terrain.computeHeight(x, z), z), normalize(vec3(rand1(), rand1(), rand1())), 0.1f);
+    fish_m.setLightProps(0.9, 0.8, 1.0, 120.0);
+    // std::cerr << "terrain height at fish#" << i << " is " << terrain.computeHeight(x, z) << std::endl;
+    obj::Fish *fish = new obj::Fish(fish_m, vec3(x, terrain.computeHeight(x, z), z), normalize(vec3(rand1(), rand1(), rand1())), 0.20f);
     mainScene.pushObject(fish, fish->orientationMtx());
   }
   /*for (size_t i = 0; i < 10; i++)
@@ -163,14 +164,19 @@ void init(void)
     float z = rand1() * coralRadius * 2 + mainScene.terrain->width() / 2 - coralRadius;
     Modelv2 coral_m{"coral1", "tree_coral.obj", "coral1", 3, "knt-textures/IxirGround.png"};
     coral_m.setLightProps(0.9, 1.0, 0.2, 50.0);
-    obj::ModelledObject *coral = new obj::Coral(coral_m, vec3(x, terrain.computeHeight(x, z), z), vec3(1, 0, 0));
+    obj::ModelledObject *coral = new obj::Coral(coral_m, vec3(x, terrain.computeHeight(x, z) + 20, z), vec3(1, 0, 0));
 
     mainScene.pushObject(coral, coral->orientationMtx());
   }
 
   mainScene.addLightSource(mainLight);
   // mainScene.addLightSource(shinyLight);
+
+
   spotlight.attachToCamera(mainScene.camera);
+
+
+  
   mainScene.addLightSource(spotlight);
 
   glutRepeatingTimer(FRAME_GAP_MS);

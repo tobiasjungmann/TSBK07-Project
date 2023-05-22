@@ -63,7 +63,6 @@ float withinSpotlight(int index) {
     vec3 fragToLight = normalize(posInViewCoordinates - positionInView(index));
     float spreading = dot(fragToLight, normalize(directionInView(index)));
     return clamp((spreading - lights[index].outerEdgeCutOff) / (lights[index].cutOff - lights[index].outerEdgeCutOff), 0.0, 1.0);
-    // FIXME compute outerEdge attenuation, dont return bool anymore probably
 }
 
 // vector s in the formula, light pointing to contact point on surface, normalized
