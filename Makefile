@@ -23,12 +23,13 @@ run: $(src_dir)
 	./$(build_dir)/$(TARGET)
 
 $(common_dir):
+	mkdir -p $(build_dir)/common/Linux
 	$(MAKE) -C $@
 
 $(src_dir): $(common_dir)
+	mkdir -p $(build_dir)/scene/gameobj
 	$(MAKE) -C $@ TARGET=$(TARGET)
 
 clean:
 	rm -r $(build_dir)
-	mkdir -p $(build_dir)/common/Linux
-	mkdir -p $(build_dir)/scene/gameobj
+	
