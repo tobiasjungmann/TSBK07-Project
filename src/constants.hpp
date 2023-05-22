@@ -3,10 +3,13 @@
 
 namespace constants
 {
+  enum class Key : char {
+    Forward = 'w',
+    Left = 'a',
+    Back = 's',
+    Right = 'd',
+    Color = 'c'
+  };
   constexpr int display_size{900};
-  constexpr const char KEY_FORWARD = 'w';
-  constexpr const char KEY_LEFT = 'a';
-  constexpr const char KEY_BACK = 's';
-  constexpr const char KEY_RIGHT = 'd';
 }
 #endif

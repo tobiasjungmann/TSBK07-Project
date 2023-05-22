@@ -50,6 +50,12 @@ namespace evt
       bool d;
       bool right;
     };
+
+    union
+    {
+      bool c;
+      bool color;
+    };
   };
 
   struct Context
@@ -73,6 +79,6 @@ namespace evt
      * @param back - true if the key responsible for the movement is pressed.
      * @param right - true if the key responsible for the movement is pressed.
      */
-    void setPressedKeys(bool forward, bool left, bool back, bool right) noexcept;
+    void setPressedKeys(bool forward, bool left, bool back, bool right, bool color) noexcept;
   };
 }

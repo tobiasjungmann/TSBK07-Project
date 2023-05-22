@@ -130,6 +130,13 @@ namespace scn
     m_lights.erase(std::begin(m_lights) + index);
   }
 
+  Light& Scene::getLight(long index) {
+    if (index < 0)
+      index += m_lights.size();
+
+    return m_lights[index];
+  }
+
   void Scene::update() {
     for (size_t i =0; i < m_objs.size(); i++) {
       auto obj {m_objs[i].get()};

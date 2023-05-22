@@ -10,6 +10,7 @@ struct Light {
     float ambientK;
     float diffuseK;
     float specularK;
+    float powerK;
 
     float attenuConst;
     float attenuLinear;
@@ -62,7 +63,6 @@ float withinSpotlight(int index) {
     vec3 fragToLight = normalize(posInViewCoordinates - positionInView(index));
     float spreading = dot(fragToLight, normalize(directionInView(index)));
     return clamp((spreading - lights[index].outerEdgeCutOff) / (lights[index].cutOff - lights[index].outerEdgeCutOff), 0.0, 1.0);
-    // FIXME compute outerEdge attenuation, dont return bool anymore probably
 }
 
 // vector s in the formula, light pointing to contact point on surface, normalized
@@ -117,16 +117,19 @@ void main(void)
         float spot = withinSpotlight(i);
         if (spot > 0) {
             float attenuation = spot * computeAttenuation(i);
-	    	diffuseComponent += attenuation * computeDiffuseLight(i, normalizedNormal, posInViewCoordinates);
-    		specularComponent += attenuation * computeSpecularLight(i, camera, normalizedNormal, posInViewCoordinates); 
+	    	diffuseComponent += lights[i].powerK * attenuation * computeDiffuseLight(i, normalizedNormal, posInViewCoordinates);
+    		specularComponent += lights[i].powerK * attenuation * computeSpecularLight(i, camera, normalizedNormal, posInViewCoordinates); 
         }
 	}
 
     specularComponent *= materialLight.specularity;
     diffuseComponent *= materialLight.diffuseness;
-    ambientComponent *= materialLight.ambientCoeff;
+    ambientComponent *= materialLight.ambientCoeff; 
 
 	vec3 shade = ambientComponent + diffuseComponent + specularComponent;
+    shade.r = clamp(shade.r, 0.0, 1.0);
+    shade.g = clamp(shade.g, 0.0, 1.0);
+    shade.b = clamp(shade.b, 0.0, 1.0);
 	out_Color = vec4(shade, 1.0);
     out_Color *= texture(texUnit, texScalingF*texCoord);
 }

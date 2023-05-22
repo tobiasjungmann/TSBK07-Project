@@ -28,7 +28,7 @@ namespace obj
         m2w.setLine(0, newDirection);
         m2w.setLine(1, yaxis);
         m2w.setLine(2, zaxis);
-        mat3 combinedRotation = mat3(m2w) * orientationMtx();
+        mat3 combinedRotation = mat3(m2w) * this->orientationMtx();
         m2w = mat3tomat4(combinedRotation);
 
       }

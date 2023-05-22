@@ -1,5 +1,6 @@
 #include "coral.hpp"
 #include <cmath>
+#include <iostream>
 
 namespace obj
 {

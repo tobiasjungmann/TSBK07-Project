@@ -42,9 +42,9 @@ namespace obj
     {
         if ((float)(rand() / (float)RAND_MAX) < 0.1)
         {
-            m_direction().y += randomMovementInDir();
-            m_direction().x += randomMovementInDir();
-            m_direction().z += randomMovementInDir();
+            m_direction().y += randomMovementInDir() * m_speed;
+            m_direction().x += randomMovementInDir() * m_speed;
+            m_direction().z += randomMovementInDir() * m_speed;
             m_direction() = normalize(m_direction());
             updateModelToWorldRotation();
         }

@@ -201,6 +201,7 @@ namespace scn
       GLint ambientKLoc = glGetUniformLocation(hndl, (lightStr + ".ambientK").c_str());
       GLint diffuseKLoc = glGetUniformLocation(hndl, (lightStr + ".diffuseK").c_str());
       GLint specularKLoc = glGetUniformLocation(hndl, (lightStr + ".specularK").c_str());
+      GLint powerKLoc = glGetUniformLocation(hndl, (lightStr + ".powerK").c_str());
       if ((colorLoc == -1 or attenuateLoc == -1 or directionalLoc == -1 or spotlightLoc == -1 or inViewLoc == -1 or ambientKLoc == -1 or diffuseKLoc == -1 or specularKLoc == -1) && !ENV_NOTHROW)
         report(i);
 
@@ -212,6 +213,7 @@ namespace scn
       glUniform1f(ambientKLoc, curr.ambientK);
       glUniform1f(diffuseKLoc, curr.diffuseK);
       glUniform1f(specularKLoc, curr.specularK);
+      glUniform1f(powerKLoc, curr.powerK);
 
       if (curr.attenuate)
       {

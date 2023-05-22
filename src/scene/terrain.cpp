@@ -59,12 +59,13 @@ namespace scn
         {
           // Vertex array. You need to scale this properly
           vertexArray[(x + z * tex->width)].x = x * scalingFactor;
-          vertexArray[(x + z * tex->width)].y = (tex->imageData[(x + z * tex->width) * (tex->bpp / 8)] / 10.0);
+          auto textHeight = tex->imageData[(x + z * tex->width) * (tex->bpp / 8)];
+          vertexArray[(x + z * tex->width)].y = textHeight < 20.0f ? textHeight / 10.0f : textHeight / 20.0f; //*scalingFactor;
           vertexArray[(x + z * tex->width)].z = z * scalingFactor;
           // Normal vectors. You need to calculate these.
 
           normalArray[(x + z * tex->width)].x = 0.0; // normalvector for this vertex
-          normalArray[(x + z * tex->width)].y = 0.0;
+          normalArray[(x + z * tex->width)].y = 1.0;
           normalArray[(x + z * tex->width)].z = 0.0;
 
           // Texture coordinates. You may want to scale them.
