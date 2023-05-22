@@ -40,7 +40,7 @@ namespace scn
     camera.attachDirection(direction);
     camera.attachPosition(position);
   }
-  // FIXME Not great
+
   void Light::detachOfCamera(scn::Camera &camera)
   {
     position.inView = false;

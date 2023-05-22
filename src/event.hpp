@@ -17,8 +17,8 @@ namespace evt
 
   struct Mouse
   {
-    vec2 currPos = vec2(450, 450); // FIXME here you should make use of your values in constants::
-    vec2 prevPos = vec2(450, 450);
+    vec2 currPos = vec2(constants::display_size/2, constants::display_size/2);
+    vec2 prevPos = vec2(constants::display_size/2,constants::display_size/2);
 
     void update(int x, int y)
     {

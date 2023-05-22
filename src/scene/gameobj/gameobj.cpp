@@ -19,6 +19,7 @@ namespace obj
     m_direction = newDirection;
     m_upVector = newUp;
 
+// TODO fix inView To update once in the beginning
  //   if (m_position.inView)
  //   {
       if (auto m2w_p = m_model.matrix())

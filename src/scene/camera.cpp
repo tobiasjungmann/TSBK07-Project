@@ -111,17 +111,8 @@ namespace scn
     direction.z = sin(0.1 * toRadians(yaw)) * cos(0.1 * toRadians(pitch));
     viewingDirection = normalize(direction);
 
-    // FIXME probably updateProps requirements of attached to have a relative position setter, instead of setPos
     m_attachedDir.updateProps(viewingDirection);
     m_attachedPos.updateProps(0);
 
-    // check for collisions with the ground
-    /* TODO probably move into the collision detection
-    float minHeigth = computeHeight(camera.x, camera.z) + 0.5;
-        if (camera.y < minHeigth)
-        {
-            camera.y = minHeigth;
-        }*/
-    // camera->lookat = lookat + camera->pos;
   }
 }

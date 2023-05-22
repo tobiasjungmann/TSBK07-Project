@@ -58,7 +58,7 @@ namespace obj
     {
         CollidingObject::updateModelToWorldRotation();
         model().matrix()->m[2] *= -1;
-        model().matrix()->m[5] *= -1; // FIXME check here that it was like that
+        model().matrix()->m[5] *= -1;
     }
 
     void Fish::update(scn::Scene &scene)
@@ -138,7 +138,6 @@ namespace obj
             m_direction = normalize(m_direction);
             updateModelToWorldRotation();
         }
-        // TODO also check that they do not move out of the water on the top
     }
     void Fish::handleObjectCollision(CollidingObject *other)
     {

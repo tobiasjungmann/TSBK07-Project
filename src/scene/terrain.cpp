@@ -59,7 +59,7 @@ namespace scn
         {
           // Vertex array. You need to scale this properly
           vertexArray[(x + z * tex->width)].x = x * scalingFactor;
-          vertexArray[(x + z * tex->width)].y = (tex->imageData[(x + z * tex->width) * (tex->bpp / 8)] / 10.0); //*scalingFactor;
+          vertexArray[(x + z * tex->width)].y = (tex->imageData[(x + z * tex->width) * (tex->bpp / 8)] / 10.0);
           vertexArray[(x + z * tex->width)].z = z * scalingFactor;
           // Normal vectors. You need to calculate these.
 
@@ -68,8 +68,8 @@ namespace scn
           normalArray[(x + z * tex->width)].z = 0.0;
 
           // Texture coordinates. You may want to scale them.
-          texCoordArray[(x + z * tex->width)].x = x; // * 10; // (float)x / tex->width;
-          texCoordArray[(x + z * tex->width)].y = z; // * 10; // (float)z / tex->height;
+          texCoordArray[(x + z * tex->width)].x = x;
+          texCoordArray[(x + z * tex->width)].y = z;
         }
       for (x = 0; x < tex->width - 1; x++)
         for (z = 0; z < tex->height - 1; z++)
@@ -113,8 +113,7 @@ namespace scn
   {
     auto &rmgr{rc::ResourceManager::get()};
     TextureData *texp{rmgr.getTextureData(name, path)};
-    //    m_width = (texp->width-1)*scalingFactor +1;     // last position must not be scaled
-    //   m_height = (texp->height-1)*scalingFactor+1;
+
     m_width = (texp->width) * scalingFactor; // last position must not be scaled
     m_height = (texp->height) * scalingFactor;
     m_vertices_height = texp->height;

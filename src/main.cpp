@@ -95,12 +95,12 @@ void init(void)
 
     auto skyboxShader = std::make_unique<scn::SkyboxShader>("src/shaders/skybox.vert", "src/shaders/skybox.frag", "projectionMatrix", "preProjTransform");
     skyboxShader->initTexturing("texUnit", "inTexCoord");
-    rc::ResourceManager::config(skyboxShader->hndl, "in_Position", "", "inTexCoord"); // TODO write here name of texture coord variable
+    rc::ResourceManager::config(skyboxShader->hndl, "in_Position", "", "inTexCoord");
     Modelv2 skyboxModel{"skybox", "skyboxfull.obj", "skybox", 0, "oceanbox.tga"};
     scn::Skybox *skybox = new scn::Skybox(std::move(skyboxShader), skyboxModel);
 
     auto programShader = std::make_unique<scn::SceneShader>("src/shaders/light.vert", "src/shaders/light.frag", "projectionMatrix", "w2vMatrix", "m2wMatrix");
-    rc::ResourceManager::config(programShader->hndl, "in_Position", "in_Normal", "inTexCoord"); // TODO write here name of texture coord variable
+    rc::ResourceManager::config(programShader->hndl, "in_Position", "in_Normal", "inTexCoord");
     const scn::Camera camera{{0.f, 0.2f, -20.f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.f, 0.0f}};
 
     // Create Scene
@@ -110,8 +110,6 @@ void init(void)
     terrain.model().setLightProps(0.1, 0.7, 0.0, 1.0);
     terrain.model().texture({"terrainText", 1, "beach_sand.tga"});
     terrain.model().textureFactor(0.01);
-
-    // mainScene.shader->resetShaderDataLocation(scn::SceneShader::Matrices::preProj, "preProjTransform");
 
     mainScene.addTerrain(std::move(terrain));
     mainScene.shader->initMaterialProps("materialLight");
@@ -129,8 +127,6 @@ void init(void)
 float coralRadius = 50;
     for (size_t i = 0; i < 1; i++)
     {
-     //   float x = rand1() * terrain.width();
-     //   float z = rand1() * terrain.width();
         float x = rand1() * coralRadius * 2 + mainScene.terrain->width() / 2 - coralRadius;
         float z = rand1() * coralRadius * 2 + mainScene.terrain->width() / 2 - coralRadius;
 
@@ -139,16 +135,7 @@ float coralRadius = 50;
         obj::Fish *fish = new obj::Fish(fish_m, vec3(x, terrain.computeHeight(x, z), z), normalize(vec3(rand1(), rand1(), rand1())), 0.1f);
         mainScene.pushObject(fish, fish->orientationMtx());
     }
-    /*for (size_t i = 0; i < 10; i++)
-    {
-        float x = rand1() * terrain.width();
-        float z = rand1() * terrain.width();
 
-        Modelv2 fish_m{"smallfish", "smallfish.obj", "smallfish", 2, "smallfish.png"};
-        fish_m.setLightProps(0.9, 0.8, 0.9, 80.0);
-        obj::Fish *fish = new obj::Fish(fish_m, vec3(x, terrain.computeHeight(x, z), z), normalize(vec3(rand1(), rand1(), rand1())), 0.1f);
-        mainScene.pushObject(fish, fish->orientationMtx());
-    }*/
     for (size_t i = 0; i < 10; i++)
     {
         
@@ -184,7 +171,6 @@ void display(void)
 
     mainScene.draw();
 
-    // todo draw stuff here
     glutSwapBuffers();
 }
 
